@@ -1,0 +1,79 @@
+{
+    "Software": [
+        "Installation & Technical Performance",
+        "Intrusive Ads & Monetization Frustrations",
+        "Feature Set, Usability & Accessibility",
+        "Content Availability, Licensing & Online Requirements",
+        "Security, Privacy & Update Policies",
+        "Customer Support, Pricing & Marketing Transparency",
+        "Gameplay Experience & Educational Value",
+        "Hardware Integration & Performance"
+    ],
+    "Appliances": [
+        "Product Quality & Durability",
+        "Performance & Functionality",
+        "Design & Ergonomics",
+        "Ease of Installation, Use & Maintenance",
+        "Safety & Reliability",
+        "Customer Service, Shipping & Packaging",
+        "Value for Money & Authenticity",
+        "Environmental Impact & Sustainability",
+        "Compatibility & Fit with Existing Appliances",
+        "Sensory Experience (Noise, Taste, Audio)"
+    ],
+    "All Beauty": [
+        "Product Performance & Effectiveness",
+        "Ease of Use, Application & Maintenance",
+        "Quality, Durability & Reliability",
+        "Ingredient Safety & Transparency",
+        "Sensory & Aesthetic Experience",
+        "Sustainability & Eco-Friendliness",
+        "Value for Money",
+        "Customer Support, Shipping & Service",
+        "Authenticity & Brand Trust",
+        "Shelf Life & Freshness"
+    ],
+    "Video Games": [
+        "Accessibility & Inclusive Design",
+        "Audio and Visual Quality",
+        "Battery Life and Portability",
+        "Performance Stability and Bug Issues",
+        "Hardware Build Quality Comfort and Connectivity",
+        "Gameplay Mechanics Controls and Difficulty",
+        "Content Depth Storyline and Appropriateness",
+        "Online Multiplayer and Connectivity Services",
+        "Installation DRM and Privacy Requirements",
+        "Pricing Value and Monetization",
+        "Customer Service Support and Delivery"
+    ],
+    "Digital Music": [
+        "Sound quality and production/mastering",
+        "Format and physical media durability",
+        "Packaging, liner notes and metadata accuracy",
+        "Songwriting, musicianship and stylistic authenticity",
+        "Track selection and album curation",
+        "Emotional, nostalgic and therapeutic impact",
+        "Authenticity, rarity and collectability",
+        "Artist background and historical context"
+    ],
+    "Health & Personal Care": [
+        "Effectiveness & Precision",
+        "Ease of Use & Convenience",
+        "Build Quality & Durability",
+        "Comfort & Sensory Experience",
+        "Cleaning & Maintenance",
+        "Power & Battery Performance",
+        "Safety & Health Considerations",
+        "Environmental & Packaging Impact",
+        "Value for Money"
+    ],
+    "Fashion": [
+        "Comfort, Support & Wearability",
+        "Fit & Sizing Accuracy",
+        "Material Quality, Durability & Construction",
+        "Style, Color & Aesthetic Appeal",
+        "Care, Laundering & Maintenance Requirements",
+        "Functional Features & Performance",
+        "Value, Versatility & Purchase Experience"
+    ]
+}

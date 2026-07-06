@@ -40,6 +40,7 @@ type RawTribe = {
   member_user_characteristics: {
     user_id: string;
     characteristic_summary: string;
+    category_characteristics?: Record<string, string>;
     similarity_score?: number;
   }[];
   members_grouped_by_user: Record<string, RawReview[]>;
@@ -58,6 +59,7 @@ export type Product = {
 export type User = {
   id: string;
   characteristicSummary: string;
+  categoryCharacteristics: Record<string, string>;
   similarityScore: number;
   products: Product[];
 };
@@ -109,6 +111,7 @@ function normalizeTribe(raw: RawTribe): Tribe {
     return {
       id: u.user_id,
       characteristicSummary: u.characteristic_summary,
+      categoryCharacteristics: u.category_characteristics ?? {},
       similarityScore: u.similarity_score ?? 0.5,
       products,
     };

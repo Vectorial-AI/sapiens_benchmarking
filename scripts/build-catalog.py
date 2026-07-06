@@ -20,7 +20,10 @@ from typing import Any
 WORKSPACE = Path(__file__).resolve().parents[2]
 CLUSTERING = WORKSPACE / "Clustering"
 OUTPUTS = WORKSPACE / "outputs"
+DATA_EXTRACTION = WORKSPACE / "Data extraction"
 OUT_DIR = Path(__file__).resolve().parents[1] / "src" / "data"
+USER_CHARS_PATH = DATA_EXTRACTION / "user_llm_characteristics.json"
+CATEGORY_MAPPING_PATH = DATA_EXTRACTION / "category_mapping_to_7_main.json"
 
 # 27 cluster_4 tribes + 3 high performers from other clusters
 SELECTED_TRIBES: list[tuple[str, str]] = [
@@ -101,6 +104,43 @@ def find_tribe_definition(definitions: list, cluster: str, micro: str) -> str:
     return ""
 
 
+def load_user_category_characteristics() -> dict[str, dict[str, str]]:
+    """user_id -> { main_category -> influencing_characteristics_summary }"""
+    if not USER_CHARS_PATH.exists():
+        return {}
+    raw = load_json(USER_CHARS_PATH)
+    out: dict[str, dict[str, str]] = {}
+    for uid, user_data in raw.items():
+        if not isinstance(user_data, dict):
+            continue
+        cat_chars = user_data.get("category_characteristics") or {}
+        if not isinstance(cat_chars, dict):
+            continue
+        summaries: dict[str, str] = {}
+        for main_cat, block in cat_chars.items():
+            if isinstance(block, dict):
+                summary = str(block.get("influencing_characteristics_summary") or "").strip()
+                if summary:
+                    summaries[str(main_cat)] = summary
+        if summaries:
+            out[str(uid)] = summaries
+    return out
+
+
+def enrich_user_characteristics(
+    user_id: str,
+    characteristic_summary: str,
+    user_cat_chars: dict[str, dict[str, str]],
+) -> dict:
+    general = characteristic_summary
+    uid_chars = user_cat_chars.get(user_id) or {}
+    return {
+        "user_id": user_id,
+        "characteristic_summary": general,
+        "category_characteristics": uid_chars,
+    }
+
+
 def user_similarity_scores(cluster: str, micro: str) -> dict[str, float]:
     """Mean overall_accuracy per user from benchmark predictions."""
     p = CLUSTERING / "Prediction_Accuracy_Refined" / cluster / f"{micro}_summary_enhanced_delta_corrected.json"
@@ -172,7 +212,13 @@ def load_sgo_reviews(cluster: str, micro: str) -> tuple[list[dict], str] | None:
     return None
 
 
-def build_tribe(cluster: str, micro: str, definitions: list, population_def: str) -> dict | None:
+def build_tribe(
+    cluster: str,
+    micro: str,
+    definitions: list,
+    population_def: str,
+    user_cat_chars: dict[str, dict[str, str]],
+) -> dict | None:
     details_path = CLUSTERING / "micro_cluster_details" / cluster / f"{micro}_details.json"
     if not details_path.exists():
         print(f"  SKIP {cluster}/{micro}: no details file")
@@ -238,6 +284,7 @@ def build_tribe(cluster: str, micro: str, definitions: list, population_def: str
                 {
                     "user_id": uid,
                     "characteristic_summary": char_by_user.get(uid, ""),
+                    "category_characteristics": user_cat_chars.get(uid, {}),
                     "similarity_score": round(mean_sim, 4),
                     "products": products,
                 }
@@ -268,6 +315,7 @@ def build_tribe(cluster: str, micro: str, definitions: list, population_def: str
                 {
                     "user_id": uid,
                     "characteristic_summary": m.get("characteristic_summary", ""),
+                    "category_characteristics": user_cat_chars.get(uid, {}),
                     "similarity_score": round(sim_scores.get(uid, 0.5), 4),
                     "products": products,
                 }
@@ -292,7 +340,12 @@ def build_tribe(cluster: str, micro: str, definitions: list, population_def: str
         },
         "qualitative_summary": qualitative,
         "member_user_characteristics": [
-            {"user_id": u["user_id"], "characteristic_summary": u["characteristic_summary"], "similarity_score": u["similarity_score"]}
+            {
+                "user_id": u["user_id"],
+                "characteristic_summary": u["characteristic_summary"],
+                "category_characteristics": u.get("category_characteristics") or {},
+                "similarity_score": u["similarity_score"],
+            }
             for u in users_out
         ],
         "members_grouped_by_user": {u["user_id"]: u["products"] for u in users_out},
@@ -313,11 +366,26 @@ def main() -> None:
     tribes_dir = OUT_DIR / "tribes"
     tribes_dir.mkdir(parents=True, exist_ok=True)
 
+    user_cat_chars = load_user_category_characteristics()
+    print(f"Loaded category characteristics for {len(user_cat_chars)} users")
+
+    # Bundle category reference data for prompts
+    cat_themes_src = CLUSTERING / "category_themes.json"
+    cat_map_src = CATEGORY_MAPPING_PATH
+    if cat_themes_src.exists():
+        (OUT_DIR / "category-themes.json").write_text(
+            cat_themes_src.read_text(encoding="utf-8"), encoding="utf-8"
+        )
+    if cat_map_src.exists():
+        (OUT_DIR / "category-mapping.json").write_text(
+            cat_map_src.read_text(encoding="utf-8"), encoding="utf-8"
+        )
+
     index = []
     built = 0
     for cluster, micro in SELECTED_TRIBES:
         print(f"Building {cluster}/{micro}...")
-        tribe = build_tribe(cluster, micro, definitions, population_def)
+        tribe = build_tribe(cluster, micro, definitions, population_def, user_cat_chars)
         if not tribe:
             continue
         out_path = tribes_dir / f"{tribe['id']}.json"

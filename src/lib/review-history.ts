@@ -111,3 +111,13 @@ export function formatReviewHistoryText(
   }
   return rows.length ? rows.join("\n\n") : "(none available)";
 }
+
+/** Ensure held-out target review text never appears in history context. */
+export function excludeTargetReviewText(
+  items: HistoryContextItem[],
+  targetReviewText?: string,
+): HistoryContextItem[] {
+  const target = targetReviewText?.trim();
+  if (!target) return items;
+  return items.filter((h) => h.reviewText.trim() !== target);
+}

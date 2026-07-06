@@ -192,7 +192,11 @@ export async function POST(req: Request) {
 
   const historyContext =
     method === "history"
-      ? buildHistoryContext({ user, excludeReviewKey: reviewKey })
+      ? buildHistoryContext({
+          user,
+          excludeReviewKey: reviewKey,
+          excludeReviewText: product?.groundTruthReview,
+        })
       : undefined;
 
   let baseline: EngineResult;

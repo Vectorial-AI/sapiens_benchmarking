@@ -387,24 +387,13 @@ export default function Home() {
               <div className="space-y-3">
                 <div className="space-y-2 max-h-[26rem] overflow-y-auto pr-1">
                   {tribe.users.map((u, i) => (
-                    <button
+                    <UserSelectCard
                       key={u.id}
-                      onClick={() => selectUser(u.id)}
-                      className={`w-full text-left rounded-xl border p-3.5 transition ${
-                        u.id === userId
-                          ? "border-accent bg-accent/[0.04]"
-                          : "border-border hover:border-border-strong"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[11px] font-mono text-muted-2">#{i + 1}</span>
-                        <span className="text-[12.5px] font-medium text-foreground">Modelled user</span>
-                      </div>
-                      <p className="text-[12.5px] text-muted leading-relaxed line-clamp-2">
-                        {u.characteristicSummary}
-                      </p>
-                      <p className="text-[11px] text-muted-2 mt-1">{u.products.length} products</p>
-                    </button>
+                      index={i}
+                      user={u}
+                      selected={u.id === userId}
+                      onSelect={() => selectUser(u.id)}
+                    />
                   ))}
                 </div>
               </div>
@@ -798,6 +787,54 @@ function TraitGroup({ label, items }: { label: string; items: string[] }) {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+function UserSelectCard({
+  user,
+  index,
+  selected,
+  onSelect,
+}: {
+  user: CatalogTribe["users"][number];
+  index: number;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const summary = user.characteristicSummary?.trim();
+  const canExpand = summary.length > 160;
+
+  return (
+    <div
+      className={`rounded-xl border p-3.5 transition ${
+        selected ? "border-accent bg-accent/[0.04]" : "border-border hover:border-border-strong"
+      }`}
+    >
+      <button type="button" onClick={onSelect} className="w-full text-left">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[11px] font-mono text-muted-2">#{index + 1}</span>
+          <span className="text-[12.5px] font-medium text-foreground">Modelled user</span>
+        </div>
+        <p
+          className={`text-[12.5px] text-muted leading-relaxed ${
+            expanded ? "" : "line-clamp-3"
+          }`}
+        >
+          {summary}
+        </p>
+        <p className="text-[11px] text-muted-2 mt-1">{user.products.length} products</p>
+      </button>
+      {canExpand && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="text-[11px] text-accent hover:underline mt-2"
+        >
+          {expanded ? "Show less" : "Show full characteristics"}
+        </button>
+      )}
     </div>
   );
 }

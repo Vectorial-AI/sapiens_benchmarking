@@ -1,29 +1,25 @@
 import type { BaselineMethod } from "./baselines";
+import { getCategoryThemes } from "./category-themes";
+import { DEFAULT_THEMES } from "./prompts-constants";
 import type { HistoryContextItem, ReviewSentiment } from "./types";
 import type { Product, Tribe, User } from "./master";
 import {
   buildHistoryBaselineContext,
   buildSapiensHistoryContext,
+  excludeTargetReviewText,
   formatLengthConstraint,
   formatReviewHistoryText,
   wordCount,
 } from "./review-history";
+import { formatUserCharacteristics } from "./user-characteristics";
 
-export { wordCount, formatLengthConstraint };
+export { wordCount, formatLengthConstraint, DEFAULT_THEMES };
 
 export type ParsedPrediction = {
   reviewText: string;
   predictedThemes: Record<string, number>;
   sentiment: ReviewSentiment | null;
 };
-
-export const DEFAULT_THEMES = [
-  "Effectiveness & Precision",
-  "Ease of Use & Convenience",
-  "Value for Money",
-  "Quality & Durability",
-  "Safety & Health Considerations",
-];
 
 export const REVIEW_SYSTEM =
   "You are simulating a specific real human writing an honest Amazon review. Stay fully in character and respond ONLY with valid JSON.";
@@ -50,9 +46,8 @@ ${themesJson(themes)}
 }`;
 }
 
-function themesFor(product: Product | null): string[] {
-  const t = product?.predictedThemes ?? [];
-  return t.length ? t : DEFAULT_THEMES;
+function themesForCategory(category: string): string[] {
+  return getCategoryThemes(category);
 }
 
 /**
@@ -70,13 +65,17 @@ export function buildSapiensPrompt(args: {
 }): string {
   const { tribe, user, product, productDescription, category, excludeReviewKey } = args;
   const q = tribe.qualitative;
-  const themes = themesFor(product);
+  const themes = themesForCategory(category);
+  const userCharBlock = formatUserCharacteristics(user, category);
 
-  const historyItems = buildSapiensHistoryContext({
-    products: user.products,
-    excludeReviewKey,
-    targetCategory: category,
-  });
+  const historyItems = excludeTargetReviewText(
+    buildSapiensHistoryContext({
+      products: user.products,
+      excludeReviewKey,
+      targetCategory: category,
+    }),
+    product?.groundTruthReview,
+  );
   const historyBlock = formatReviewHistoryText(historyItems);
 
   return `You are someone from ${tribe.name} — a real person who shops on Amazon and writes honest reviews.
@@ -115,7 +114,7 @@ SECTION 2: Your User Characteristics (you personally)
 
 Beyond the tribe, **you** personally behave like this when you shop and review:
 
-${user.characteristicSummary}
+${userCharBlock}
 
 ---
 SECTION 3: Your Prior Reviews
@@ -176,7 +175,7 @@ export function buildTribePersonaPrompt(args: {
   category: string;
 }): string {
   const { tribe, product, productDescription, category } = args;
-  const themes = themesFor(product);
+  const themes = themesForCategory(category);
   return `You are someone who belongs to ${tribe.name}.
 
 Respond ONLY with valid JSON.
@@ -230,7 +229,7 @@ export function buildPopulationPersonaPrompt(args: {
   populationDefinition?: string;
 }): string {
   const { tribe, product, productDescription, category, populationDefinition } = args;
-  const themes = themesFor(product);
+  const themes = themesForCategory(category);
   const popName = `${category} shoppers`;
   const definition = populationDefinition?.trim() || tribe.populationDefinition;
   return `You are someone who belongs to ${popName}.
@@ -282,11 +281,15 @@ Generate the review now:`;
 export function buildHistoryContext(args: {
   user: User;
   excludeReviewKey?: string;
+  excludeReviewText?: string;
 }): HistoryContextItem[] {
-  return buildHistoryBaselineContext({
-    products: args.user.products,
-    excludeReviewKey: args.excludeReviewKey,
-  });
+  return excludeTargetReviewText(
+    buildHistoryBaselineContext({
+      products: args.user.products,
+      excludeReviewKey: args.excludeReviewKey,
+    }),
+    args.excludeReviewText,
+  );
 }
 
 export function buildHistoryPrompt(args: {
@@ -294,11 +297,15 @@ export function buildHistoryPrompt(args: {
   user: User;
   product: Product | null;
   productDescription: string;
+  category: string;
   excludeReviewKey?: string;
 }): string {
-  const { product, productDescription, personaName } = args;
-  const themes = themesFor(product);
-  const historyItems = buildHistoryContext(args);
+  const { product, productDescription, personaName, category } = args;
+  const themes = themesForCategory(category);
+  const historyItems = buildHistoryContext({
+    ...args,
+    excludeReviewText: product?.groundTruthReview,
+  });
 
   const historyTextBlock = historyItems
     .map((h, i) => `Example ${i + 1}:\n${h.reviewText}\n`)
@@ -352,6 +359,7 @@ export function buildBaselinePrompt(
         user: args.user,
         product: args.product,
         productDescription: args.productDescription,
+        category: args.category,
         excludeReviewKey: args.excludeReviewKey,
       });
     case "tribe_persona":
