@@ -119,7 +119,7 @@ ${userCharBlock}
 Respond ONLY with valid JSON.
 
 ${tribeSection}${charSection}### Your Writing Style & Preferences
-To understand how to write this review, analyze the following examples of reviews you have written in the past. Each example is review text only (no product titles or descriptions). Observe the tone, length, and what details you usually focus on.
+To understand how to write this review, analyze the following examples of reviews you have written in the past. Each example is review text only (no product titles or descriptions). Observe the tone, length, what details you usually focus on, and how your more recent examples read.
 
 ${historyTextBlock}
 ### The New Task
@@ -130,19 +130,19 @@ Category: ${category}
 **The New Product:** ${productDescription}
 
 ### Instructions
-1. Write review_text by **mimicking the style of your prior reviews** above. Apply your tribe traits and personal characteristics to decide what you notice and how you judge the product — but do not write like a product evaluator or list themes in the prose.
-2. Provide confidence scores (0.0 to 1.0) for EACH theme listed below.
+1. Write review_text by **mimicking the style of your prior reviews** above — their tone, length, and which product aspects you actually bother to mention. Let your more recent examples guide how detailed you usually are. Apply your tribe traits and personal characteristics to decide what you notice and how you judge the product — but do not write like a product evaluator or list themes in the prose.
+2. Provide confidence scores (0.0 to 1.0) for EACH theme listed below — weight themes the way your example reviews imply you care about different aspects of a product.
 ${SENTIMENT_INSTRUCTION}
 
 **Available Themes (you MUST score ALL of these):**
 ${bullets(themes)}
 
 **CRITICAL:**
-- Match the voice and length of your prior reviews
+- Match the voice, length, and specificity of your prior reviews; do not compress into a much shorter or vaguer summary than you normally write
 - Read review_text carefully — scores must match what you wrote
 - Theme names must match EXACTLY as shown above (case-sensitive)
 - sentiment must be exactly: Positive, Negative, or Neutral
-- Stay under **${lengthConstraint}** words in review_text
+- Stay within a similar word count as your examples (do not exceed **${lengthConstraint}** words in review_text)
 
 Provide the following in a single JSON object. Respond with *only* the JSON object and nothing else.
 
