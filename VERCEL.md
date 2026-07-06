@@ -60,3 +60,15 @@ Those files are **not** available on Vercel. Their contents must be baked into `
 | `POST /api/analyze` | Fidelity scoring |
 
 `/api/run` has `maxDuration: 120s` (requires Vercel Pro for >60s on some plans).
+
+## Prompt context logs
+
+Each Sapiens run logs structured context to **Vercel function logs**. Search for `[sapiens-prompt]`:
+
+1. Vercel → Project → **Logs** (or a deployment → **Functions** → `/api/run`)
+2. Run Sapiens in the app
+3. Filter/search: `sapiens-prompt`
+
+The log includes checklist flags, Section 2 preview, Section 3 review count/previews, and whether Section 4 SGO reference was included (char length only — not full reference text).
+
+Optional curl (no UI): `GET /api/prompt-context?tribeId=...&userId=...&reviewKey=...&category=...`

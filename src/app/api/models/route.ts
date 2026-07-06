@@ -14,8 +14,13 @@ const FALLBACK_MODELS = [
 ];
 
 export async function GET() {
-  if (!hasGatewayKey()) {
-    return NextResponse.json({ models: FALLBACK_MODELS, source: "fallback" });
+  const gatewayConfigured = hasGatewayKey();
+  if (!gatewayConfigured) {
+    return NextResponse.json({
+      models: FALLBACK_MODELS,
+      source: "mock",
+      gatewayConfigured: false,
+    });
   }
   try {
     const available = await gateway.getAvailableModels();
@@ -26,8 +31,13 @@ export async function GET() {
     return NextResponse.json({
       models: ids.length ? ids : FALLBACK_MODELS,
       source: ids.length ? "gateway" : "fallback",
+      gatewayConfigured: true,
     });
   } catch {
-    return NextResponse.json({ models: FALLBACK_MODELS, source: "fallback" });
+    return NextResponse.json({
+      models: FALLBACK_MODELS,
+      source: "fallback",
+      gatewayConfigured: true,
+    });
   }
 }

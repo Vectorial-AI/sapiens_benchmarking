@@ -106,6 +106,13 @@ export default function Home() {
   }, [tribe?.id, tribe?.populationDefinition]);
 
   useEffect(() => {
+    fetch("/api/models")
+      .then((r) => r.json())
+      .then((d) => setGatewayConnected(Boolean(d.gatewayConfigured)))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     fetch("/api/catalog")
       .then((r) => r.json())
       .then((d) => setTribeIndex(d.tribes ?? []))
@@ -134,7 +141,7 @@ export default function Home() {
     setGroundTruthSentiment(saved.groundTruthSentiment);
     setSapiens(saved.sapiens);
     setBaselines(saved.baselines);
-    setGatewayConnected(saved.gatewayConnected);
+    // gatewayConnected comes from /api/models on mount — don't restore stale session value
 
     setTribeLoading(true);
     fetch(`/api/tribe/${saved.tribeId}`)
@@ -224,7 +231,7 @@ export default function Home() {
       setGroundTruth(data.groundTruth ?? null);
       setGroundTruthThemes(data.groundTruthThemes ?? []);
       setGroundTruthSentiment(data.groundTruthSentiment ?? null);
-      setGatewayConnected(data.source === "gateway");
+      if (data.source === "gateway") setGatewayConnected(true);
     } catch {
       /* noop */
     } finally {
@@ -423,27 +430,14 @@ export default function Home() {
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-muted-2 mt-1.5 flex items-center gap-2">
-                        <span>{p.category}</span>
-                        {p.hasBestPrediction ? (
-                          <span className="text-accent">SGO best prediction available</span>
-                        ) : null}
+                      <p className="text-[11px] text-muted-2 mt-1.5">
+                        {p.category}
                       </p>
                     </button>
                   ))}
                 </div>
                 {product && (
                   <>
-                    {product.bestPredictionReview ? (
-                      <div className="rounded-xl border border-border bg-muted/20 p-3.5">
-                        <ExpandableText
-                          text={product.bestPredictionReview}
-                          className="text-[13px] text-foreground leading-relaxed"
-                          clampClass="line-clamp-4"
-                          toggleLabel="reference prediction"
-                        />
-                      </div>
-                    ) : null}
                     <ProductDescriptionEditor
                     value={customProductDesc}
                     onChange={(v) => {
@@ -707,7 +701,7 @@ function Header({ connected }: { connected: boolean }) {
       </div>
       <span className="inline-flex items-center gap-1.5 text-xs text-muted">
         <span className={`h-1.5 w-1.5 rounded-full ${connected ? "bg-real" : "bg-accent"}`} />
-        {connected ? "Gateway" : "Mock / Gateway"}
+        {connected ? "Gateway" : "Mock mode"}
       </span>
     </header>
   );

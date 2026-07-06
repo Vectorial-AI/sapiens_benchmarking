@@ -15,8 +15,13 @@ import {
   parsePredictionResponse,
   REVIEW_SYSTEM,
 } from "@/lib/prompts";
-import { formatLengthConstraint } from "@/lib/review-history";
+import {
+  buildSapiensHistoryContext,
+  excludeTargetReviewText,
+  formatLengthConstraint,
+} from "@/lib/review-history";
 import { hasGatewayKey, mockPrediction, runModel } from "@/lib/ai";
+import { logSapiensPromptContext } from "@/lib/prompt-log";
 import { scorePredictionAgainstGroundTruth } from "@/lib/scoring";
 import type { EngineResult, ReviewSentiment, RunMode } from "@/lib/types";
 
@@ -142,9 +147,21 @@ export async function POST(req: Request) {
 
   const metricsSource = hasGatewayKey() ? "pipeline" : "mock";
 
+  const sapiensHistoryContext = excludeTargetReviewText(
+    buildSapiensHistoryContext({
+      products: user.products,
+      excludeReviewKey: reviewKey,
+      targetCategory: category,
+    }),
+    product?.groundTruthReview,
+  );
+  const hasBestPredictionReference = Boolean(product?.bestPredictionReview?.trim());
+
   // ---- SAPIENS ----
   if (mode === "sapiens") {
     let sapiens: EngineResult;
+    const runMode = hasGatewayKey() ? "sapiens" : "mock";
+
     if (!hasGatewayKey()) {
       const mock = mockPrediction("sapiens", productDescription);
       sapiens = {
@@ -155,6 +172,18 @@ export async function POST(req: Request) {
         model: `${SAPIENS_MODEL} (mock)`,
         latencyMs: 0,
       };
+      logSapiensPromptContext({
+        tribeId,
+        userId,
+        reviewKey,
+        category,
+        tribe,
+        user,
+        product,
+        historyItems: sapiensHistoryContext,
+        hasBestPredictionReference,
+        mode: runMode,
+      });
     } else {
       const prompt = buildSapiensPrompt({
         tribe,
@@ -164,6 +193,19 @@ export async function POST(req: Request) {
         category,
         lengthConstraint,
         excludeReviewKey: reviewKey,
+      });
+      logSapiensPromptContext({
+        tribeId,
+        userId,
+        reviewKey,
+        category,
+        tribe,
+        user,
+        product,
+        historyItems: sapiensHistoryContext,
+        hasBestPredictionReference,
+        promptCharLength: prompt.length,
+        mode: runMode,
       });
       sapiens = await runEngine("sapiens", prompt, SAPIENS_MODEL);
     }

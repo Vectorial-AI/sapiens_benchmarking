@@ -16,8 +16,6 @@ export type CatalogProduct = {
   category: string;
   rating: number | null;
   groundTruthSentiment?: ReviewSentiment | null;
-  hasBestPrediction?: boolean;
-  bestPredictionReview?: string;
   healthcareBenchmark?: boolean;
 };
 

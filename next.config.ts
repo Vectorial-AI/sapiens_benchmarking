@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
     "/api/run": ["./src/data/**/*"],
     "/api/benchmark": ["./src/data/**/*"],
     "/api/analyze": ["./src/data/**/*"],
+    "/api/prompt-context": ["./src/data/**/*"],
+    "/api/history-context": ["./src/data/**/*"],
   },
 };
 

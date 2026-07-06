@@ -193,8 +193,6 @@ export function getCatalogTribe(id: string): CatalogTribe | undefined {
         productDescription: p.productDescription,
         category: p.category,
         rating: p.rating,
-        hasBestPrediction: Boolean(p.bestPredictionReview),
-        bestPredictionReview: p.bestPredictionReview,
         healthcareBenchmark: p.healthcareBenchmark,
       })),
     })),
