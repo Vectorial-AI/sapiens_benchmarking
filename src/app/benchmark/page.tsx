@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { Dot, Spinner } from "@/components/ui";
+import { markWizardRestorePending } from "@/lib/wizard-session";
 
 type ModeSummary = {
   mode: string;
@@ -63,8 +63,12 @@ function BenchmarkContent() {
           <span className="h-4 w-px bg-border-strong" />
           <span className="text-[13px] text-muted">Benchmark Metrics</span>
         </div>
-        <Link href="/" className="btn btn-ghost px-4 py-2 text-sm">
-          ← Back to benchmark
+        <Link
+          href="/"
+          onClick={() => markWizardRestorePending()}
+          className="btn btn-ghost px-4 py-2 text-sm"
+        >
+          ← Back
         </Link>
       </header>
 
@@ -77,13 +81,6 @@ function BenchmarkContent() {
       </p>
       <p className="text-[12px] text-muted-2 mb-6">
         Overall = 0.25×text + 0.70×recall@k + 0.05×sentiment
-        {data?.dataSource && (
-          <>
-            {" "}
-            · source{" "}
-            <code className="bg-surface-3 px-1 py-0.5 rounded text-[11px]">{data.dataSource}</code>
-          </>
-        )}
       </p>
 
       {loading ? (

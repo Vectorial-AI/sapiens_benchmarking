@@ -1,6 +1,15 @@
 import type { BaselineMethod } from "./baselines";
 import type { HistoryContextItem, ReviewSentiment } from "./types";
 import type { Product, Tribe, User } from "./master";
+import {
+  buildHistoryBaselineContext,
+  buildSapiensHistoryContext,
+  formatLengthConstraint,
+  formatReviewHistoryText,
+  wordCount,
+} from "./review-history";
+
+export { wordCount, formatLengthConstraint };
 
 export type ParsedPrediction = {
   reviewText: string;
@@ -41,10 +50,6 @@ ${themesJson(themes)}
 }`;
 }
 
-export function wordCount(text: string): number {
-  return (text.trim().match(/\S+/g) ?? []).length;
-}
-
 function themesFor(product: Product | null): string[] {
   const t = product?.predictedThemes ?? [];
   return t.length ? t : DEFAULT_THEMES;
@@ -61,24 +66,34 @@ export function buildSapiensPrompt(args: {
   productDescription: string;
   category: string;
   lengthConstraint: number;
+  excludeReviewKey?: string;
 }): string {
-  const { tribe, user, product, productDescription, category } = args;
+  const { tribe, user, product, productDescription, category, excludeReviewKey } = args;
   const q = tribe.qualitative;
   const themes = themesFor(product);
 
+  const historyItems = buildSapiensHistoryContext({
+    products: user.products,
+    excludeReviewKey,
+    targetCategory: category,
+  });
+  const historyBlock = formatReviewHistoryText(historyItems);
+
   return `You are someone from ${tribe.name} — a real person who shops on Amazon and writes honest reviews.
 
-You have NOT seen anyone else's review of this product. You only know the product description, your tribe profile (Section 1), and your personal user characteristics (Section 2).
+You have NOT seen anyone else's review of this product. You only know the product description, your tribe profile (Section 1), your personal user characteristics (Section 2), and your own prior reviews (Section 3).
 
 Respond ONLY with valid JSON.
 
 ---
 SECTION 1: Your Tribe (group profile)
 
+Read this carefully. It tells you **who your tribe is** and **how people in your group tend to write reviews**.
+
 **1A. Group summary** — the big picture of your tribe:
 ${tribe.description}
 
-**Group traits** — as you evaluate this product, behave like the tribe below.
+**Group traits** — as you evaluate this product, **behave like the tribe below**:
 
 **Inherent Behavioral Traits (DO):**
 ${bullets(q.inherentBehavioralTraits)}
@@ -86,10 +101,10 @@ ${bullets(q.inherentBehavioralTraits)}
 **Latent Motivations (DRIVE):**
 ${bullets(q.latentMotivations)}
 
-**Validation Triggers (win signals):**
+**Validation Triggers:**
 ${bullets(q.validationTriggers)}
 
-**Friction Points (deal-breakers):**
+**Friction Points:**
 ${bullets(q.frictionPoints)}
 
 **Implicit Goals (ACHIEVE):**
@@ -98,10 +113,25 @@ ${bullets(q.implicitGoals)}
 ---
 SECTION 2: Your User Characteristics (you personally)
 
+Beyond the tribe, **you** personally behave like this when you shop and review:
+
 ${user.characteristicSummary}
 
 ---
-SECTION 3: The Product
+SECTION 3: Your Prior Reviews
+
+These are **other reviews written by this same user** on different products. The target review you are writing is NOT included here.
+
+**How to use them**
+1. Read all examples first and note this user's normal review length and structure.
+2. Match that length and structure in your review.
+3. Match their voice: casual vs detailed, blunt vs explanatory.
+4. Use Section 3 for **style and length only** — review text only.
+
+${historyBlock}
+
+---
+SECTION 4: The Product
 
 Category: ${category}
 
@@ -109,17 +139,26 @@ Product Description:
 ${productDescription}
 
 ---
-SECTION 4: Themes People Discuss in This Category
+SECTION 5: Themes People Discuss in This Category
 
 ${bullets(themes)}
 
 ---
-YOUR TASK
-1. Write a realistic first-person review_text this user would ACTUALLY post — natural voice, flowing paragraphs, no headings, no pros/cons lists, no theme labels.
-2. Score EVERY theme in Section 4 (0.0–1.0) to match what your review reflects.
+YOUR TASK (two steps — do them in this order)
+
+**STEP 1 — Write a high-quality review**
+
+Write the Amazon review YOU would actually post for this product.
+- First person, natural voice — not like a product evaluator.
+- Flowing paragraphs — no theme headings, no pros/cons lists unless your prior reviews use that style.
+- Match the tone, length, structure, and detail density of your prior reviews in Section 3.
+
+**STEP 2 — Assign theme confidence scores**
+
+After you have written review_text, score EVERY theme in Section 5 (0.0 to 1.0).
 ${SENTIMENT_INSTRUCTION}
 
-Make sure not to cross the review ${args.lengthConstraint} words.
+Make sure not to cross the review **${args.lengthConstraint}** words.
 
 ${predictionOutputBlock(themes, "predicted_themes")}
 
@@ -244,12 +283,10 @@ export function buildHistoryContext(args: {
   user: User;
   excludeReviewKey?: string;
 }): HistoryContextItem[] {
-  return args.user.products
-    .filter((p) => p.reviewKey !== args.excludeReviewKey)
-    .map((p) => ({
-      productDescription: p.productDescription,
-      reviewText: p.groundTruthReview,
-    }));
+  return buildHistoryBaselineContext({
+    products: args.user.products,
+    excludeReviewKey: args.excludeReviewKey,
+  });
 }
 
 export function buildHistoryPrompt(args: {

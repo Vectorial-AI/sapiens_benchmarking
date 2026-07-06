@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Dot, Label, Spinner, Stars, TONE_BG, type Tone } from "@/components/ui";
 import {
   BASELINE_METHOD_META,
@@ -23,16 +23,25 @@ import type {
   ReviewSentiment,
   SapiensRunResponse,
 } from "@/lib/types";
+import {
+  clearWizardRestoreFlag,
+  loadWizardSession,
+  saveWizardSession,
+} from "@/lib/wizard-session";
 
 const STEPS = [
   { id: "tribe", label: "Tribe", title: "Pick a tribe", hint: "Select a behavioral tribe to model." },
-  { id: "user", label: "User", title: "Pick a user", hint: "Users ranked by modelling similarity." },
+  { id: "user", label: "User", title: "Pick a modelled user", hint: "" },
   { id: "product", label: "Product", title: "Pick a product", hint: "Choose a product from this user." },
   { id: "sapiens", label: "Sapiens", title: "Sapiens prediction", hint: "What Sapiens generates vs the real review." },
-  { id: "compare", label: "Compare", title: "Compare baselines", hint: "Optionally run baselines and compare scores." },
+  { id: "compare", label: "Compare", title: "Compare baselines", hint: "Run baselines and compare scores against Sapiens." },
 ];
 
 export default function Home() {
+  const router = useRouter();
+  const restoredRef = useRef(false);
+  const skipProductDescSyncRef = useRef(false);
+  const skipPopulationDefSyncRef = useRef(false);
   const [step, setStep] = useState(0);
   const [gatewayConnected, setGatewayConnected] = useState(false);
 
@@ -60,6 +69,7 @@ export default function Home() {
   const [runningBaselineKey, setRunningBaselineKey] = useState<string | null>(null);
   const [runningBaselineMethod, setRunningBaselineMethod] = useState<BaselineMethod | null>(null);
   const [runningBaselineModel, setRunningBaselineModel] = useState<BaselineModel | null>(null);
+  const [historyPreview, setHistoryPreview] = useState<HistoryContextItem[]>([]);
 
   const user = useMemo(
     () => tribe?.users.find((u) => u.id === userId) ?? null,
@@ -74,20 +84,77 @@ export default function Home() {
   const effectiveCategory = product?.category ?? "Health & Personal Care";
 
   useEffect(() => {
+    if (skipProductDescSyncRef.current) {
+      skipProductDescSyncRef.current = false;
+      return;
+    }
     if (product) setCustomProductDesc(product.productDescription);
   }, [product?.reviewKey, product?.productDescription]);
 
   useEffect(() => {
+    if (skipPopulationDefSyncRef.current) {
+      skipPopulationDefSyncRef.current = false;
+      return;
+    }
     if (tribe?.populationDefinition) {
       setCustomPopulationDef(tribe.populationDefinition);
     }
   }, [tribe?.id, tribe?.populationDefinition]);
 
   useEffect(() => {
+    if (step !== 4 || baselineMethod !== "history" || !tribeId || !userId) {
+      setHistoryPreview([]);
+      return;
+    }
+    const params = new URLSearchParams({
+      tribeId,
+      userId,
+      mode: "history",
+    });
+    if (reviewKey) params.set("reviewKey", reviewKey);
+    fetch(`/api/history-context?${params}`)
+      .then((r) => r.json())
+      .then((d) => setHistoryPreview(d.items ?? []))
+      .catch(() => setHistoryPreview([]));
+  }, [step, baselineMethod, tribeId, userId, reviewKey]);
+
+  useEffect(() => {
     fetch("/api/catalog")
       .then((r) => r.json())
       .then((d) => setTribeIndex(d.tribes ?? []))
       .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (restoredRef.current) return;
+    const saved = loadWizardSession();
+    if (!saved?.tribeId) return;
+    restoredRef.current = true;
+    clearWizardRestoreFlag();
+    skipProductDescSyncRef.current = true;
+    skipPopulationDefSyncRef.current = true;
+
+    setStep(saved.step);
+    setTribeId(saved.tribeId);
+    setUserId(saved.userId);
+    setReviewKey(saved.reviewKey);
+    setCustomProductDesc(saved.customProductDesc);
+    setBaselineMethod(saved.baselineMethod);
+    setUseCustomPopulationDef(saved.useCustomPopulationDef);
+    setCustomPopulationDef(saved.customPopulationDef);
+    setGroundTruth(saved.groundTruth);
+    setGroundTruthThemes(saved.groundTruthThemes);
+    setGroundTruthSentiment(saved.groundTruthSentiment);
+    setSapiens(saved.sapiens);
+    setBaselines(saved.baselines);
+    setGatewayConnected(saved.gatewayConnected);
+
+    setTribeLoading(true);
+    fetch(`/api/tribe/${saved.tribeId}`)
+      .then((r) => r.json())
+      .then((d) => setTribe(d.tribe ?? null))
+      .catch(() => {})
+      .finally(() => setTribeLoading(false));
   }, []);
 
   function resetOutputs() {
@@ -226,7 +293,26 @@ export default function Home() {
     if (t === 3 && !sapiens && !runningSapiens && canRun) void doRunSapiens();
   }
 
-  const benchmarkHref = `/benchmark?tribeId=${encodeURIComponent(tribeId)}`;
+  function openBenchmarking() {
+    if (!tribeId) return;
+    saveWizardSession({
+      step,
+      tribeId,
+      userId,
+      reviewKey,
+      customProductDesc,
+      baselineMethod,
+      useCustomPopulationDef,
+      customPopulationDef,
+      groundTruth,
+      groundTruthThemes,
+      groundTruthSentiment,
+      sapiens,
+      baselines,
+      gatewayConnected,
+    });
+    router.push(`/benchmark?tribeId=${encodeURIComponent(tribeId)}`);
+  }
 
   function selectBaselineMethod(m: BaselineMethod) {
     setBaselineMethod(m);
@@ -247,7 +333,9 @@ export default function Home() {
           </div>
         )}
         <h1 className="text-[22px] font-semibold tracking-tight">{STEPS[step].title}</h1>
-        <p className="text-[14px] text-muted mt-1">{STEPS[step].hint}</p>
+        {STEPS[step].hint ? (
+          <p className="text-[14px] text-muted mt-1">{STEPS[step].hint}</p>
+        ) : null}
       </div>
 
       <section className="card p-6 sm:p-7 animate-in" key={step}>
@@ -311,9 +399,6 @@ export default function Home() {
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-[11px] font-mono text-muted-2">#{i + 1}</span>
                         <span className="text-[12.5px] font-medium text-foreground">Modelled user</span>
-                        <span className="text-[11px] font-semibold text-accent ml-auto">
-                          {(u.similarityScore * 100).toFixed(1)}% sim
-                        </span>
                       </div>
                       <p className="text-[12.5px] text-muted leading-relaxed line-clamp-2">
                         {u.characteristicSummary}
@@ -382,15 +467,6 @@ export default function Home() {
                     <span className="text-[13px] text-muted flex items-center gap-1.5">
                       <Spinner /> Running Sapiens…
                     </span>
-                  )}
-                  {sapiens && !runningSapiens && (
-                    <button
-                      type="button"
-                      onClick={() => void doRunSapiens()}
-                      className="btn btn-ghost px-3 py-1 text-[12px]"
-                    >
-                      Re-run Sapiens
-                    </button>
                   )}
                 </div>
 
@@ -486,6 +562,15 @@ export default function Home() {
                     </div>
                   )}
 
+                  {baselineMethod === "history" && (
+                    <HistoryContextPanel
+                      items={
+                        baselines.find((b) => b.method === "history")?.historyContext ??
+                        historyPreview
+                      }
+                    />
+                  )}
+
                   <div>
                     <Label>Model — click to run</Label>
                     <div className="flex flex-wrap gap-2">
@@ -569,9 +654,14 @@ export default function Home() {
                 )}
 
                 <div className="mt-6 pt-4 border-t border-border">
-                  <Link href={benchmarkHref} className="text-[13px] text-accent hover:underline">
-                    View aggregated benchmark metrics (252 reviews) →
-                  </Link>
+                  <button
+                    type="button"
+                    onClick={openBenchmarking}
+                    disabled={!tribeId}
+                    className="text-[13px] text-accent hover:underline disabled:opacity-40"
+                  >
+                    View benchmarking →
+                  </button>
                 </div>
               </div>
             )}
@@ -598,7 +688,7 @@ export default function Home() {
             }
             className="btn btn-primary px-6 py-2 text-sm"
           >
-            {step === 3 ? "Compare baselines (optional)" : "Continue"}
+            {step === 3 ? "Compare baselines" : "Continue"}
           </button>
         )}
       </div>
@@ -708,6 +798,36 @@ function TraitGroup({ label, items }: { label: string; items: string[] }) {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+function HistoryContextPanel({ items }: { items: HistoryContextItem[] }) {
+  const [open, setOpen] = useState(true);
+  if (!items.length) return null;
+  return (
+    <div className="rounded-xl border border-history/30 bg-history/[0.03] p-4">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2 text-[13px] font-medium text-history w-full text-left"
+      >
+        <Dot tone="history" />
+        Reviews sent as history context ({items.length})
+        <span className="ml-auto text-muted-2">{open ? "▲" : "▼"}</span>
+      </button>
+      {open && (
+        <div className="mt-3 space-y-3 max-h-64 overflow-y-auto">
+          {items.map((h, i) => (
+            <div key={i} className="text-[12px] border-t border-border pt-2 first:border-0 first:pt-0">
+              {h.productDescription && (
+                <p className="text-muted-2 text-[11px] mb-1 line-clamp-2">{h.productDescription}</p>
+              )}
+              <p className="text-foreground/80 whitespace-pre-wrap">{h.reviewText}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

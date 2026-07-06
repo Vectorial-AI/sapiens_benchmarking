@@ -13,9 +13,9 @@ import {
   buildHistoryContext,
   buildSapiensPrompt,
   parsePredictionResponse,
-  wordCount,
   REVIEW_SYSTEM,
 } from "@/lib/prompts";
+import { formatLengthConstraint } from "@/lib/review-history";
 import { hasGatewayKey, mockPrediction, runModel } from "@/lib/ai";
 import { scorePredictionAgainstGroundTruth } from "@/lib/scoring";
 import type { EngineResult, ReviewSentiment, RunMode } from "@/lib/types";
@@ -132,7 +132,8 @@ export async function POST(req: Request) {
   const groundTruth = product?.groundTruthReview ?? null;
   const groundTruthThemes = product?.predictedThemes ?? [];
   const groundTruthSentiment = product?.groundTruthSentiment ?? null;
-  const lengthConstraint = groundTruth ? Math.max(120, wordCount(groundTruth)) : 250;
+  const lengthConstraint =
+    formatLengthConstraint(groundTruth ?? "") ?? 250;
 
   const scoringGroundTruth: ScoringGroundTruth =
     groundTruth && groundTruth.trim()
@@ -162,6 +163,7 @@ export async function POST(req: Request) {
         productDescription,
         category,
         lengthConstraint,
+        excludeReviewKey: reviewKey,
       });
       sapiens = await runEngine("sapiens", prompt, SAPIENS_MODEL);
     }
