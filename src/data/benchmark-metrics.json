@@ -1,0 +1,160 @@
+{
+  "cluster": "cluster_4",
+  "micro": "micro_7",
+  "canonicalReviews": 252,
+  "modes": [
+    {
+      "mode": "sgo_i0",
+      "pipeline": "sapiens",
+      "nReviews": 252,
+      "recallAtK": 0.8198365457294028,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.2523552184412813
+    },
+    {
+      "mode": "sgo_best",
+      "pipeline": "sapiens",
+      "nReviews": 252,
+      "recallAtK": 0.8278675359032502,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.2149381715882098
+    },
+    {
+      "mode": "history_o3",
+      "pipeline": "history",
+      "nReviews": 252,
+      "recallAtK": 0.7927957294028724,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.2522050195261087
+    },
+    {
+      "mode": "history_gpt-5",
+      "pipeline": "history_gpt-5",
+      "nReviews": 0,
+      "recallAtK": null,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": null
+    },
+    {
+      "mode": "history_gpt-5.2",
+      "pipeline": "history",
+      "nReviews": 252,
+      "recallAtK": 0.8353032879818595,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.22411791182756444
+    },
+    {
+      "mode": "history_gpt-5.5",
+      "pipeline": "history",
+      "nReviews": 252,
+      "recallAtK": 0.846650604686319,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.20555230984893916
+    },
+    {
+      "mode": "history_claude-sonnet-4-6",
+      "pipeline": "history",
+      "nReviews": 252,
+      "recallAtK": 0.8224820483749056,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.22726161620406432
+    },
+    {
+      "mode": "history_claude-opus-4-8",
+      "pipeline": "history",
+      "nReviews": 252,
+      "recallAtK": 0.8154431216931217,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.21333726799026612
+    },
+    {
+      "mode": "tribe_gpt-5.2",
+      "pipeline": "tribe",
+      "nReviews": 252,
+      "recallAtK": 0.7812122071050643,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.2735012648751955
+    },
+    {
+      "mode": "tribe_gpt-5.5",
+      "pipeline": "tribe",
+      "nReviews": 252,
+      "recallAtK": 0.7980631141345428,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.24640014018198472
+    },
+    {
+      "mode": "tribe_claude-sonnet-4-6",
+      "pipeline": "tribe",
+      "nReviews": 252,
+      "recallAtK": 0.7360827664399093,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.31352279213158263
+    },
+    {
+      "mode": "tribe_claude-opus-4-8",
+      "pipeline": "tribe",
+      "nReviews": 252,
+      "recallAtK": 0.7799319727891156,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.26151170887515823
+    },
+    {
+      "mode": "tribe_gpt-5",
+      "pipeline": "other",
+      "nReviews": 252,
+      "recallAtK": 0.7880668934240364,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.2704728066334875
+    },
+    {
+      "mode": "tribe_gpt-5.2_category_generic",
+      "pipeline": "tribe",
+      "nReviews": 252,
+      "recallAtK": 0.8013416477702193,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.23625275783534883
+    },
+    {
+      "mode": "tribe_gpt-5_category_generic",
+      "pipeline": "tribe",
+      "nReviews": 252,
+      "recallAtK": 0.7625472411186697,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.25611397223178256
+    },
+    {
+      "mode": "tribe_claude-sonnet-4-6_category_generic",
+      "pipeline": "tribe",
+      "nReviews": 252,
+      "recallAtK": 0.7869094860166288,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.25046751676553086
+    },
+    {
+      "mode": "tribe_claude-opus-4-8_category_generic",
+      "pipeline": "tribe",
+      "nReviews": 252,
+      "recallAtK": 0.7867724867724867,
+      "textSimilarity": null,
+      "overallSimilarity": null,
+      "jsd": 0.2422436693605196
+    }
+  ]
+}

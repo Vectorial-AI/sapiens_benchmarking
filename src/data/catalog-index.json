@@ -1,0 +1,665 @@
+{
+  "tribes": [
+    {
+      "id": "cluster_4-micro_0",
+      "name": "Practical Family Shoppers",
+      "cluster": "cluster_4",
+      "microId": "micro_0",
+      "description": "Members of this micro-cluster are pragmatic, family-oriented buyers who judge products on real-world usefulness and how well they satisfy spouses, children, or household routines. Their writing style …",
+      "userCount": 30,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_0_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_0_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_0_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_1",
+      "name": "Hands-On Value Advocates",
+      "cluster": "cluster_4",
+      "microId": "micro_1",
+      "description": "This tribe shops like a failure-mode forecaster: they assume a product will look acceptable in a listing or a calm first try, so they go hunting for the one real-world condition that will decide wheth…",
+      "userCount": 10,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_1_details.json (user characteristics)",
+        "products": "outputs/amazon_sgo/cluster_4/micro_1/best_delta_predictions.json",
+        "similarity": "outputs/amazon_sgo/cluster_4/micro_1/best_delta_predictions.json",
+        "traits": "evolution_state.json"
+      },
+      "traitCounts": {
+        "behavioral": 38,
+        "motivations": 4,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_2",
+      "name": "Gift-Focused Grand Givers",
+      "cluster": "cluster_4",
+      "microId": "micro_2",
+      "description": "This micro-cluster is composed mainly of grandparents and other family-oriented shoppers who purchase items as gifts and then rate them based on the recipient’s reaction. Their writing style is brief,…",
+      "userCount": 16,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_2_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_2_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_2_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_3",
+      "name": "Kid-Approval Shoppers",
+      "cluster": "cluster_4",
+      "microId": "micro_3",
+      "description": "Kid-Approval Shoppers are family-centric caregivers—often grandparents—who buy with the goal of delighting youngsters and making shared moments easy. Their reviews mirror this: short, enthusiastic end…",
+      "userCount": 30,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_3_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_3_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_3_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_4",
+      "name": "Practical Family Shoppers",
+      "cluster": "cluster_4",
+      "microId": "micro_4",
+      "description": "Members of this micro-cluster are hands-on, value-conscious caregivers who test items with their children (and often pets or spouses) before writing matter-of-fact reviews. Their writing style mirrors…",
+      "userCount": 30,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_4_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_4_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_4_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_5",
+      "name": "Practical Family Pleasers",
+      "cluster": "cluster_4",
+      "microId": "micro_5",
+      "description": "Practical Family Pleasers buy with specific relatives in mind and write short, positive reviews that reassure other caregivers. Their writing style mirrors their pragmatic nature: concise sentences, c…",
+      "userCount": 16,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_5_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_5_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_5_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_6",
+      "name": "Sensory-Savvy Pragmatists",
+      "cluster": "cluster_4",
+      "microId": "micro_6",
+      "description": "They shop like constraint auditors, not feature collectors. Their core belief is that the real question isn’t whether a product can work in ideal conditions, but whether it can be used safely, predict…",
+      "userCount": 30,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_6_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_6_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_6_summary_enhanced_delta_corrected.json",
+        "traits": "evolution_state.json"
+      },
+      "traitCounts": {
+        "behavioral": 10,
+        "motivations": 6,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_7",
+      "name": "Health-Safe Detailers",
+      "cluster": "cluster_4",
+      "microId": "micro_7",
+      "description": "This tribe shops like deployment auditors: they don’t treat a product as “real” until the exact item in-hand can be identified, inventoried, and used immediately in the way the listing implies. Their …",
+      "userCount": 21,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_7_details.json (user characteristics)",
+        "products": "outputs/amazon_sgo/cluster_4/micro_7_best/sapiens_vs_baselines_final_dataset.json",
+        "similarity": "outputs/amazon_sgo/cluster_4/micro_7_best/sapiens_vs_baselines_final_dataset.json",
+        "traits": "evolution_state.json"
+      },
+      "traitCounts": {
+        "behavioral": 19,
+        "motivations": 7,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 5
+      }
+    },
+    {
+      "id": "cluster_4-micro_8",
+      "name": "Kid-Delight Parents",
+      "cluster": "cluster_4",
+      "microId": "micro_8",
+      "description": "Kid-Delight Parents write short, upbeat reviews that spotlight how much fun, comfort, or learning a product brings to their children. Their language is repetitive and affirmative, mirroring their core…",
+      "userCount": 30,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_8_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_8_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_8_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_9",
+      "name": "Practical Beauty Enthusiasts",
+      "cluster": "cluster_4",
+      "microId": "micro_9",
+      "description": "They shop for at-home grooming, beauty, and therapeutic devices the way a pragmatic pro would stock a kit: the product only becomes “real” when it produces a specific finished end-state and keeps doin…",
+      "userCount": 30,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_9_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_9_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_9_summary_enhanced_delta_corrected.json",
+        "traits": "evolution_state.json"
+      },
+      "traitCounts": {
+        "behavioral": 10,
+        "motivations": 7,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_10",
+      "name": "Family-Fun Enthusiasts",
+      "cluster": "cluster_4",
+      "microId": "micro_10",
+      "description": "Family-Fun Enthusiasts judge every purchase by the smiles it puts on their children and loved ones. Their reviews mirror this outlook—quick, emoji-laden or repetitive bursts of praise focused far more…",
+      "userCount": 30,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_10_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_10_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_10_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_11",
+      "name": "Practical Family Caregivers",
+      "cluster": "cluster_4",
+      "microId": "micro_11",
+      "description": "This micro-cluster consists of hands-on parents, grandparents, and caregivers who quickly test products with their kids, then leave short, enthusiastic reviews to reassure similar shoppers. They value…",
+      "userCount": 30,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_11_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_11_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_11_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_12",
+      "name": "Safety-Savvy Budget Parents",
+      "cluster": "cluster_4",
+      "microId": "micro_12",
+      "description": "This tribe evaluates products the way a careful household would accept (or refuse) a new tool into the home: the item must arrive in a state that makes correct use obvious and accountable, and it must…",
+      "userCount": 12,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_12_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_12_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_12_summary_enhanced_delta_corrected.json",
+        "traits": "evolution_state.json"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_13",
+      "name": "Hands-On Value Beauty Testers",
+      "cluster": "cluster_4",
+      "microId": "micro_13",
+      "description": "This tribe buys like operators who expect to own a small system, not “try a product.” They treat the product page as an implied contract—what arrives, what connects, what’s required to function—and th…",
+      "userCount": 21,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_13_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_13_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_13_summary_enhanced_delta_corrected.json",
+        "traits": "evolution_state.json"
+      },
+      "traitCounts": {
+        "behavioral": 9,
+        "motivations": 6,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_14",
+      "name": "Value-Seeking Parent Shoppers",
+      "cluster": "cluster_4",
+      "microId": "micro_14",
+      "description": "This cluster consists of budget-minded parents who purchase across gaming, apparel, and digital media ecosystems with one question in mind: \"Will this keep the kids happy without breaking the bank?\" T…",
+      "userCount": 10,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_14_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_14_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_14_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_15",
+      "name": "Hands-On Value Seekers",
+      "cluster": "cluster_4",
+      "microId": "micro_15",
+      "description": "This tribe evaluates products like field testers for ordinary life: the item earns trust only if it performs its primary job on the first realistic attempt in the exact scenario they bought it for (a …",
+      "userCount": 30,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_15_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_15_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_15_summary_enhanced_delta_corrected.json",
+        "traits": "evolution_state.json"
+      },
+      "traitCounts": {
+        "behavioral": 10,
+        "motivations": 4,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_16",
+      "name": "Practical Parent Purchasers",
+      "cluster": "cluster_4",
+      "microId": "micro_16",
+      "description": "This cluster consists of busy caregivers who shop with a ‘function-first’ lens. Their writing is brief, upbeat, and grounded in real-world testing—highlighting how well a product fits, lasts, and keep…",
+      "userCount": 17,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_16_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_16_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_16_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_17",
+      "name": "Family-Focused Pragmatists",
+      "cluster": "cluster_4",
+      "microId": "micro_17",
+      "description": "This cluster consists of detail-oriented parents who personally test products—or delegate the testing to their spouse or kids—and then deliver thorough, experience-based write-ups. Their reviews mirro…",
+      "userCount": 20,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_17_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_17_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_17_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_18",
+      "name": "Expert Helper Reviewers",
+      "cluster": "cluster_4",
+      "microId": "micro_18",
+      "description": "They shop like routine-guardians and credibility accountants: a product “works” only if it preserves an already-lived workflow while restoring real agency under constraints the user cannot negotiate a…",
+      "userCount": 14,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_18_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_18_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_18_summary_enhanced_delta_corrected.json",
+        "traits": "evolution_state.json"
+      },
+      "traitCounts": {
+        "behavioral": 10,
+        "motivations": 6,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 4
+      }
+    },
+    {
+      "id": "cluster_4-micro_19",
+      "name": "Pragmatic Parent Testers",
+      "cluster": "cluster_4",
+      "microId": "micro_19",
+      "description": "This micro-cluster is composed of hands-on caregivers who trial products alongside their kids and report back in plain, no-nonsense language. Their writing mirrors their practical nature—brief when th…",
+      "userCount": 13,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_19_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_19_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_19_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 6,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_20",
+      "name": "Practical Family Testers",
+      "cluster": "cluster_4",
+      "microId": "micro_20",
+      "description": "This micro-cluster is made up of hands-on, family-oriented shoppers who test items in the chaos of daily life—be it gaming gear, kids’ clothing or household tools—and then report back in straightforwa…",
+      "userCount": 16,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_20_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_20_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_20_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_21",
+      "name": "Value-Seeking Self-Care Caregivers",
+      "cluster": "cluster_4",
+      "microId": "micro_21",
+      "description": "This tribe shops and reviews like a case-closer: they believe a recommendation is only “fair” when it can be defended from what happened on first handling and first use, using proof another person cou…",
+      "userCount": 14,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_21_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_21_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_21_summary_enhanced_delta_corrected.json",
+        "traits": "evolution_state.json"
+      },
+      "traitCounts": {
+        "behavioral": 9,
+        "motivations": 3,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_22",
+      "name": "Protective Caregiver Shoppers",
+      "cluster": "cluster_4",
+      "microId": "micro_22",
+      "description": "Family-oriented parents and grandparents who actively test products with their children/grandchildren and then write balanced, pragmatic reviews. Their feedback blends warm anecdotes with practical ch…",
+      "userCount": 10,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_22_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_22_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_22_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_23",
+      "name": "Practical Kid-Centric Parents",
+      "cluster": "cluster_4",
+      "microId": "micro_23",
+      "description": "This cluster is composed of hands-on, family-focused parents who buy and review products chiefly to keep their kids happily occupied while learning. Their writing is concise, experience-based, and bal…",
+      "userCount": 21,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_23_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_23_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_23_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_24",
+      "name": "Practical Parent Validators",
+      "cluster": "cluster_4",
+      "microId": "micro_24",
+      "description": "Practical Parent Validators are hands-on caregivers who buy with their children in mind and report back in concise, matter-of-fact blurbs. They rarely dwell on technical specs; instead, they validate …",
+      "userCount": 19,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_24_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_24_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_24_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_25",
+      "name": "Practical Family Evaluators",
+      "cluster": "cluster_4",
+      "microId": "micro_25",
+      "description": "This tribe evaluates purchases the way a household “systems operator” would: they start with the real constraint that forced the buy (no time, no access to a service, need to do it at home) and then j…",
+      "userCount": 11,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_25_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_25_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_25_summary_enhanced_delta_corrected.json",
+        "traits": "evolution_state.json"
+      },
+      "traitCounts": {
+        "behavioral": 8,
+        "motivations": 4,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_26",
+      "name": "Analytical Supplement Sleuths",
+      "cluster": "cluster_4",
+      "microId": "micro_26",
+      "description": "This tribe shops the way a practical investigator makes decisions: they are trying to eliminate regret, not chase upside. A product is only “good” if it behaves predictably in their real routine—when …",
+      "userCount": 10,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_26_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_4/micro_26_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_26_summary_enhanced_delta_corrected.json",
+        "traits": "evolution_state.json"
+      },
+      "traitCounts": {
+        "behavioral": 14,
+        "motivations": 7,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_1-micro_9",
+      "name": "Efficient Bargain Hunters",
+      "cluster": "cluster_1",
+      "microId": "micro_9",
+      "description": "These shoppers zero in on whether an item is inexpensive, arrives quickly, and meets baseline expectations. They communicate in very short bursts—often a single sentence—showing an efficiency-driven, …",
+      "userCount": 30,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_1/micro_9_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_1/micro_9_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_1/micro_9_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_1-micro_17",
+      "name": "Effusive Cheerleaders",
+      "cluster": "cluster_1",
+      "microId": "micro_17",
+      "description": "Effusive Cheerleaders write lightning-fast, high-energy reviews meant to spread good vibes more than in-depth guidance. Their micro-posts mirror their core trait of spontaneous enthusiasm: repetitive …",
+      "userCount": 22,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_1/micro_17_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_1/micro_17_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_1/micro_17_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 6,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_3-micro_12",
+      "name": "Practical Value Seekers",
+      "cluster": "cluster_3",
+      "microId": "micro_12",
+      "description": "This micro-cluster consists of no-nonsense shoppers who test items hands-on and then leave short, fact-based reviews. They care far more about everyday functionality, comfort, and price than about bra…",
+      "userCount": 30,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_3/micro_12_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_3/micro_12_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_3/micro_12_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    }
+  ],
+  "total": 30
+}

@@ -1,0 +1,130 @@
+{
+    "tribes": [
+      {
+        "id": "quiet-optimizers",
+        "name": "The Quiet Optimizers",
+        "tagline": "Data-driven minimalists who quietly upgrade their lives",
+        "description": "Self-directed professionals who obsessively research before buying and distrust marketing hype.",
+        "traits": [
+          "High research intensity",
+          "Skeptical of marketing",
+          "Values longevity over novelty",
+          "Privacy conscious"
+        ],
+        "size": "~1.2M profiles",
+        "discoveredFrom": ["Reddit r/BuyItForLife", "Hacker News", "App Store reviews"],
+        "users": [
+          {
+            "id": "maya",
+            "name": "Maya R.",
+            "archetype": "The Spec Auditor",
+            "description": "Compares three alternatives in a spreadsheet before any purchase over $40.",
+            "traits": ["Spreadsheet buyer", "Anti-subscription", "Build-quality first"],
+            "demographics": {
+              "age": 34,
+              "location": "Seattle, WA",
+              "occupation": "Backend engineer",
+              "income": "$145k"
+            }
+          },
+          {
+            "id": "devon",
+            "name": "Devon K.",
+            "archetype": "The Quiet Upgrader",
+            "description": "Replaces things only when they break, then buys the version that lasts a decade.",
+            "traits": ["Replacement buyer", "Long-horizon", "Ignores influencers"],
+            "demographics": {
+              "age": 41,
+              "location": "Portland, OR",
+              "occupation": "Architect",
+              "income": "$120k"
+            }
+          }
+        ]
+      },
+      {
+        "id": "chaos-parents",
+        "name": "The Chaos-Managing Parents",
+        "tagline": "Time-starved caregivers optimizing for survival, not perfection",
+        "description": "Parents of young kids who make fast, high-stakes decisions with zero spare time.",
+        "traits": [
+          "Time-poor, decision-fast",
+          "Durability + safety obsessed",
+          "Mental-load reduction",
+          "Trusts other parents"
+        ],
+        "size": "~3.4M profiles",
+        "discoveredFrom": ["Facebook parenting groups", "Amazon Q&A", "TikTok"],
+        "users": [
+          {
+            "id": "priya",
+            "name": "Priya S.",
+            "archetype": "The Mental-Load CEO",
+            "description": "Pays a premium for anything that removes a recurring chore or a source of anxiety.",
+            "traits": ["Ops-minded", "Anxiety-driven purchases", "Failure-mode reader"],
+            "demographics": {
+              "age": 37,
+              "location": "Austin, TX",
+              "occupation": "Marketing director",
+              "income": "$98k household"
+            }
+          },
+          {
+            "id": "marcus",
+            "name": "Marcus T.",
+            "archetype": "The Weekend Fixer",
+            "description": "Buys once and expects it to survive juice spills, drops, and the dishwasher.",
+            "traits": ["Durability tester", "Loyal-then-gone", "Value hunter"],
+            "demographics": {
+              "age": 39,
+              "location": "Columbus, OH",
+              "occupation": "Physical therapist",
+              "income": "$110k household"
+            }
+          }
+        ]
+      },
+      {
+        "id": "status-native-genz",
+        "name": "The Status-Native Gen Z",
+        "tagline": "Digitally-native trendsetters where aesthetics = identity",
+        "description": "Gen Z consumers for whom a product is a piece of their public identity.",
+        "traits": [
+          "Aesthetics as identity",
+          "Community-consensus driven",
+          "Authenticity radar",
+          "Impulse + FOMO buying"
+        ],
+        "size": "~5.1M profiles",
+        "discoveredFrom": ["TikTok", "Instagram", "Discord communities"],
+        "users": [
+          {
+            "id": "zoe",
+            "name": "Zoe L.",
+            "archetype": "The Taste Curator",
+            "description": "Buys things that photograph well and signal a specific vibe.",
+            "traits": ["Vibe-first", "Early adopter", "Brand-fickle"],
+            "demographics": {
+              "age": 22,
+              "location": "Brooklyn, NY",
+              "occupation": "Junior UX designer",
+              "income": "$61k"
+            }
+          },
+          {
+            "id": "leo",
+            "name": "Leo M.",
+            "archetype": "The Hype Validator",
+            "description": "Won't buy until his group chat confirms it's not cringe.",
+            "traits": ["Social proof driven", "Scarcity sensitive", "Group-chat gated"],
+            "demographics": {
+              "age": 20,
+              "location": "Los Angeles, CA",
+              "occupation": "CS student / creator",
+              "income": "$28k"
+            }
+          }
+        ]
+      }
+    ]
+  }

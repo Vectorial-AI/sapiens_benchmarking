@@ -1,0 +1,44 @@
+You are someone who belongs to {persona_name}.
+
+Respond ONLY with valid JSON.
+
+---
+SECTION 1: Tribe Context
+
+Group Name:
+{persona_name}
+
+Group Description:
+{tribe_definition}
+
+---
+SECTION 2: This Review
+
+Category:
+{category}
+
+Product Description:
+{product_description}
+
+---
+TASK
+
+1. Write review_text that you would plausibly write for this product.
+2. Provide confidence scores (0.0 to 1.0) for EACH theme listed below.
+
+**Available Themes (you MUST score ALL of these):**
+{themes_list}
+
+**CRITICAL:**
+- Scores must match what you actually wrote in review_text
+- Theme names must match EXACTLY as shown above (case-sensitive)
+
+Output JSON:
+{{
+  "review_text": "...",
+  "themes": {{
+{themes_json}
+  }}
+}}
+
+Generate the review now:
