@@ -1,8 +1,30 @@
+import type { BaselineMethod } from "./baselines";
 import type { HistoryContextItem } from "./types";
 import type { Product, Tribe, User } from "./master";
 import { formatUserCharacteristics } from "./user-characteristics";
 
-/** Structured log for Vercel/server logs — search for `[sapiens-prompt]`. */
+const PROMPT_LOG_CHUNK = 12_000;
+
+/** Full prompt body — search Vercel logs for `[prompt-full:sapiens]` etc. */
+export function logFullPrompt(
+  tag: string,
+  prompt: string,
+  meta: Record<string, unknown>,
+): void {
+  console.log(`[prompt-full:${tag}] meta ${JSON.stringify(meta)}`);
+  if (!prompt.length) {
+    console.log(`[prompt-full:${tag}] (empty prompt)`);
+    return;
+  }
+  const parts = Math.ceil(prompt.length / PROMPT_LOG_CHUNK);
+  for (let i = 0; i < parts; i++) {
+    const chunk = prompt.slice(i * PROMPT_LOG_CHUNK, (i + 1) * PROMPT_LOG_CHUNK);
+    console.log(`[prompt-full:${tag}] part ${i + 1}/${parts}\n${chunk}`);
+  }
+  console.log(`[prompt-full:${tag}] end charLength=${prompt.length}`);
+}
+
+/** Structured summary — search for `[sapiens-prompt]`. */
 export function logSapiensPromptContext(args: {
   tribeId: string;
   userId: string;
@@ -61,7 +83,6 @@ export function logSapiensPromptContext(args: {
       count: historyItems.length,
       reviews: historyItems.map((item, i) => ({
         index: i + 1,
-        productDescription: item.productDescription?.slice(0, 80) ?? "",
         reviewCharLength: item.reviewText.length,
         preview: item.reviewText.slice(0, 200),
       })),
@@ -71,7 +92,31 @@ export function logSapiensPromptContext(args: {
       referenceCharLength: product?.bestPredictionReview?.length ?? 0,
     },
     promptCharLength: promptCharLength ?? null,
+    fullPromptLogTags: [
+      "prompt-full:system",
+      "prompt-full:sapiens",
+      "prompt-full:baseline:history",
+      "prompt-full:baseline:tribe_persona",
+      "prompt-full:baseline:population_persona",
+    ],
   };
 
   console.log("[sapiens-prompt]", JSON.stringify(payload, null, 2));
+}
+
+export function logBaselinePromptFull(args: {
+  method: BaselineMethod;
+  tribeId: string;
+  userId: string;
+  reviewKey?: string;
+  prompt: string;
+  model?: string;
+}): void {
+  logFullPrompt(`baseline:${args.method}`, args.prompt, {
+    tribeId: args.tribeId,
+    userId: args.userId,
+    reviewKey: args.reviewKey ?? null,
+    method: args.method,
+    model: args.model ?? null,
+  });
 }

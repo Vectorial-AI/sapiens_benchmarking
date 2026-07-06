@@ -21,7 +21,11 @@ import {
   formatLengthConstraint,
 } from "@/lib/review-history";
 import { hasGatewayKey, mockPrediction, runModel } from "@/lib/ai";
-import { logSapiensPromptContext } from "@/lib/prompt-log";
+import {
+  logBaselinePromptFull,
+  logFullPrompt,
+  logSapiensPromptContext,
+} from "@/lib/prompt-log";
 import { scorePredictionAgainstGroundTruth } from "@/lib/scoring";
 import type { EngineResult, ReviewSentiment, RunMode } from "@/lib/types";
 
@@ -157,10 +161,67 @@ export async function POST(req: Request) {
   );
   const hasBestPredictionReference = Boolean(product?.bestPredictionReview?.trim());
 
+  const promptBase = {
+    tribe,
+    user,
+    product,
+    productDescription,
+    category,
+    excludeReviewKey: reviewKey,
+  };
+
+  function logAllPrompts(sapiensPrompt: string, runModeLabel: "sapiens" | "mock") {
+    logFullPrompt("system", REVIEW_SYSTEM, {
+      tribeId,
+      userId,
+      reviewKey: reviewKey ?? null,
+      note: "System message sent with every engine call",
+    });
+    logSapiensPromptContext({
+      tribeId,
+      userId,
+      reviewKey,
+      category,
+      tribe,
+      user,
+      product,
+      historyItems: sapiensHistoryContext,
+      hasBestPredictionReference,
+      promptCharLength: sapiensPrompt.length,
+      mode: runModeLabel,
+    });
+    logFullPrompt("sapiens", sapiensPrompt, {
+      tribeId,
+      userId,
+      reviewKey: reviewKey ?? null,
+      model: SAPIENS_MODEL,
+    });
+    for (const method of BASELINE_METHODS) {
+      const baselinePrompt = buildBaselinePrompt(method, {
+        ...promptBase,
+        populationDefinition:
+          method === "population_persona" ? tribe.populationDefinition : undefined,
+      });
+      logBaselinePromptFull({
+        method,
+        tribeId,
+        userId,
+        reviewKey,
+        prompt: baselinePrompt,
+      });
+    }
+  }
+
   // ---- SAPIENS ----
   if (mode === "sapiens") {
     let sapiens: EngineResult;
-    const runMode = hasGatewayKey() ? "sapiens" : "mock";
+    const runModeLabel = hasGatewayKey() ? "sapiens" : "mock";
+
+    const sapiensPrompt = buildSapiensPrompt({
+      ...promptBase,
+      lengthConstraint,
+    });
+    logAllPrompts(sapiensPrompt, runModeLabel);
 
     if (!hasGatewayKey()) {
       const mock = mockPrediction("sapiens", productDescription);
@@ -172,42 +233,8 @@ export async function POST(req: Request) {
         model: `${SAPIENS_MODEL} (mock)`,
         latencyMs: 0,
       };
-      logSapiensPromptContext({
-        tribeId,
-        userId,
-        reviewKey,
-        category,
-        tribe,
-        user,
-        product,
-        historyItems: sapiensHistoryContext,
-        hasBestPredictionReference,
-        mode: runMode,
-      });
     } else {
-      const prompt = buildSapiensPrompt({
-        tribe,
-        user,
-        product,
-        productDescription,
-        category,
-        lengthConstraint,
-        excludeReviewKey: reviewKey,
-      });
-      logSapiensPromptContext({
-        tribeId,
-        userId,
-        reviewKey,
-        category,
-        tribe,
-        user,
-        product,
-        historyItems: sapiensHistoryContext,
-        hasBestPredictionReference,
-        promptCharLength: prompt.length,
-        mode: runMode,
-      });
-      sapiens = await runEngine("sapiens", prompt, SAPIENS_MODEL);
+      sapiens = await runEngine("sapiens", sapiensPrompt, SAPIENS_MODEL);
     }
 
     if (scoringGroundTruth) sapiens = await attachMetrics(sapiens, scoringGroundTruth);
@@ -242,6 +269,27 @@ export async function POST(req: Request) {
       : undefined;
 
   let baseline: EngineResult;
+  const baselinePrompt = buildBaselinePrompt(method, {
+    ...promptBase,
+    populationDefinition: usingCustomPopulationDef
+      ? customPopulationDefinition
+      : undefined,
+  });
+  logFullPrompt("system", REVIEW_SYSTEM, {
+    tribeId,
+    userId,
+    reviewKey: reviewKey ?? null,
+    note: "System message sent with every engine call",
+  });
+  logBaselinePromptFull({
+    method,
+    tribeId,
+    userId,
+    reviewKey,
+    prompt: baselinePrompt,
+    model: gateway,
+  });
+
   if (!hasGatewayKey()) {
     const mock = mockPrediction("baseline", productDescription, method);
     baseline = {
@@ -253,18 +301,7 @@ export async function POST(req: Request) {
       latencyMs: 0,
     };
   } else {
-    const prompt = buildBaselinePrompt(method, {
-      tribe,
-      user,
-      product,
-      productDescription,
-      category,
-      excludeReviewKey: reviewKey,
-      populationDefinition: usingCustomPopulationDef
-        ? customPopulationDefinition
-        : undefined,
-    });
-    baseline = await runEngine("baseline", prompt, gateway);
+    baseline = await runEngine("baseline", baselinePrompt, gateway);
   }
 
   if (scoringGroundTruth) baseline = await attachMetrics(baseline, scoringGroundTruth);

@@ -47,7 +47,6 @@ export function buildSapiensHistoryContext(args: {
         mapCategoryToMain(p.category) === targetMain,
     )
     .map((p) => ({
-      productDescription: p.productDescription,
       reviewText: p.groundTruthReview,
     }));
 }
@@ -64,7 +63,6 @@ export function buildHistoryBaselineContext(args: {
         p.groundTruthReview.trim().length > 0,
     )
     .map((p) => ({
-      productDescription: p.productDescription,
       reviewText: p.groundTruthReview,
     }));
 }

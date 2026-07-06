@@ -61,7 +61,6 @@ export type CatalogTribe = CatalogTribeIndex & {
 };
 
 export type HistoryContextItem = {
-  productDescription: string;
   reviewText: string;
 };
 

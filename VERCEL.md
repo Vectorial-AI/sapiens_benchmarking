@@ -71,4 +71,16 @@ Each Sapiens run logs structured context to **Vercel function logs**. Search for
 
 The log includes checklist flags, Section 2 preview, Section 3 review count/previews, and whether Section 4 SGO reference was included (char length only — not full reference text).
 
-Optional curl (no UI): `GET /api/prompt-context?tribeId=...&userId=...&reviewKey=...&category=...`
+**Full prompt text** (chunked if long) — search these tags after a run:
+
+| Search tag | Prompt |
+|------------|--------|
+| `prompt-full:system` | Shared system message |
+| `prompt-full:sapiens` | Full Sapiens user prompt |
+| `prompt-full:baseline:history` | History baseline |
+| `prompt-full:baseline:tribe_persona` | Tribe persona baseline |
+| `prompt-full:baseline:population_persona` | Population persona baseline |
+
+Running **Sapiens once** logs all four user prompts plus the system message. Running a **baseline** logs that baseline’s full prompt only.
+
+Optional curl (summary, no full text): `GET /api/prompt-context?tribeId=...&userId=...&reviewKey=...&category=...`

@@ -156,13 +156,14 @@ ${userCharBlock}
 ---
 SECTION ${section3}: Your Prior Reviews
 
-These are **other reviews written by this same user** on different products. The target review you are writing is NOT included here.
+These are **other reviews written by this same user**. The target review you are writing is NOT included here.
+Each example is **review text only** — no product titles or descriptions.
 
 **How to use them**
 1. Read all examples first and note this user's normal review length and structure.
 2. Match that length and structure in your review.
 3. Match their voice: casual vs detailed, blunt vs explanatory.
-4. Use Section ${section3} for **style and length only** — review text only.
+4. Use Section ${section3} for **style and length only**.
 
 ${historyBlock}
 
@@ -363,7 +364,7 @@ export function buildHistoryPrompt(args: {
   return `You are someone who belongs to ${personaName}.
 
 ### Your Writing Style & Preferences
-To understand how to write this review, analyze the following examples of reviews you have written in the past. Observe the tone, length, and what details you usually focus on.
+To understand how to write this review, analyze the following examples of reviews you have written in the past. Each example is review text only (no product titles or descriptions). Observe the tone, length, and what details you usually focus on.
 
 ${historyTextBlock || "(no prior reviews available)"}
 ### The New Task
