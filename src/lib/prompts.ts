@@ -188,10 +188,12 @@ export function buildPopulationPersonaPrompt(args: {
   product: Product | null;
   productDescription: string;
   category: string;
+  populationDefinition?: string;
 }): string {
-  const { tribe, product, productDescription, category } = args;
+  const { tribe, product, productDescription, category, populationDefinition } = args;
   const themes = themesFor(product);
   const popName = `${category} shoppers`;
+  const definition = populationDefinition?.trim() || tribe.populationDefinition;
   return `You are someone who belongs to ${popName}.
 
 Respond ONLY with valid JSON.
@@ -203,7 +205,7 @@ Group Name:
 ${popName}
 
 Group Description:
-${tribe.populationDefinition}
+${definition}
 
 ---
 SECTION 2: This Review
@@ -303,6 +305,7 @@ export function buildBaselinePrompt(
     productDescription: string;
     category: string;
     excludeReviewKey?: string;
+    populationDefinition?: string;
   },
 ): string {
   switch (method) {
@@ -327,6 +330,7 @@ export function buildBaselinePrompt(
         product: args.product,
         productDescription: args.productDescription,
         category: args.category,
+        populationDefinition: args.populationDefinition,
       });
   }
 }

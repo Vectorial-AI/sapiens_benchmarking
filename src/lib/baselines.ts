@@ -32,14 +32,91 @@ export const BASELINE_METHOD_META: Record<
   },
   tribe_persona: {
     label: "Tribe persona baseline",
-    blurb: "Per-tribe definition from generate_tribe_definitions.py",
+    blurb: "Per-micro definition from micro_cluster_tribe_definitions.json",
     tone: "persona",
   },
   population_persona: {
     label: "Population persona baseline",
-    blurb: "Generic category-level shopper definition",
+    blurb: "Category definition from category_generic_tribe_definitions.json",
     tone: "persona",
   },
+};
+
+/** Source files and field mapping for each baseline prompt. */
+export const BASELINE_DATA_SOURCES: Record<BaselineMethod, string> = {
+  history: "Clustering/prediction_micro_cluster_history.py (leave-one-out user reviews)",
+  tribe_persona: "Clustering/micro_cluster_tribe_definitions.json",
+  population_persona: "Clustering/category_generic_tribe_definitions.json",
+};
+
+/** What each baseline method actually receives in the prompt (for UI transparency). */
+export const BASELINE_CONTEXT: Record<
+  BaselineMethod,
+  { includes: string[]; excludes: string[]; whyStrong?: string }
+> = {
+  history: {
+    includes: [
+      "All of this user's other reviews (leave-one-out — held-out product excluded)",
+      "Review text only in examples (style, tone, length, detail level)",
+      "Target product description",
+      "Category theme list for confidence scoring",
+      "Tribe name as persona label",
+    ],
+    excludes: [
+      "Sapiens evolved tribe traits",
+      "Per-user characteristic summary",
+      "Held-out ground-truth review",
+      "micro_cluster_tribe_definitions.json persona paragraph",
+    ],
+    whyStrong:
+      "Past reviews are a very direct style signal — the model mimics how this person actually writes. Often the strongest baseline on text similarity.",
+  },
+  tribe_persona: {
+    includes: [
+      "tribe_definition for this cluster/micro from micro_cluster_tribe_definitions.json",
+      "Tribe name (persona_name)",
+      "Product description + category",
+      "Category theme list",
+    ],
+    excludes: [
+      "Sapiens evolved traits from evolution_state.json",
+      "User-specific characteristics",
+      "Any review history",
+    ],
+    whyStrong:
+      "Short seed persona per micro-cluster — no per-user tailoring, but gives a coherent group voice for theme scoring.",
+  },
+  population_persona: {
+    includes: [
+      "Generic category shopper definition from category_generic_tribe_definitions.json",
+      "Group name: \"{category} shoppers\"",
+      "Product description + category",
+      "Category theme list",
+    ],
+    excludes: [
+      "Tribe-specific micro_cluster_tribe_definitions.json entry",
+      "Sapiens evolved traits",
+      "User characteristics",
+      "Review history",
+    ],
+    whyStrong:
+      "Broadest persona — still gets product + theme rubric, so it can score well on themes; on a single review it can beat Sapiens by chance (e.g. sentiment match).",
+  },
+};
+
+export const SAPIENS_CONTEXT = {
+  includes: [
+    "Evolved tribe traits (group summary + DO / DRIVE / triggers / frictions / goals)",
+    "This user's characteristic summary",
+    "Product description + category",
+    "Category theme list",
+    "Review length target from ground truth",
+  ],
+  excludes: [
+    "Held-out ground-truth review text",
+    "Other reviews by this user (leave-one-out history — not yet in UI port)",
+  ],
+  note: "Full Python i0 prompt also sends prior reviews as style context; UI port is traits + user chars only.",
 };
 
 /** Map pipeline model slug → Vercel AI Gateway model id */

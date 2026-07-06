@@ -10,10 +10,12 @@ type ModeSummary = {
   mode: string;
   pipeline: string;
   nReviews: number;
-  recallAtK: number | null;
   textSimilarity: number | null;
+  recallAtK: number | null;
+  sentiment: number | null;
   overallSimilarity: number | null;
-  jsd: number | null;
+  matchCount: number | null;
+  matchPct: number | null;
 };
 
 type BenchmarkData = {
@@ -22,7 +24,9 @@ type BenchmarkData = {
   micro?: string;
   available: boolean;
   canonicalReviews?: number;
-  sapiensModes: ModeSummary[];
+  matchThreshold?: number;
+  dataSource?: string;
+  sapiensMode: ModeSummary | null;
   baselineModes: ModeSummary[];
   allModes: ModeSummary[];
   message?: string;
@@ -49,8 +53,10 @@ function BenchmarkContent() {
     };
   }, [tribeId]);
 
+  const threshold = data?.matchThreshold ?? 0.65;
+
   return (
-    <div className="mx-auto w-full max-w-5xl px-6 py-8 sm:py-12">
+    <div className="mx-auto w-full max-w-6xl px-6 py-8 sm:py-12">
       <header className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <Image src="/vectorial-logo.png" alt="Vectorial" width={163} height={22} className="h-[22px] w-auto" />
@@ -65,12 +71,19 @@ function BenchmarkContent() {
       <h1 className="text-[22px] font-semibold tracking-tight mb-1">
         Aggregated scores: Sapiens vs baselines
       </h1>
-      <p className="text-[14px] text-muted mb-6">
-        Reference run from bundled{" "}
-        <code className="text-[12px] bg-surface-3 px-1.5 py-0.5 rounded">
-          src/data/benchmark-metrics.json
-        </code>
-        {data?.canonicalReviews && ` · ${data.canonicalReviews} reviews`}
+      <p className="text-[14px] text-muted mb-2">
+        Mean metrics over {data?.canonicalReviews ?? 252} canonical reviews · match threshold{" "}
+        {Math.round(threshold * 100)}%
+      </p>
+      <p className="text-[12px] text-muted-2 mb-6">
+        Overall = 0.25×text + 0.70×recall@k + 0.05×sentiment
+        {data?.dataSource && (
+          <>
+            {" "}
+            · source{" "}
+            <code className="bg-surface-3 px-1 py-0.5 rounded text-[11px]">{data.dataSource}</code>
+          </>
+        )}
       </p>
 
       {loading ? (
@@ -81,23 +94,25 @@ function BenchmarkContent() {
         <p className="text-muted">{data?.message ?? "Metrics not available."}</p>
       ) : (
         <div className="space-y-8">
-          <section>
-            <h2 className="text-[15px] font-semibold mb-3 flex items-center gap-2">
-              <Dot tone="sapiens" /> Sapiens pipeline modes
-            </h2>
-            <MetricsTable modes={data.sapiensModes} highlight />
-          </section>
+          {data.sapiensMode && (
+            <section>
+              <h2 className="text-[15px] font-semibold mb-3 flex items-center gap-2">
+                <Dot tone="sapiens" /> Sapiens
+              </h2>
+              <MetricsTable modes={[data.sapiensMode]} highlight threshold={threshold} />
+            </section>
+          )}
 
           <section>
             <h2 className="text-[15px] font-semibold mb-3 flex items-center gap-2">
-              <Dot tone="persona" /> Baseline modes (history · tribe · population)
+              <Dot tone="persona" /> Baselines (history · tribe · population)
             </h2>
-            <MetricsTable modes={data.baselineModes} />
+            <MetricsTable modes={data.baselineModes} threshold={threshold} />
           </section>
 
           <section>
-            <h2 className="text-[15px] font-semibold mb-3">All modes</h2>
-            <MetricsTable modes={data.allModes} compact />
+            <h2 className="text-[15px] font-semibold mb-3">All modes (ranked)</h2>
+            <MetricsTable modes={data.allModes} threshold={threshold} />
           </section>
         </div>
       )}
@@ -108,15 +123,15 @@ function BenchmarkContent() {
 function MetricsTable({
   modes,
   highlight,
-  compact,
+  threshold,
 }: {
   modes: ModeSummary[];
   highlight?: boolean;
-  compact?: boolean;
+  threshold: number;
 }) {
   if (!modes.length) return <p className="text-[13px] text-muted-2">No modes in this group.</p>;
 
-  const fmt = (v: number | null) => (v != null ? (v * 100).toFixed(1) + "%" : "—");
+  const fmtRaw = (v: number | null) => (v != null ? v.toFixed(4) : "—");
 
   return (
     <div className="overflow-x-auto rounded-xl border border-border">
@@ -124,12 +139,12 @@ function MetricsTable({
         <thead>
           <tr className="border-b border-border bg-surface-2 text-left text-muted-2">
             <th className="px-4 py-2.5 font-medium">Mode</th>
-            {!compact && <th className="px-4 py-2.5 font-medium">Pipeline</th>}
-            <th className="px-4 py-2.5 font-medium">Reviews</th>
-            <th className="px-4 py-2.5 font-medium">Recall@k</th>
-            <th className="px-4 py-2.5 font-medium">Text sim</th>
-            <th className="px-4 py-2.5 font-medium">Overall sim</th>
-            {!compact && <th className="px-4 py-2.5 font-medium">JSD</th>}
+            <th className="px-4 py-2.5 font-medium">Mean text sim</th>
+            <th className="px-4 py-2.5 font-medium">Mean recall@k</th>
+            <th className="px-4 py-2.5 font-medium">Mean sentiment</th>
+            <th className="px-4 py-2.5 font-medium">Mean overall</th>
+            <th className="px-4 py-2.5 font-medium">Reviews ≥ {threshold}</th>
+            <th className="px-4 py-2.5 font-medium">Reviews ≥ {threshold} (%)</th>
           </tr>
         </thead>
         <tbody>
@@ -141,12 +156,12 @@ function MetricsTable({
               }`}
             >
               <td className="px-4 py-2.5 font-mono text-[12px]">{m.mode}</td>
-              {!compact && <td className="px-4 py-2.5 text-muted">{m.pipeline}</td>}
-              <td className="px-4 py-2.5">{m.nReviews}</td>
-              <td className="px-4 py-2.5">{fmt(m.recallAtK)}</td>
-              <td className="px-4 py-2.5">{fmt(m.textSimilarity)}</td>
-              <td className="px-4 py-2.5 font-medium">{fmt(m.overallSimilarity)}</td>
-              {!compact && <td className="px-4 py-2.5">{m.jsd?.toFixed(3) ?? "—"}</td>}
+              <td className="px-4 py-2.5">{fmtRaw(m.textSimilarity)}</td>
+              <td className="px-4 py-2.5">{fmtRaw(m.recallAtK)}</td>
+              <td className="px-4 py-2.5">{fmtRaw(m.sentiment)}</td>
+              <td className="px-4 py-2.5 font-medium">{fmtRaw(m.overallSimilarity)}</td>
+              <td className="px-4 py-2.5">{m.matchCount ?? "—"}</td>
+              <td className="px-4 py-2.5">{m.matchPct != null ? `${m.matchPct}%` : "—"}</td>
             </tr>
           ))}
         </tbody>

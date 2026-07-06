@@ -84,17 +84,27 @@ export type EngineResult = {
   error?: string;
 };
 
-export type RunResponse = {
+/** A single baseline run, keyed by method + model. */
+export type BaselineResult = EngineResult & {
+  key: string;
+  method: BaselineMethod;
+  baselineModel: BaselineModel;
+  historyContext?: HistoryContextItem[];
+};
+
+export type RunMode = "sapiens" | "baseline";
+
+export type SapiensRunResponse = {
   groundTruth: string | null;
   groundTruthThemes?: string[];
   groundTruthSentiment?: ReviewSentiment | null;
-  baselineMethod: BaselineMethod;
-  baselineModel: BaselineModel;
-  results: {
-    baseline: EngineResult;
-    sapiens: EngineResult;
-  };
-  historyContext?: HistoryContextItem[];
+  sapiens: EngineResult;
+  source: string;
+  metricsSource?: "pipeline" | "mock";
+};
+
+export type BaselineRunResponse = {
+  baseline: BaselineResult;
   source: string;
   metricsSource?: "pipeline" | "mock";
 };

@@ -9,50 +9,27 @@ import {
   BASELINE_METHODS,
   BASELINE_MODELS,
   baselineLabel,
-  SAPIENS_MODEL,
   type BaselineMethod,
   type BaselineModel,
 } from "@/lib/baselines";
 import type {
+  BaselineResult,
+  BaselineRunResponse,
   CatalogTribe,
   CatalogTribeIndex,
+  EngineResult,
   HistoryContextItem,
   PipelineMetrics,
   ReviewSentiment,
-  RunResponse,
+  SapiensRunResponse,
 } from "@/lib/types";
 
 const STEPS = [
-  {
-    id: "tribe",
-    label: "Tribe",
-    title: "Pick a learned tribe",
-    hint: "30 Sapiens-discovered behavioral tribes. Select one to inspect its evolved traits.",
-  },
-  {
-    id: "user",
-    label: "User",
-    title: "Pick a modelled user",
-    hint: "Users ranked by modelling similarity score (best performers first).",
-  },
-  {
-    id: "product",
-    label: "Product",
-    title: "Pick a product",
-    hint: "Choose a product from this user's review history.",
-  },
-  {
-    id: "baseline",
-    label: "Baseline",
-    title: "Select a baseline",
-    hint: "15 baselines: 3 methods × 5 models. Sapiens runs on a fixed model (gpt-5.2).",
-  },
-  {
-    id: "compare",
-    label: "Compare",
-    title: "Baseline vs Sapiens",
-    hint: "The selected baseline is compared against Sapiens using evolved tribe traits.",
-  },
+  { id: "tribe", label: "Tribe", title: "Pick a tribe", hint: "Select a behavioral tribe to model." },
+  { id: "user", label: "User", title: "Pick a user", hint: "Users ranked by modelling similarity." },
+  { id: "product", label: "Product", title: "Pick a product", hint: "Choose a product from this user." },
+  { id: "sapiens", label: "Sapiens", title: "Sapiens prediction", hint: "What Sapiens generates vs the real review." },
+  { id: "compare", label: "Compare", title: "Compare baselines", hint: "Optionally run baselines and compare scores." },
 ];
 
 export default function Home() {
@@ -67,12 +44,22 @@ export default function Home() {
 
   const [userId, setUserId] = useState("");
   const [reviewKey, setReviewKey] = useState<string | null>(null);
+  const [customProductDesc, setCustomProductDesc] = useState("");
 
   const [baselineMethod, setBaselineMethod] = useState<BaselineMethod>("history");
-  const [baselineModel, setBaselineModel] = useState<BaselineModel>("gpt-5.2");
+  const [useCustomPopulationDef, setUseCustomPopulationDef] = useState(false);
+  const [customPopulationDef, setCustomPopulationDef] = useState("");
 
-  const [run, setRun] = useState<RunResponse | null>(null);
-  const [running, setRunning] = useState(false);
+  const [groundTruth, setGroundTruth] = useState<string | null>(null);
+  const [groundTruthThemes, setGroundTruthThemes] = useState<string[]>([]);
+  const [groundTruthSentiment, setGroundTruthSentiment] = useState<ReviewSentiment | null>(null);
+  const [sapiens, setSapiens] = useState<EngineResult | null>(null);
+  const [baselines, setBaselines] = useState<BaselineResult[]>([]);
+
+  const [runningSapiens, setRunningSapiens] = useState(false);
+  const [runningBaselineKey, setRunningBaselineKey] = useState<string | null>(null);
+  const [runningBaselineMethod, setRunningBaselineMethod] = useState<BaselineMethod | null>(null);
+  const [runningBaselineModel, setRunningBaselineModel] = useState<BaselineModel | null>(null);
 
   const user = useMemo(
     () => tribe?.users.find((u) => u.id === userId) ?? null,
@@ -83,12 +70,38 @@ export default function Home() {
     [user, reviewKey],
   );
 
+  const effectiveProductDesc = customProductDesc.trim();
+  const effectiveCategory = product?.category ?? "Health & Personal Care";
+
+  useEffect(() => {
+    if (product) setCustomProductDesc(product.productDescription);
+  }, [product?.reviewKey, product?.productDescription]);
+
+  useEffect(() => {
+    if (tribe?.populationDefinition) {
+      setCustomPopulationDef(tribe.populationDefinition);
+    }
+  }, [tribe?.id, tribe?.populationDefinition]);
+
   useEffect(() => {
     fetch("/api/catalog")
       .then((r) => r.json())
       .then((d) => setTribeIndex(d.tribes ?? []))
       .catch(() => {});
   }, []);
+
+  function resetOutputs() {
+    setSapiens(null);
+    setBaselines([]);
+    setGroundTruth(null);
+    setGroundTruthThemes([]);
+    setGroundTruthSentiment(null);
+  }
+
+  const gtThemeRecord = useMemo(
+    () => Object.fromEntries(groundTruthThemes.map((t) => [t, 1])),
+    [groundTruthThemes],
+  );
 
   async function loadTribe(id: string) {
     setTribeLoading(true);
@@ -120,45 +133,105 @@ export default function Home() {
     resetOutputs();
   }
 
-  function resetOutputs() {
-    setRun(null);
+  const canRun = Boolean(tribeId && userId && effectiveProductDesc);
+
+  function runPayload() {
+    return {
+      tribeId,
+      userId,
+      reviewKey: reviewKey ?? undefined,
+      productDescription: effectiveProductDesc,
+      category: effectiveCategory,
+    };
   }
 
-  const canRun = Boolean(tribeId && userId && product?.productDescription?.trim());
+  function baselineKey(method: BaselineMethod, model: BaselineModel) {
+    const customPop =
+      method === "population_persona" && useCustomPopulationDef && customPopulationDef.trim();
+    return customPop ? `${method}:${model}:custom` : `${method}:${model}`;
+  }
 
-  async function doRun() {
+  async function doRunSapiens() {
     if (!canRun) return;
-    setRunning(true);
-    setRun(null);
+    setRunningSapiens(true);
+    setSapiens(null);
+    setBaselines([]);
     try {
       const res = await fetch("/api/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tribeId,
-          userId,
-          reviewKey: reviewKey ?? undefined,
-          baselineMethod,
-          baselineModel,
+          ...runPayload(),
+          runMode: "sapiens",
         }),
       });
-      const data: RunResponse = await res.json();
-      setRun(data);
+      const data: SapiensRunResponse = await res.json();
+      setSapiens(data.sapiens ?? null);
+      setGroundTruth(data.groundTruth ?? null);
+      setGroundTruthThemes(data.groundTruthThemes ?? []);
+      setGroundTruthSentiment(data.groundTruthSentiment ?? null);
       setGatewayConnected(data.source === "gateway");
     } catch {
       /* noop */
     } finally {
-      setRunning(false);
+      setRunningSapiens(false);
     }
+  }
+
+  async function doRunBaseline(method: BaselineMethod, model: BaselineModel) {
+    if (!canRun) return;
+    if (method === "population_persona" && useCustomPopulationDef && !customPopulationDef.trim()) {
+      return;
+    }
+    const key = baselineKey(method, model);
+    if (baselines.some((b) => b.key === key) || runningBaselineKey === key) return;
+
+    setRunningBaselineKey(key);
+    setRunningBaselineMethod(method);
+    setRunningBaselineModel(model);
+    try {
+      const res = await fetch("/api/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...runPayload(),
+          runMode: "baseline",
+          baselineMethod: method,
+          baselineModel: model,
+          ...(method === "population_persona" && useCustomPopulationDef && customPopulationDef.trim()
+            ? { populationDefinition: customPopulationDef.trim() }
+            : {}),
+        }),
+      });
+      const data: BaselineRunResponse = await res.json();
+      if (data.baseline) {
+        setBaselines((prev) => [...prev.filter((b) => b.key !== key), data.baseline]);
+      }
+    } catch {
+      /* noop */
+    } finally {
+      setRunningBaselineKey(null);
+      setRunningBaselineMethod(null);
+      setRunningBaselineModel(null);
+    }
+  }
+
+  function removeBaseline(key: string) {
+    setBaselines((prev) => prev.filter((b) => b.key !== key));
   }
 
   function goTo(target: number) {
     const t = Math.max(0, Math.min(STEPS.length - 1, target));
     setStep(t);
-    if (t === 4 && !run && !running && canRun) void doRun();
+    if (t === 3 && !sapiens && !runningSapiens && canRun) void doRunSapiens();
   }
 
   const benchmarkHref = `/benchmark?tribeId=${encodeURIComponent(tribeId)}`;
+
+  function selectBaselineMethod(m: BaselineMethod) {
+    setBaselineMethod(m);
+    if (m !== "population_persona") setUseCustomPopulationDef(false);
+  }
 
   return (
     <div className="mx-auto w-full max-w-4xl px-6 py-8 sm:py-12">
@@ -167,6 +240,12 @@ export default function Home() {
       <Stepper step={step} onStep={goTo} />
 
       <div className="mt-8 mb-6">
+        {tribe && (
+          <div className="flex items-center gap-2 mb-2">
+            <Dot tone="sapiens" />
+            <span className="text-[13px] font-semibold text-foreground">{tribe.name}</span>
+          </div>
+        )}
         <h1 className="text-[22px] font-semibold tracking-tight">{STEPS[step].title}</h1>
         <p className="text-[14px] text-muted mt-1">{STEPS[step].hint}</p>
       </div>
@@ -178,9 +257,7 @@ export default function Home() {
           <>
             {step === 0 && (
               <div className="space-y-4">
-                <p className="text-[13px] text-muted">
-                  {tribeIndex.length} tribes available · traits from SGO evolution or seed summaries
-                </p>
+                <p className="text-[13px] text-muted">{tribeIndex.length} tribes available</p>
                 <div className="grid gap-2 sm:grid-cols-2 max-h-[28rem] overflow-y-auto pr-1">
                   {tribeIndex.map((t) => (
                     <button
@@ -196,20 +273,15 @@ export default function Home() {
                         <Dot tone="sapiens" />
                         <span className="text-[13px] font-semibold leading-snug">{t.name}</span>
                       </div>
-                      <p className="text-[11px] text-muted-2 mb-1.5">
-                        {t.cluster} · {t.microId} · {t.userCount} users
-                      </p>
+                      <p className="text-[11px] text-muted-2 mb-1.5">{t.userCount} users</p>
                       <p className="text-[12px] text-muted line-clamp-2">{t.description}</p>
-                      <p className="text-[10px] text-muted-2 mt-1.5">
-                        Traits: {t.traitCounts.behavioral} behavioral · {t.traitSource}
-                      </p>
                     </button>
                   ))}
                 </div>
 
                 {tribeLoading && (
                   <div className="flex items-center gap-2 text-[13px] text-muted">
-                    <Spinner /> Loading tribe traits…
+                    <Spinner /> Loading tribe…
                   </div>
                 )}
 
@@ -225,57 +297,37 @@ export default function Home() {
 
             {step === 1 && tribe && (
               <div className="space-y-3">
-                <StepContextHeader
-                  tribeName={tribe.name}
-                  subtitle={`${tribe.cluster} · ${tribe.microId} · ${tribe.users.length} modelled users`}
-                />
-                {tribe.dataSources && (
-                  <DataSourceNote
-                    users={tribe.dataSources.users}
-                    similarity={tribe.dataSources.similarity}
-                  />
-                )}
-                <div className="space-y-2 max-h-[24rem] overflow-y-auto pr-1">
-                {tribe.users.map((u, i) => (
-                  <button
-                    key={u.id}
-                    onClick={() => selectUser(u.id)}
-                    className={`w-full text-left rounded-xl border p-3.5 transition ${
-                      u.id === userId
-                        ? "border-accent bg-accent/[0.04]"
-                        : "border-border hover:border-border-strong"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[11px] font-mono text-muted-2">#{i + 1}</span>
-                      <span className="text-[12.5px] font-medium text-foreground">
-                        Modelled user
-                      </span>
-                      <span className="text-[11px] font-semibold text-accent ml-auto">
-                        {(u.similarityScore * 100).toFixed(1)}% sim
-                      </span>
-                    </div>
-                    <p className="text-[11px] font-mono text-muted-2 mb-1">{u.id.slice(0, 18)}…</p>
-                    <p className="text-[12.5px] text-muted leading-relaxed line-clamp-2">
-                      {u.characteristicSummary}
-                    </p>
-                    <p className="text-[11px] text-muted-2 mt-1">{u.products.length} products</p>
-                  </button>
-                ))}
+                <div className="space-y-2 max-h-[26rem] overflow-y-auto pr-1">
+                  {tribe.users.map((u, i) => (
+                    <button
+                      key={u.id}
+                      onClick={() => selectUser(u.id)}
+                      className={`w-full text-left rounded-xl border p-3.5 transition ${
+                        u.id === userId
+                          ? "border-accent bg-accent/[0.04]"
+                          : "border-border hover:border-border-strong"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] font-mono text-muted-2">#{i + 1}</span>
+                        <span className="text-[12.5px] font-medium text-foreground">Modelled user</span>
+                        <span className="text-[11px] font-semibold text-accent ml-auto">
+                          {(u.similarityScore * 100).toFixed(1)}% sim
+                        </span>
+                      </div>
+                      <p className="text-[12.5px] text-muted leading-relaxed line-clamp-2">
+                        {u.characteristicSummary}
+                      </p>
+                      <p className="text-[11px] text-muted-2 mt-1">{u.products.length} products</p>
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
 
             {step === 2 && user && tribe && (
               <div className="space-y-4">
-                <StepContextHeader
-                  tribeName={tribe.name}
-                  subtitle={`Modelled user · ${user.id.slice(0, 20)}… · ${user.products.length} products`}
-                />
-                {tribe.dataSources && (
-                  <DataSourceNote products={tribe.dataSources.products} />
-                )}
-                <div className="space-y-2 max-h-[22rem] overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-[20rem] overflow-y-auto pr-1">
                   {user.products.map((p) => (
                     <button
                       key={p.reviewKey}
@@ -300,159 +352,227 @@ export default function Home() {
                     </button>
                   ))}
                 </div>
-                <p className="text-[12.5px] text-muted-2 leading-relaxed flex items-start gap-1.5">
-                  <span className="text-history">●</span>
-                  The real review is ground truth and is excluded from the history baseline
-                  (leave-one-out).
-                </p>
+                {product && (
+                  <ProductDescriptionEditor
+                    value={customProductDesc}
+                    onChange={(v) => {
+                      setCustomProductDesc(v);
+                      resetOutputs();
+                    }}
+                    category={effectiveCategory}
+                  />
+                )}
               </div>
             )}
 
             {step === 3 && (
-              <div className="space-y-5">
-                <div>
-                  <Label>Baseline method</Label>
-                  <div className="grid gap-2 sm:grid-cols-3">
-                    {BASELINE_METHODS.map((m) => (
-                      <button
-                        key={m}
-                        onClick={() => {
-                          setBaselineMethod(m);
-                          resetOutputs();
-                        }}
-                        className={`text-left rounded-xl border p-3 transition ${
-                          baselineMethod === m
-                            ? "border-accent bg-accent/[0.04]"
-                            : "border-border hover:border-border-strong"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <Dot tone={BASELINE_METHOD_META[m].tone} />
-                          <span className="text-[13px] font-medium">
-                            {BASELINE_METHOD_META[m].label}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-muted-2 leading-relaxed">
-                          {BASELINE_METHOD_META[m].blurb}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
+              <div>
+                <ProductDescriptionEditor
+                  value={customProductDesc}
+                  onChange={(v) => {
+                    setCustomProductDesc(v);
+                    resetOutputs();
+                  }}
+                  category={effectiveCategory}
+                  compact
+                />
+
+                <div className="flex flex-wrap items-center gap-3 mb-4 mt-4">
+                  {runningSapiens && (
+                    <span className="text-[13px] text-muted flex items-center gap-1.5">
+                      <Spinner /> Running Sapiens…
+                    </span>
+                  )}
+                  {sapiens && !runningSapiens && (
+                    <button
+                      type="button"
+                      onClick={() => void doRunSapiens()}
+                      className="btn btn-ghost px-3 py-1 text-[12px]"
+                    >
+                      Re-run Sapiens
+                    </button>
+                  )}
                 </div>
 
-                <div>
-                  <Label>Model (baseline only)</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {BASELINE_MODELS.map((m) => (
-                      <button
-                        key={m}
-                        onClick={() => {
-                          setBaselineModel(m);
-                          resetOutputs();
-                        }}
-                        className={`chip ${baselineModel === m ? "border-accent text-accent" : ""}`}
-                      >
-                        {m}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="card-soft p-3 text-[12px] text-muted">
-                  <span className="font-medium text-foreground">Sapiens model (fixed):</span>{" "}
-                  {SAPIENS_MODEL} — from amazon_sgo_pipeline_config.yaml
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <ResultCard
+                    tone="real"
+                    title="Real review"
+                    subtitle="ground truth"
+                    text={groundTruth ?? undefined}
+                    predictedThemes={gtThemeRecord}
+                    sentiment={groundTruthSentiment}
+                  />
+                  <ResultCard
+                    tone="sapiens"
+                    title="Sapiens"
+                    loading={runningSapiens}
+                    text={sapiens?.reviewText}
+                    predictedThemes={sapiens?.predictedThemes}
+                    sentiment={sapiens?.sentiment}
+                    metrics={sapiens?.metrics}
+                    error={sapiens?.error}
+                    latencyMs={sapiens?.latencyMs}
+                  />
                 </div>
               </div>
             )}
 
             {step === 4 && (
               <div>
-                <div className="flex flex-wrap items-center gap-3 mb-5">
-                  {running && (
-                    <span className="text-[13px] text-muted flex items-center gap-1.5">
-                      <Spinner /> Running {baselineLabel(baselineMethod, baselineModel)} vs Sapiens…
-                    </span>
+                <p className="text-[13px] text-muted mb-4 leading-relaxed">
+                  Pick a baseline method and model — it runs immediately and stacks alongside Sapiens.
+                </p>
+
+                <ProductDescriptionEditor
+                  value={customProductDesc}
+                  onChange={(v) => {
+                    setCustomProductDesc(v);
+                    resetOutputs();
+                  }}
+                  category={effectiveCategory}
+                  compact
+                />
+
+                <div className="space-y-5 mb-6 mt-4">
+                  <div>
+                    <Label>Baseline method</Label>
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      {BASELINE_METHODS.map((m) => (
+                        <button
+                          key={m}
+                          onClick={() => selectBaselineMethod(m)}
+                          className={`text-left rounded-xl border p-3 transition ${
+                            baselineMethod === m
+                              ? "border-accent bg-accent/[0.04]"
+                              : "border-border hover:border-border-strong"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Dot tone={BASELINE_METHOD_META[m].tone} />
+                            <span className="text-[13px] font-medium">
+                              {BASELINE_METHOD_META[m].label}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {baselineMethod === "population_persona" && (
+                    <div className="rounded-xl border border-border bg-surface-2/40 p-4 space-y-3">
+                      <label className="flex items-center gap-2 text-[13px] cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={useCustomPopulationDef}
+                          onChange={(e) => setUseCustomPopulationDef(e.target.checked)}
+                          className="rounded border-border"
+                        />
+                        <span>Use custom population definition</span>
+                      </label>
+                      {useCustomPopulationDef ? (
+                        <textarea
+                          value={customPopulationDef}
+                          onChange={(e) => setCustomPopulationDef(e.target.value)}
+                          rows={5}
+                          placeholder="Describe the population persona to send as context…"
+                          className="w-full rounded-lg border border-border bg-surface-1 px-3 py-2.5 text-[13px] text-foreground leading-relaxed resize-y min-h-[6rem]"
+                        />
+                      ) : (
+                        <p className="text-[12px] text-muted leading-relaxed line-clamp-4">
+                          {tribe?.populationDefinition || "Default population definition for this tribe."}
+                        </p>
+                      )}
+                    </div>
                   )}
-                  {run?.metricsSource && !running && (
-                    <span className="text-[11px] text-muted-2">
-                      Scored with pipeline metrics
-                      {run.metricsSource === "mock" ? " (lexical text fallback)" : ""}
-                    </span>
-                  )}
-                  {run && (
-                    <Link
-                      href={benchmarkHref}
-                      className="btn btn-ghost px-4 py-1.5 text-[13px] ml-auto text-accent"
-                    >
-                      View benchmark metrics →
-                    </Link>
-                  )}
+
+                  <div>
+                    <Label>Model — click to run</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {BASELINE_MODELS.map((m) => {
+                        const key = baselineKey(baselineMethod, m);
+                        const isRunning = runningBaselineKey === key;
+                        const isDone = baselines.some((b) => b.key === key);
+                        return (
+                          <button
+                            key={m}
+                            onClick={() => void doRunBaseline(baselineMethod, m)}
+                            disabled={isRunning || isDone || !canRun}
+                            className={`chip flex items-center gap-1.5 ${
+                              isDone ? "border-real/40 text-real" : isRunning ? "border-accent text-accent" : ""
+                            }`}
+                          >
+                            {isRunning && <Spinner />}
+                            {m}
+                            {isDone && <span className="text-[10px]">✓</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {runningBaselineKey && (
+                      <p className="text-[12px] text-muted mt-2 flex items-center gap-1.5">
+                        <Spinner /> Running…
+                      </p>
+                    )}
+                  </div>
                 </div>
 
-                {run?.historyContext && run.historyContext.length > 0 && (
-                  <HistoryContextPanel
-                    items={run.historyContext}
-                    excludedKey={reviewKey}
-                  />
-                )}
-
-                <div className="grid gap-4 sm:grid-cols-2 mt-4">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   <ResultCard
                     tone="real"
                     title="Real review"
                     subtitle="ground truth"
-                    text={run?.groundTruth ?? undefined}
-                  />
-                  <ResultCard
-                    tone={BASELINE_METHOD_META[baselineMethod].tone}
-                    title={baselineLabel(baselineMethod, baselineModel)}
-                    subtitle={BASELINE_METHOD_META[baselineMethod].blurb}
-                    loading={running}
-                    text={run?.results.baseline?.reviewText}
-                    predictedThemes={run?.results.baseline?.predictedThemes}
-                    sentiment={run?.results.baseline?.sentiment}
-                    metrics={run?.results.baseline?.metrics}
-                    error={run?.results.baseline?.error}
-                    latencyMs={run?.results.baseline?.latencyMs}
+                    text={groundTruth ?? undefined}
+                    predictedThemes={gtThemeRecord}
+                    sentiment={groundTruthSentiment}
                   />
                   <ResultCard
                     tone="sapiens"
                     title="Sapiens"
-                    subtitle={`Evolved tribe traits · ${SAPIENS_MODEL}`}
-                    loading={running}
-                    text={run?.results.sapiens?.reviewText}
-                    predictedThemes={run?.results.sapiens?.predictedThemes}
-                    sentiment={run?.results.sapiens?.sentiment}
-                    metrics={run?.results.sapiens?.metrics}
-                    error={run?.results.sapiens?.error}
-                    latencyMs={run?.results.sapiens?.latencyMs}
+                    text={sapiens?.reviewText}
+                    predictedThemes={sapiens?.predictedThemes}
+                    sentiment={sapiens?.sentiment}
+                    metrics={sapiens?.metrics}
+                    error={sapiens?.error}
+                    latencyMs={sapiens?.latencyMs}
                   />
+                  {baselines.map((b) => (
+                    <ResultCard
+                      key={b.key}
+                      tone={BASELINE_METHOD_META[b.method].tone}
+                      title={baselineDisplayLabel(b)}
+                      text={b.reviewText}
+                      predictedThemes={b.predictedThemes}
+                      sentiment={b.sentiment}
+                      metrics={b.metrics}
+                      error={b.error}
+                      latencyMs={b.latencyMs}
+                      onRemove={() => removeBaseline(b.key)}
+                    />
+                  ))}
+                  {runningBaselineKey && runningBaselineMethod && runningBaselineModel &&
+                    !baselines.some((b) => b.key === runningBaselineKey) && (
+                    <ResultCard
+                      tone={BASELINE_METHOD_META[runningBaselineMethod].tone}
+                      title={
+                        runningBaselineKey.endsWith(":custom")
+                          ? `${baselineLabel(runningBaselineMethod, runningBaselineModel)} (custom def)`
+                          : baselineLabel(runningBaselineMethod, runningBaselineModel)
+                      }
+                      loading
+                    />
+                  )}
                 </div>
 
-                {run?.results.baseline?.metrics && run?.results.sapiens?.metrics && (
-                  <p className="text-[13px] text-muted mt-5 pt-5 border-t border-border leading-relaxed">
-                    <span className="text-foreground font-medium">Overall.</span>{" "}
-                    {run.results.sapiens.metrics.overallSimilarityScore !== null &&
-                    run.results.baseline.metrics.overallSimilarityScore !== null ? (
-                      run.results.sapiens.metrics.overallSimilarityScore >=
-                      run.results.baseline.metrics.overallSimilarityScore ? (
-                        <>
-                          Sapiens scores higher on the pipeline composite (
-                          {fmtPct(run.results.sapiens.metrics.overallSimilarityScore)} vs{" "}
-                          {fmtPct(run.results.baseline.metrics.overallSimilarityScore)}).
-                        </>
-                      ) : (
-                        <>
-                          {baselineLabel(baselineMethod, baselineModel)} scores higher on the pipeline
-                          composite ({fmtPct(run.results.baseline.metrics.overallSimilarityScore)} vs{" "}
-                          {fmtPct(run.results.sapiens.metrics.overallSimilarityScore)}).
-                        </>
-                      )
-                    ) : (
-                      "Composite scores computed where ground truth is available."
-                    )}
-                  </p>
+                {baselines.length > 0 && sapiens?.metrics && (
+                  <ScoreboardTable sapiens={sapiens} baselines={baselines} />
                 )}
+
+                <div className="mt-6 pt-4 border-t border-border">
+                  <Link href={benchmarkHref} className="text-[13px] text-accent hover:underline">
+                    View aggregated benchmark metrics (252 reviews) →
+                  </Link>
+                </div>
               </div>
             )}
           </>
@@ -474,11 +594,11 @@ export default function Home() {
               (step === 0 && !tribe) ||
               (step === 1 && !userId) ||
               (step === 2 && !canRun) ||
-              (step === 3 && !canRun)
+              (step === 3 && (runningSapiens || !sapiens))
             }
             className="btn btn-primary px-6 py-2 text-sm"
           >
-            {step === 3 ? "Run comparison" : "Continue"}
+            {step === 3 ? "Compare baselines (optional)" : "Continue"}
           </button>
         )}
       </div>
@@ -537,45 +657,6 @@ function Stepper({ step, onStep }: { step: number; onStep: (n: number) => void }
   );
 }
 
-function StepContextHeader({
-  tribeName,
-  subtitle,
-}: {
-  tribeName: string;
-  subtitle: string;
-}) {
-  return (
-    <div className="card-soft px-4 py-3">
-      <div className="flex items-center gap-2 text-[14px]">
-        <Dot tone="sapiens" />
-        <span className="font-semibold">{tribeName}</span>
-      </div>
-      <p className="text-[12px] text-muted-2 mt-1 ml-4">{subtitle}</p>
-    </div>
-  );
-}
-
-function DataSourceNote({
-  users,
-  products,
-  similarity,
-}: {
-  users?: string;
-  products?: string;
-  similarity?: string;
-}) {
-  return (
-    <div className="rounded-lg border border-border bg-surface-2/50 px-3.5 py-2.5 text-[11px] text-muted-2 leading-relaxed space-y-0.5">
-      <p className="font-medium text-muted uppercase tracking-wide text-[10px] mb-1">
-        Data sources
-      </p>
-      {users && <p><span className="text-foreground/70">Users:</span> {users}</p>}
-      {similarity && <p><span className="text-foreground/70">Similarity rank:</span> {similarity}</p>}
-      {products && <p><span className="text-foreground/70">Products:</span> {products}</p>}
-    </div>
-  );
-}
-
 function LearnedTribePanel({
   tribe,
   open,
@@ -599,7 +680,6 @@ function LearnedTribePanel({
       <button onClick={onToggle} className="flex items-center gap-1.5 text-[13px] font-medium w-full text-left">
         <span className={`transition-transform ${open ? "rotate-90" : ""}`}>▶</span>
         Learned tribe from Sapiens
-        <span className="text-muted-2 font-normal">· {tribe.traitSource}</span>
       </button>
       {open && (
         <div className="mt-4 space-y-4 max-h-[24rem] overflow-y-auto">
@@ -632,38 +712,38 @@ function TraitGroup({ label, items }: { label: string; items: string[] }) {
   );
 }
 
-function HistoryContextPanel({
-  items,
-  excludedKey,
+function baselineDisplayLabel(b: BaselineResult) {
+  const base = baselineLabel(b.method, b.baselineModel);
+  return b.key.endsWith(":custom") ? `${base} (custom def)` : base;
+}
+
+function ProductDescriptionEditor({
+  value,
+  onChange,
+  category,
+  compact,
 }: {
-  items: HistoryContextItem[];
-  excludedKey?: string | null;
+  value: string;
+  onChange: (v: string) => void;
+  category?: string;
+  compact?: boolean;
 }) {
-  const [open, setOpen] = useState(true);
   return (
-    <div className="rounded-xl border border-history/30 bg-history/[0.03] p-4 mb-4">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 text-[13px] font-medium text-history w-full text-left"
-      >
-        <Dot tone="history" />
-        History context sent to baseline ({items.length} reviews, leave-one-out)
-        <span className="ml-auto text-muted-2">{open ? "▲" : "▼"}</span>
-      </button>
-      <p className="text-[11px] text-muted-2 mt-2 ml-4">
-        All other reviews for this user are sent — held-out product
-        {excludedKey ? ` (${excludedKey.slice(0, 24)}…)` : ""} is excluded.
-      </p>
-      {open && (
-        <div className="mt-3 space-y-3 max-h-64 overflow-y-auto">
-          {items.map((h, i) => (
-            <div key={i} className="text-[12px] border-t border-border pt-2 first:border-0 first:pt-0">
-              <p className="text-muted-2 font-medium mb-1">Example {i + 1}</p>
-              <p className="text-foreground/80 whitespace-pre-wrap">{h.reviewText}</p>
-            </div>
-          ))}
-        </div>
+    <div className={`rounded-xl border border-border bg-surface-2/40 ${compact ? "p-3" : "p-4"}`}>
+      <Label>Product description</Label>
+      {category && (
+        <p className="text-[11px] text-muted-2 mb-2">{category}</p>
       )}
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={compact ? 3 : 4}
+        placeholder="Write or edit the product description used for predictions…"
+        className="w-full rounded-lg border border-border bg-surface-1 px-3 py-2.5 text-[13px] text-foreground leading-relaxed resize-y min-h-[4.5rem]"
+      />
+      <p className="text-[11px] text-muted-2 mt-2">
+        Used for Sapiens and all baseline runs. Editing clears existing results.
+      </p>
     </div>
   );
 }
@@ -671,6 +751,60 @@ function HistoryContextPanel({
 function fmtPct(value: number | null | undefined): string {
   if (value === null || value === undefined) return "—";
   return `${Math.round(value * 100)}%`;
+}
+
+function ScoreboardTable({
+  sapiens,
+  baselines,
+}: {
+  sapiens: EngineResult;
+  baselines: BaselineResult[];
+}) {
+  const rows = [
+    { label: "Sapiens", metrics: sapiens.metrics, highlight: true },
+    ...baselines.map((b) => ({
+      label: baselineDisplayLabel(b),
+      metrics: b.metrics,
+      highlight: false,
+    })),
+  ]
+    .filter((r) => r.metrics)
+    .sort(
+      (a, b) =>
+        (b.metrics?.overallSimilarityScore ?? 0) - (a.metrics?.overallSimilarityScore ?? 0),
+    );
+
+  return (
+    <div className="mt-6 overflow-x-auto rounded-xl border border-border">
+      <table className="w-full text-[13px]">
+        <thead>
+          <tr className="border-b border-border bg-surface-2 text-left text-muted-2">
+            <th className="px-4 py-2.5 font-medium">Mode</th>
+            <th className="px-4 py-2.5 font-medium">Overall</th>
+            <th className="px-4 py-2.5 font-medium">Recall@k</th>
+            <th className="px-4 py-2.5 font-medium">Text</th>
+            <th className="px-4 py-2.5 font-medium">Sentiment</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr
+              key={r.label}
+              className={`border-b border-border last:border-0 ${r.highlight ? "bg-accent/[0.04]" : ""}`}
+            >
+              <td className="px-4 py-2.5 font-medium">{r.label}</td>
+              <td className="px-4 py-2.5 font-medium">{fmtPct(r.metrics?.overallSimilarityScore)}</td>
+              <td className="px-4 py-2.5">{fmtPct(r.metrics?.recallAtK)}</td>
+              <td className="px-4 py-2.5">{fmtPct(r.metrics?.textSimilarity)}</td>
+              <td className="px-4 py-2.5">
+                {r.metrics?.sentimentMatch === 1 ? "✓" : r.metrics?.sentimentMatch === 0 ? "✗" : "—"}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 function ResultCard({
@@ -684,6 +818,7 @@ function ResultCard({
   loading,
   error,
   latencyMs,
+  onRemove,
 }: {
   tone: Tone;
   title: string;
@@ -695,12 +830,13 @@ function ResultCard({
   loading?: boolean;
   error?: string;
   latencyMs?: number;
+  onRemove?: () => void;
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const isGenerated = tone !== "real";
   const showSkeleton = loading && isGenerated && !text;
   const themeEntries = Object.entries(predictedThemes ?? {}).sort((a, b) => b[1] - a[1]);
-  const hasStructuredOutput = isGenerated && (themeEntries.length > 0 || sentiment);
+  const hasDetails = themeEntries.length > 0 || sentiment;
   return (
     <div className="rounded-xl border border-border p-4 flex flex-col">
       <div className="flex items-center justify-between mb-2.5">
@@ -708,9 +844,21 @@ function ResultCard({
           <Dot tone={tone} />
           <span className="text-[13px] font-medium">{title}</span>
         </div>
-        {latencyMs ? (
-          <span className="text-[11px] text-muted-2">{(latencyMs / 1000).toFixed(1)}s</span>
-        ) : null}
+        <div className="flex items-center gap-2">
+          {latencyMs ? (
+            <span className="text-[11px] text-muted-2">{(latencyMs / 1000).toFixed(1)}s</span>
+          ) : null}
+          {onRemove && (
+            <button
+              type="button"
+              onClick={onRemove}
+              className="text-[11px] text-muted-2 hover:text-foreground"
+              aria-label="Remove"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
       {subtitle && <p className="text-[11px] text-muted-2 -mt-1.5 mb-2.5">{subtitle}</p>}
       {metrics?.overallSimilarityScore !== null && metrics?.overallSimilarityScore !== undefined && (
@@ -729,16 +877,12 @@ function ResultCard({
           <div className="h-1 rounded-full bg-surface-3 overflow-hidden">
             <div
               className={`h-full rounded-full ${TONE_BG[tone]}`}
-              style={{
-                width: `${Math.min(100, Math.max(0, metrics.overallSimilarityScore * 100))}%`,
-              }}
+              style={{ width: `${Math.min(100, Math.max(0, metrics.overallSimilarityScore * 100))}%` }}
             />
           </div>
           <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-[10px] text-muted-2">
             {metrics.recallAtK !== null && <span>recall@k {fmtPct(metrics.recallAtK)}</span>}
-            {metrics.textSimilarity !== null && (
-              <span>text {fmtPct(metrics.textSimilarity)}</span>
-            )}
+            {metrics.textSimilarity !== null && <span>text {fmtPct(metrics.textSimilarity)}</span>}
             {metrics.sentimentMatch !== null && (
               <span>sentiment {metrics.sentimentMatch === 1 ? "✓" : "✗"}</span>
             )}
@@ -760,7 +904,7 @@ function ResultCard({
       ) : (
         <p className="text-[12.5px] text-muted-2">{loading ? "Generating…" : "No review yet."}</p>
       )}
-      {hasStructuredOutput && text && (
+      {hasDetails && text && (
         <div className="mt-3 pt-3 border-t border-border">
           <button
             type="button"
@@ -768,8 +912,7 @@ function ResultCard({
             className="flex items-center gap-1.5 text-[11px] text-muted-2 hover:text-muted transition w-full text-left"
           >
             <span className={`transition-transform text-[10px] ${detailsOpen ? "rotate-90" : ""}`}>▶</span>
-            Structured model output
-            <span className="text-muted-2/80">(themes & sentiment)</span>
+            Themes &amp; sentiment
           </button>
           {detailsOpen && (
             <div className="mt-2 space-y-2">
@@ -786,7 +929,9 @@ function ResultCard({
                       <span className="text-muted truncate flex-1" title={theme}>
                         {theme}
                       </span>
-                      <span className="text-muted-2 tabular-nums w-8 text-right">{value.toFixed(2)}</span>
+                      {value !== 1 && (
+                        <span className="text-muted-2 tabular-nums w-8 text-right">{value.toFixed(2)}</span>
+                      )}
                     </li>
                   ))}
                 </ul>

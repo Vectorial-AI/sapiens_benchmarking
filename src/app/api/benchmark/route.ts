@@ -4,6 +4,18 @@ import benchmarkMetrics from "@/data/benchmark-metrics.json";
 
 export const runtime = "nodejs";
 
+type RawMode = {
+  mode: string;
+  pipeline: string;
+  nReviews: number;
+  textSimilarity: number | null;
+  recallAtK: number | null;
+  sentiment: number | null;
+  overallSimilarity: number | null;
+  matchCount: number | null;
+  matchPct: number | null;
+};
+
 /** Aggregated benchmark metrics — bundled in src/data for Vercel deployment. */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -13,34 +25,26 @@ export async function GET(req: Request) {
     cluster?: string;
     micro?: string;
     canonicalReviews?: number;
-    modes: {
-      mode: string;
-      pipeline: string;
-      nReviews: number;
-      recallAtK: number | null;
-      textSimilarity: number | null;
-      overallSimilarity: number | null;
-      jsd: number | null;
-    }[];
+    matchThreshold?: number;
+    source?: string;
+    modes: RawMode[];
   };
 
-  const summary = raw.modes ?? [];
-  const sapiensModes = summary.filter(
-    (s) => s.pipeline === "sapiens" || s.mode.includes("sgo") || s.mode === "sapiens",
-  );
-  const baselineModes = summary.filter(
-    (s) => s.pipeline !== "sapiens" && !s.mode.includes("sgo"),
-  );
+  const modes = raw.modes ?? [];
+  const sapiensMode = modes.find((m) => m.mode === "sapiens") ?? null;
+  const baselineModes = modes.filter((m) => m.mode !== "sapiens");
 
   return NextResponse.json({
     tribeId,
     cluster: raw.cluster,
     micro: raw.micro,
-    available: true,
+    available: modes.length > 0,
     canonicalReviews: raw.canonicalReviews,
-    sapiensModes,
+    matchThreshold: raw.matchThreshold ?? 0.65,
+    dataSource: raw.source,
+    sapiensMode,
     baselineModes,
-    allModes: summary,
+    allModes: modes,
     source: path.join("src", "data", "benchmark-metrics.json"),
   });
 }

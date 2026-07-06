@@ -2,159 +2,195 @@
   "cluster": "cluster_4",
   "micro": "micro_7",
   "canonicalReviews": 252,
+  "matchThreshold": 0.65,
+  "source": "outputs/amazon_sgo/cluster_4/micro_7_best/sapiens_vs_baselines_final_dataset.json",
   "modes": [
     {
-      "mode": "sgo_i0",
+      "mode": "sapiens",
       "pipeline": "sapiens",
       "nReviews": 252,
-      "recallAtK": 0.8198365457294028,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.2523552184412813
+      "textSimilarity": 0.701,
+      "recallAtK": 0.8849,
+      "sentiment": 0.7659,
+      "overallSimilarity": 0.833,
+      "matchCount": 217,
+      "matchPct": 86.1
     },
     {
-      "mode": "sgo_best",
-      "pipeline": "sapiens",
-      "nReviews": 252,
-      "recallAtK": 0.8278675359032502,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.2149381715882098
-    },
-    {
-      "mode": "history_o3",
+      "mode": "user_history_o3",
       "pipeline": "history",
       "nReviews": 252,
-      "recallAtK": 0.7927957294028724,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.2522050195261087
+      "textSimilarity": 0.6742,
+      "recallAtK": 0.6485,
+      "sentiment": 0.7063,
+      "overallSimilarity": 0.6578,
+      "matchCount": 134,
+      "matchPct": 53.2
     },
     {
-      "mode": "history_gpt-5",
-      "pipeline": "history_gpt-5",
-      "nReviews": 0,
-      "recallAtK": null,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": null
-    },
-    {
-      "mode": "history_gpt-5.2",
+      "mode": "user_history_claude-sonnet-4-6",
       "pipeline": "history",
       "nReviews": 252,
-      "recallAtK": 0.8353032879818595,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.22411791182756444
+      "textSimilarity": 0.6802,
+      "recallAtK": 0.6283,
+      "sentiment": 0.6944,
+      "overallSimilarity": 0.6446,
+      "matchCount": 129,
+      "matchPct": 51.2
     },
     {
-      "mode": "history_gpt-5.5",
+      "mode": "user_history_gpt-5.2",
       "pipeline": "history",
       "nReviews": 252,
-      "recallAtK": 0.846650604686319,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.20555230984893916
+      "textSimilarity": 0.6783,
+      "recallAtK": 0.627,
+      "sentiment": 0.6944,
+      "overallSimilarity": 0.6432,
+      "matchCount": 127,
+      "matchPct": 50.4
     },
     {
-      "mode": "history_claude-sonnet-4-6",
+      "mode": "user_history_gpt-5.5",
       "pipeline": "history",
       "nReviews": 252,
-      "recallAtK": 0.8224820483749056,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.22726161620406432
+      "textSimilarity": 0.6994,
+      "recallAtK": 0.6181,
+      "sentiment": 0.7024,
+      "overallSimilarity": 0.6426,
+      "matchCount": 127,
+      "matchPct": 50.4
     },
     {
-      "mode": "history_claude-opus-4-8",
+      "mode": "user_history_claude-opus-4-8",
       "pipeline": "history",
       "nReviews": 252,
-      "recallAtK": 0.8154431216931217,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.21333726799026612
+      "textSimilarity": 0.6969,
+      "recallAtK": 0.6121,
+      "sentiment": 0.6627,
+      "overallSimilarity": 0.6358,
+      "matchCount": 127,
+      "matchPct": 50.4
     },
     {
-      "mode": "tribe_gpt-5.2",
+      "mode": "user_history_gpt-5",
+      "pipeline": "history",
+      "nReviews": 252,
+      "textSimilarity": 0.6727,
+      "recallAtK": 0.6035,
+      "sentiment": 0.7063,
+      "overallSimilarity": 0.626,
+      "matchCount": 120,
+      "matchPct": 47.6
+    },
+    {
+      "mode": "population_persona_claude-sonnet-4-6",
+      "pipeline": "population",
+      "nReviews": 252,
+      "textSimilarity": 0.642,
+      "recallAtK": 0.6098,
+      "sentiment": 0.7024,
+      "overallSimilarity": 0.6225,
+      "matchCount": 118,
+      "matchPct": 46.8
+    },
+    {
+      "mode": "population_persona_gpt-5",
+      "pipeline": "population",
+      "nReviews": 252,
+      "textSimilarity": 0.6399,
+      "recallAtK": 0.6015,
+      "sentiment": 0.7024,
+      "overallSimilarity": 0.6161,
+      "matchCount": 120,
+      "matchPct": 47.6
+    },
+    {
+      "mode": "tribe_persona_gpt-5.2",
       "pipeline": "tribe",
       "nReviews": 252,
-      "recallAtK": 0.7812122071050643,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.2735012648751955
+      "textSimilarity": 0.6459,
+      "recallAtK": 0.5992,
+      "sentiment": 0.6905,
+      "overallSimilarity": 0.6155,
+      "matchCount": 112,
+      "matchPct": 44.4
     },
     {
-      "mode": "tribe_gpt-5.5",
+      "mode": "population_persona_gpt-5.2",
+      "pipeline": "population",
+      "nReviews": 252,
+      "textSimilarity": 0.6457,
+      "recallAtK": 0.5952,
+      "sentiment": 0.7063,
+      "overallSimilarity": 0.6134,
+      "matchCount": 114,
+      "matchPct": 45.2
+    },
+    {
+      "mode": "population_persona_gpt-5.5",
+      "pipeline": "population",
+      "nReviews": 252,
+      "textSimilarity": 0.6451,
+      "recallAtK": 0.5903,
+      "sentiment": 0.6984,
+      "overallSimilarity": 0.6094,
+      "matchCount": 124,
+      "matchPct": 49.2
+    },
+    {
+      "mode": "population_persona_claude-opus-4-8",
+      "pipeline": "population",
+      "nReviews": 252,
+      "textSimilarity": 0.6469,
+      "recallAtK": 0.5807,
+      "sentiment": 0.6786,
+      "overallSimilarity": 0.6021,
+      "matchCount": 113,
+      "matchPct": 44.8
+    },
+    {
+      "mode": "tribe_persona_gpt-5",
       "pipeline": "tribe",
       "nReviews": 252,
-      "recallAtK": 0.7980631141345428,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.24640014018198472
+      "textSimilarity": 0.6307,
+      "recallAtK": 0.578,
+      "sentiment": 0.6548,
+      "overallSimilarity": 0.595,
+      "matchCount": 104,
+      "matchPct": 41.3
     },
     {
-      "mode": "tribe_claude-sonnet-4-6",
+      "mode": "tribe_persona_gpt-5.5",
       "pipeline": "tribe",
       "nReviews": 252,
-      "recallAtK": 0.7360827664399093,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.31352279213158263
+      "textSimilarity": 0.6594,
+      "recallAtK": 0.5592,
+      "sentiment": 0.6865,
+      "overallSimilarity": 0.5906,
+      "matchCount": 110,
+      "matchPct": 43.7
     },
     {
-      "mode": "tribe_claude-opus-4-8",
+      "mode": "tribe_persona_claude-opus-4-8",
       "pipeline": "tribe",
       "nReviews": 252,
-      "recallAtK": 0.7799319727891156,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.26151170887515823
+      "textSimilarity": 0.6409,
+      "recallAtK": 0.5638,
+      "sentiment": 0.6468,
+      "overallSimilarity": 0.5872,
+      "matchCount": 107,
+      "matchPct": 42.5
     },
     {
-      "mode": "tribe_gpt-5",
-      "pipeline": "other",
-      "nReviews": 252,
-      "recallAtK": 0.7880668934240364,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.2704728066334875
-    },
-    {
-      "mode": "tribe_gpt-5.2_category_generic",
+      "mode": "tribe_persona_claude-sonnet-4-6",
       "pipeline": "tribe",
       "nReviews": 252,
-      "recallAtK": 0.8013416477702193,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.23625275783534883
-    },
-    {
-      "mode": "tribe_gpt-5_category_generic",
-      "pipeline": "tribe",
-      "nReviews": 252,
-      "recallAtK": 0.7625472411186697,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.25611397223178256
-    },
-    {
-      "mode": "tribe_claude-sonnet-4-6_category_generic",
-      "pipeline": "tribe",
-      "nReviews": 252,
-      "recallAtK": 0.7869094860166288,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.25046751676553086
-    },
-    {
-      "mode": "tribe_claude-opus-4-8_category_generic",
-      "pipeline": "tribe",
-      "nReviews": 252,
-      "recallAtK": 0.7867724867724867,
-      "textSimilarity": null,
-      "overallSimilarity": null,
-      "jsd": 0.2422436693605196
+      "textSimilarity": 0.6034,
+      "recallAtK": 0.5281,
+      "sentiment": 0.6071,
+      "overallSimilarity": 0.5509,
+      "matchCount": 78,
+      "matchPct": 31.0
     }
   ]
 }
