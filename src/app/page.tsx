@@ -18,7 +18,6 @@ import type {
   CatalogTribe,
   CatalogTribeIndex,
   EngineResult,
-  HistoryContextItem,
   PipelineMetrics,
   ReviewSentiment,
   SapiensRunResponse,
@@ -36,6 +35,12 @@ const STEPS = [
   { id: "sapiens", label: "Sapiens", title: "Sapiens prediction", hint: "What Sapiens generates vs the real review." },
   { id: "compare", label: "Compare", title: "Compare baselines", hint: "Run baselines and compare scores against Sapiens." },
 ];
+
+function defaultReviewKeyForUser(user: CatalogTribe["users"][number] | null | undefined): string | null {
+  if (!user?.products.length) return null;
+  const benchmark = user.products.find((p) => p.healthcareBenchmark);
+  return benchmark?.reviewKey ?? user.products[0]?.reviewKey ?? null;
+}
 
 export default function Home() {
   const router = useRouter();
@@ -69,7 +74,6 @@ export default function Home() {
   const [runningBaselineKey, setRunningBaselineKey] = useState<string | null>(null);
   const [runningBaselineMethod, setRunningBaselineMethod] = useState<BaselineMethod | null>(null);
   const [runningBaselineModel, setRunningBaselineModel] = useState<BaselineModel | null>(null);
-  const [historyPreview, setHistoryPreview] = useState<HistoryContextItem[]>([]);
 
   const user = useMemo(
     () => tribe?.users.find((u) => u.id === userId) ?? null,
@@ -100,23 +104,6 @@ export default function Home() {
       setCustomPopulationDef(tribe.populationDefinition);
     }
   }, [tribe?.id, tribe?.populationDefinition]);
-
-  useEffect(() => {
-    if (step !== 4 || baselineMethod !== "history" || !tribeId || !userId) {
-      setHistoryPreview([]);
-      return;
-    }
-    const params = new URLSearchParams({
-      tribeId,
-      userId,
-      mode: "history",
-    });
-    if (reviewKey) params.set("reviewKey", reviewKey);
-    fetch(`/api/history-context?${params}`)
-      .then((r) => r.json())
-      .then((d) => setHistoryPreview(d.items ?? []))
-      .catch(() => setHistoryPreview([]));
-  }, [step, baselineMethod, tribeId, userId, reviewKey]);
 
   useEffect(() => {
     fetch("/api/catalog")
@@ -181,7 +168,7 @@ export default function Home() {
       setTribeId(id);
       const firstUser = t.users[0];
       setUserId(firstUser?.id ?? "");
-      setReviewKey(firstUser?.products[0]?.reviewKey ?? null);
+      setReviewKey(defaultReviewKeyForUser(firstUser));
       resetOutputs();
     } finally {
       setTribeLoading(false);
@@ -191,7 +178,7 @@ export default function Home() {
   function selectUser(id: string) {
     const u = tribe?.users.find((x) => x.id === id);
     setUserId(id);
-    setReviewKey(u?.products[0]?.reviewKey ?? null);
+    setReviewKey(defaultReviewKeyForUser(u));
     resetOutputs();
   }
 
@@ -327,9 +314,19 @@ export default function Home() {
 
       <div className="mt-8 mb-6">
         {tribe && (
-          <div className="flex items-center gap-2 mb-2">
-            <Dot tone="sapiens" />
-            <span className="text-[13px] font-semibold text-foreground">{tribe.name}</span>
+          <div className="mb-2">
+            <div className="flex items-center gap-2">
+              <Dot tone="sapiens" />
+              <span className="text-[13px] font-semibold text-foreground">{tribe.name}</span>
+            </div>
+            {tribe.description && (
+              <ExpandableText
+                text={tribe.description}
+                className="text-[12px] text-muted mt-2 ml-4 leading-relaxed"
+                clampClass="line-clamp-2"
+                toggleLabel="tribe description"
+              />
+            )}
           </div>
         )}
         <h1 className="text-[22px] font-semibold tracking-tight">{STEPS[step].title}</h1>
@@ -345,27 +342,31 @@ export default function Home() {
           <>
             {step === 0 && (
               <div className="space-y-4">
-                <p className="text-[13px] text-muted">{tribeIndex.length} tribes available</p>
-                <div className="grid gap-2 sm:grid-cols-2 max-h-[28rem] overflow-y-auto pr-1">
-                  {tribeIndex.map((t) => (
-                    <button
-                      key={t.id}
-                      onClick={() => void loadTribe(t.id)}
-                      className={`text-left rounded-xl border p-3.5 transition ${
-                        tribeId === t.id
-                          ? "border-accent bg-accent/[0.04]"
-                          : "border-border hover:border-border-strong"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <Dot tone="sapiens" />
-                        <span className="text-[13px] font-semibold leading-snug">{t.name}</span>
+                <p className="text-[13px] text-muted">
+                  {tribeIndex.length} tribes — 15 healthcare, 15 video games
+                </p>
+                {(["healthcare", "video_games"] as const).map((domain) => {
+                  const domainTribes = tribeIndex.filter((t) => t.domain === domain);
+                  if (domainTribes.length === 0) return null;
+                  const label = domain === "healthcare" ? "Healthcare" : "Video Games";
+                  return (
+                    <div key={domain} className="space-y-2">
+                      <h3 className="text-[12px] font-semibold uppercase tracking-wide text-muted-2">
+                        {label} ({domainTribes.length})
+                      </h3>
+                      <div className="grid gap-2 sm:grid-cols-2 max-h-[22rem] overflow-y-auto pr-1">
+                        {domainTribes.map((t) => (
+                          <TribeSelectCard
+                            key={t.id}
+                            tribe={t}
+                            selected={tribeId === t.id}
+                            onSelect={() => void loadTribe(t.id)}
+                          />
+                        ))}
                       </div>
-                      <p className="text-[11px] text-muted-2 mb-1.5">{t.userCount} users</p>
-                      <p className="text-[12px] text-muted line-clamp-2">{t.description}</p>
-                    </button>
-                  ))}
-                </div>
+                    </div>
+                  );
+                })}
 
                 {tribeLoading && (
                   <div className="flex items-center gap-2 text-[13px] text-muted">
@@ -422,12 +423,27 @@ export default function Home() {
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-muted-2 mt-1.5">{p.category}</p>
+                      <p className="text-[11px] text-muted-2 mt-1.5 flex items-center gap-2">
+                        <span>{p.category}</span>
+                        {p.hasBestPrediction ? (
+                          <span className="text-accent">SGO best prediction available</span>
+                        ) : null}
+                      </p>
                     </button>
                   ))}
                 </div>
                 {product && (
-                  <ProductDescriptionEditor
+                  <>
+                    {product.bestPredictionReview ? (
+                      <div className="rounded-xl border border-border bg-muted/20 p-3.5">
+                        <ExpandableText
+                          text={product.bestPredictionReview}
+                          previewChars={280}
+                          toggleLabel="reference prediction"
+                        />
+                      </div>
+                    ) : null}
+                    <ProductDescriptionEditor
                     value={customProductDesc}
                     onChange={(v) => {
                       setCustomProductDesc(v);
@@ -435,6 +451,7 @@ export default function Home() {
                     }}
                     category={effectiveCategory}
                   />
+                  </>
                 )}
               </div>
             )}
@@ -485,10 +502,6 @@ export default function Home() {
 
             {step === 4 && (
               <div>
-                <p className="text-[13px] text-muted mb-4 leading-relaxed">
-                  Pick a baseline method and model — it runs immediately and stacks alongside Sapiens.
-                </p>
-
                 <ProductDescriptionEditor
                   value={customProductDesc}
                   onChange={(v) => {
@@ -549,15 +562,6 @@ export default function Home() {
                         </p>
                       )}
                     </div>
-                  )}
-
-                  {baselineMethod === "history" && (
-                    <HistoryContextPanel
-                      items={
-                        baselines.find((b) => b.method === "history")?.historyContext ??
-                        historyPreview
-                      }
-                    />
                   )}
 
                   <div>
@@ -791,6 +795,90 @@ function TraitGroup({ label, items }: { label: string; items: string[] }) {
   );
 }
 
+function ExpandableText({
+  text,
+  className,
+  clampClass = "line-clamp-3",
+  toggleLabel = "description",
+}: {
+  text: string;
+  className?: string;
+  clampClass?: string;
+  toggleLabel?: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const canExpand = text.length > 160;
+
+  return (
+    <div>
+      <p className={`${className ?? ""} ${expanded ? "" : clampClass}`}>{text}</p>
+      {canExpand && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="text-[11px] text-accent hover:underline mt-1.5 ml-4"
+        >
+          {expanded ? "Show less" : `Show full ${toggleLabel}`}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function TribeSelectCard({
+  tribe,
+  selected,
+  onSelect,
+}: {
+  tribe: CatalogTribeIndex;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const description = tribe.description?.trim() ?? "";
+  const canExpand = description.length > 160;
+
+  return (
+    <div
+      className={`rounded-xl border p-3.5 transition ${
+        selected ? "border-accent bg-accent/[0.04]" : "border-border hover:border-border-strong"
+      }`}
+    >
+      <button type="button" onClick={onSelect} className="w-full text-left">
+        <div className="flex items-center gap-2 mb-1">
+          <Dot tone="sapiens" />
+          <span className="text-[13px] font-semibold leading-snug">{tribe.name}</span>
+          {tribe.domain && (
+            <span className="text-[10px] uppercase tracking-wide text-muted-2 ml-auto shrink-0">
+              {tribe.domain === "healthcare" ? "Healthcare" : "Video Games"}
+            </span>
+          )}
+        </div>
+        <p className="text-[11px] text-muted-2 mb-1.5">
+          {tribe.userCount} users
+          {tribe.reviewCount != null ? ` · ${tribe.reviewCount} reviews` : ""}
+        </p>
+        <p
+          className={`text-[12px] text-muted leading-relaxed ${
+            expanded ? "" : "line-clamp-3"
+          }`}
+        >
+          {description}
+        </p>
+      </button>
+      {canExpand && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="text-[11px] text-accent hover:underline mt-2"
+        >
+          {expanded ? "Show less" : "Show full tribe description"}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function UserSelectCard({
   user,
   index,
@@ -839,36 +927,6 @@ function UserSelectCard({
   );
 }
 
-function HistoryContextPanel({ items }: { items: HistoryContextItem[] }) {
-  const [open, setOpen] = useState(true);
-  if (!items.length) return null;
-  return (
-    <div className="rounded-xl border border-history/30 bg-history/[0.03] p-4">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 text-[13px] font-medium text-history w-full text-left"
-      >
-        <Dot tone="history" />
-        Reviews sent as history context ({items.length})
-        <span className="ml-auto text-muted-2">{open ? "▲" : "▼"}</span>
-      </button>
-      {open && (
-        <div className="mt-3 space-y-3 max-h-64 overflow-y-auto">
-          {items.map((h, i) => (
-            <div key={i} className="text-[12px] border-t border-border pt-2 first:border-0 first:pt-0">
-              {h.productDescription && (
-                <p className="text-muted-2 text-[11px] mb-1 line-clamp-2">{h.productDescription}</p>
-              )}
-              <p className="text-foreground/80 whitespace-pre-wrap">{h.reviewText}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function baselineDisplayLabel(b: BaselineResult) {
   const base = baselineLabel(b.method, b.baselineModel);
   return b.key.endsWith(":custom") ? `${base} (custom def)` : base;
@@ -898,9 +956,6 @@ function ProductDescriptionEditor({
         placeholder="Write or edit the product description used for predictions…"
         className="w-full rounded-lg border border-border bg-surface-1 px-3 py-2.5 text-[13px] text-foreground leading-relaxed resize-y min-h-[4.5rem]"
       />
-      <p className="text-[11px] text-muted-2 mt-2">
-        Used for Sapiens and all baseline runs. Editing clears existing results.
-      </p>
     </div>
   );
 }

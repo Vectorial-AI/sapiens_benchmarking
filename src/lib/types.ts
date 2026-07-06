@@ -16,6 +16,9 @@ export type CatalogProduct = {
   category: string;
   rating: number | null;
   groundTruthSentiment?: ReviewSentiment | null;
+  hasBestPrediction?: boolean;
+  bestPredictionReview?: string;
+  healthcareBenchmark?: boolean;
 };
 
 export type CatalogUser = {
@@ -37,6 +40,8 @@ export type CatalogTribeIndex = {
   name: string;
   cluster: string;
   microId: string;
+  domain?: "healthcare" | "video_games";
+  reviewCount?: number;
   description: string;
   userCount: number;
   traitSource: string;

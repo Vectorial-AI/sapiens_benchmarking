@@ -14,6 +14,8 @@ type RawReview = {
   category: string;
   predicted_themes?: string[];
   sentiment?: string | null;
+  best_prediction_review?: string;
+  healthcare_benchmark?: boolean;
 };
 type RawTribe = {
   id: string;
@@ -54,6 +56,8 @@ export type Product = {
   groundTruthReview: string;
   predictedThemes: string[];
   groundTruthSentiment: ReviewSentiment | null;
+  bestPredictionReview?: string;
+  healthcareBenchmark?: boolean;
 };
 
 export type User = {
@@ -107,6 +111,8 @@ function normalizeTribe(raw: RawTribe): Tribe {
       groundTruthReview: r.review_text,
       predictedThemes: r.predicted_themes ?? [],
       groundTruthSentiment: normalizeSentimentLabel(r.sentiment),
+      bestPredictionReview: r.best_prediction_review?.trim() || undefined,
+      healthcareBenchmark: Boolean(r.healthcare_benchmark),
     }));
     return {
       id: u.user_id,
@@ -187,6 +193,9 @@ export function getCatalogTribe(id: string): CatalogTribe | undefined {
         productDescription: p.productDescription,
         category: p.category,
         rating: p.rating,
+        hasBestPrediction: Boolean(p.bestPredictionReview),
+        bestPredictionReview: p.bestPredictionReview,
+        healthcareBenchmark: p.healthcareBenchmark,
       })),
     })),
   };

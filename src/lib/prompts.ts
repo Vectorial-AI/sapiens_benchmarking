@@ -54,20 +54,20 @@ function themesForCategory(category: string): string[] {
  * SAPIENS — evolved tribe traits + user characteristics.
  * Aligned with amazon_sgo_pipeline_service/prompts/amazon/i0_initial_prediction_confidence_amazon.txt
  */
-export function buildSapiensPrompt(args: {
+function buildSapiensPromptSections(args: {
   tribe: Tribe;
   user: User;
   product: Product | null;
   productDescription: string;
   category: string;
-  lengthConstraint: number;
   excludeReviewKey?: string;
+  lengthConstraint: number;
 }): string {
-  const { tribe, user, product, productDescription, category, excludeReviewKey } = args;
+  const { tribe, user, product, productDescription, category, excludeReviewKey, lengthConstraint } =
+    args;
   const q = tribe.qualitative;
   const themes = themesForCategory(category);
   const userCharBlock = formatUserCharacteristics(user, category);
-
   const historyItems = excludeTargetReviewText(
     buildSapiensHistoryContext({
       products: user.products,
@@ -77,15 +77,52 @@ export function buildSapiensPrompt(args: {
     product?.groundTruthReview,
   );
   const historyBlock = formatReviewHistoryText(historyItems);
+  const bestPrediction = product?.bestPredictionReview?.trim();
+
+  let section = 1;
+  const next = () => section++;
+
+  const section1 = next();
+  const section2 = next();
+  const section3 = next();
+  const sectionBest = bestPrediction ? next() : null;
+  const sectionProduct = next();
+  const sectionThemes = next();
+
+  const introExtras = bestPrediction
+    ? `, and the SGO best-delta reference (Section ${sectionBest})`
+    : "";
+
+  const taskThemeLine = `After you have written review_text, score EVERY theme in Section ${sectionThemes} (0.0 to 1.0).`;
+
+  const bestPredictionBlock = bestPrediction
+    ? `---
+SECTION ${sectionBest}: SGO Best-Delta Prediction (reference)
+
+This review comes from the SGO pipeline's best_delta_predictions output for this review key.
+It is the best prediction previously generated for this exact product and user.
+
+**How to use it**
+Write a new review that is similar to this reference in tone, length, paragraph structure, and level of detail.
+Do not copy it word-for-word. Stay in character using Sections 1–3, but aim for something close to this style and shape.
+
+${bestPrediction}
+
+`
+    : "";
+
+  const styleGuidance = bestPrediction
+    ? `\n- When Section ${sectionBest} is present, write something similar to that SGO reference in tone, length, and structure.`
+    : "";
 
   return `You are someone from ${tribe.name} — a real person who shops on Amazon and writes honest reviews.
 
-You have NOT seen anyone else's review of this product. You only know the product description, your tribe profile (Section 1), your personal user characteristics (Section 2), and your own prior reviews (Section 3).
+You have NOT seen anyone else's review of this product. You only know the product description, your tribe profile (Section ${section1}), your personal user characteristics (Section ${section2}), and your own prior reviews (Section ${section3})${introExtras}.
 
 Respond ONLY with valid JSON.
 
 ---
-SECTION 1: Your Tribe (group profile)
+SECTION ${section1}: Your Tribe (group profile)
 
 Read this carefully. It tells you **who your tribe is** and **how people in your group tend to write reviews**.
 
@@ -110,14 +147,14 @@ ${bullets(q.frictionPoints)}
 ${bullets(q.implicitGoals)}
 
 ---
-SECTION 2: Your User Characteristics (you personally)
+SECTION ${section2}: Your User Characteristics (you personally)
 
 Beyond the tribe, **you** personally behave like this when you shop and review:
 
 ${userCharBlock}
 
 ---
-SECTION 3: Your Prior Reviews
+SECTION ${section3}: Your Prior Reviews
 
 These are **other reviews written by this same user** on different products. The target review you are writing is NOT included here.
 
@@ -125,12 +162,12 @@ These are **other reviews written by this same user** on different products. The
 1. Read all examples first and note this user's normal review length and structure.
 2. Match that length and structure in your review.
 3. Match their voice: casual vs detailed, blunt vs explanatory.
-4. Use Section 3 for **style and length only** — review text only.
+4. Use Section ${section3} for **style and length only** — review text only.
 
 ${historyBlock}
 
----
-SECTION 4: The Product
+${bestPredictionBlock}---
+SECTION ${sectionProduct}: The Product
 
 Category: ${category}
 
@@ -138,7 +175,7 @@ Product Description:
 ${productDescription}
 
 ---
-SECTION 5: Themes People Discuss in This Category
+SECTION ${sectionThemes}: Themes People Discuss in This Category
 
 ${bullets(themes)}
 
@@ -150,18 +187,30 @@ YOUR TASK (two steps — do them in this order)
 Write the Amazon review YOU would actually post for this product.
 - First person, natural voice — not like a product evaluator.
 - Flowing paragraphs — no theme headings, no pros/cons lists unless your prior reviews use that style.
-- Match the tone, length, structure, and detail density of your prior reviews in Section 3.
+- Match the tone, length, structure, and detail density of your prior reviews in Section ${section3}.${styleGuidance}
 
 **STEP 2 — Assign theme confidence scores**
 
-After you have written review_text, score EVERY theme in Section 5 (0.0 to 1.0).
+${taskThemeLine}
 ${SENTIMENT_INSTRUCTION}
 
-Make sure not to cross the review **${args.lengthConstraint}** words.
+Make sure not to cross the review **${lengthConstraint}** words.
 
 ${predictionOutputBlock(themes, "predicted_themes")}
 
 Write your review now:`;
+}
+
+export function buildSapiensPrompt(args: {
+  tribe: Tribe;
+  user: User;
+  product: Product | null;
+  productDescription: string;
+  category: string;
+  lengthConstraint: number;
+  excludeReviewKey?: string;
+}): string {
+  return buildSapiensPromptSections(args);
 }
 
 /**

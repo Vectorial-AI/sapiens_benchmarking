@@ -17,20 +17,37 @@
 
 ## What's bundled
 
+All runtime data lives under `src/data/` — **the deployed app never reads `outputs/` or `Clustering/`**.
+
 - `src/data/catalog-index.json` — 30 tribes
-- `src/data/tribes/*.json` — users, products, evolved traits
+- `src/data/tribes/*.json` — users, products, evolved traits, ground-truth reviews
+- Each product may include `best_prediction_review` — copied from `best_delta_predictions.json` at catalog build time
 - `src/data/benchmark-metrics.json` — aggregated Sapiens vs baseline scores
-- `src/lib/prompts.ts` — history / tribe / population / Sapiens prompts
+- `src/lib/prompts.ts` — Sapiens / baseline prompt builders
+
+When a product has `best_prediction_review`, Sapiens prompt **Section 4** is:
+
+> SGO Best-Delta Prediction (reference)
+
+…asking the model to write something similar in tone, length, and structure.
 
 ## Regenerate catalog (local only)
 
-After pipeline updates, run locally then commit:
+After pipeline updates, run locally then **commit** the generated JSON:
 
 ```bash
+cd sapiens_benchmarking-main
 python3 scripts/build-catalog.py
-# Re-export metrics if needed:
-python3 -c "..."  # see scripts/build-catalog.py header
+git add src/data/
 ```
+
+`build-catalog.py` reads local paths such as:
+
+- `outputs/amazon_sgo_health_care/{cluster}/{micro}/best_delta_predictions.json`
+- `Clustering/micro_cluster_details/...`
+- `Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json`
+
+Those files are **not** available on Vercel. Their contents must be baked into `src/data/tribes/*.json` before deploy.
 
 ## API routes
 
