@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { Dot, Spinner } from "@/components/ui";
 import { markWizardRestorePending } from "@/lib/wizard-session";
 
 type ModeSummary = {
