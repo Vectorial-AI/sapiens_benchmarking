@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { findContext } from "@/lib/master";
+import { findContext, type Tribe, type User } from "@/lib/master";
 import {
   BASELINE_METHODS,
   BASELINE_MODELS,
@@ -120,11 +120,13 @@ export async function POST(req: Request) {
     }
   }
 
-  const { tribe, user, product: found } = findContext(tribeId, userId, reviewKey);
-  if (!tribe || !user) {
+  const context = findContext(tribeId, userId, reviewKey);
+  if (!context.tribe || !context.user) {
     return NextResponse.json({ error: "Unknown tribe or user" }, { status: 400 });
   }
-  const product = found ?? null;
+  const tribe: Tribe = context.tribe;
+  const user: User = context.user;
+  const product = context.product ?? null;
 
   const productDescription = (
     customDesc?.trim() ||
