@@ -20,9 +20,5 @@ export function mapCategoryToMain(category: string): string {
 export function getCategoryThemes(category: string): string[] {
   const main = mapCategoryToMain(category);
   const themes = categoryThemes[main];
-  if (themes?.length) return themes;
-  // Fall back to subcategory key if present
-  const direct = categoryThemes[c];
-  if (direct?.length) return direct;
-  return DEFAULT_THEMES;
+  return themes?.length ? themes : DEFAULT_THEMES;
 }
