@@ -374,170 +374,27 @@
       }
     },
     {
-      "id": "cluster_1-micro_20",
-      "name": "Instant Convenience Seekers",
-      "cluster": "cluster_1",
-      "microId": "micro_20",
+      "id": "cluster_0-micro_4",
+      "name": "Community-Minded Enthusiasts",
+      "cluster": "cluster_0",
+      "microId": "micro_4",
       "domain": "video_games",
-      "reviewCount": 13,
-      "description": "Instant Convenience Seekers want products that work right out of the box and arrive quickly. Their reviews mirror their traits: concise, repetitive phrases like “works great” or “fast shipping” dominate, revealing a pragmatic communicator who values speed and simplicity over detailed analysis.",
-      "userCount": 6,
-      "traitSource": "micro_cluster_details (seed)",
+      "reviewCount": 60,
+      "description": "This tribe reviews like “fit-and-friction auditors”: they believe buyer regret doesn’t come from not knowing every feature—it comes from assuming the product will behave in your real routine, household, or access setup when it won’t. Their reviews are built to make ownership predictable. They collapse the decision to the few checks that actually decide success: what must already be true to use it (entitlements, region, subscription, launcher/account, community activity), what you get immediately, and what single interaction will determine whether it becomes habitual or becomes a daily annoyance.\n\nTheir first move is always a reality gate. If they hit a hard block (can’t redeem yet, wrong edition/region, core mode broken), they treat that as the whole product for the buyer and give a direct directive—refund, wait, or buy the correct version—without padding the review with content impressions they didn’t reach. But they’re equally strict in the opposite direction: if a commonly-feared dependency didn’t block them in real use (always-online on weak internet, minor shared glitches), they refuse to inflate it into a PSA veto. They keep risk scoped to what they personally observed and will explicitly mark uncertainty rather than turning guesses into warnings.\n\nWhen the product clears the gate, they stop as soon as they have one honest proof that answers the buyer’s real question. That proof might be usage accounting (“played it for months,” “finished it,” “bought it again after trying it elsewhere”), a single retellable payoff, or a recipient/household outcome (“the person I bought it for loves it”). They don’t “earn” enthusiasm by inventing mechanics, performance claims, or long-horizon durability narratives they didn’t verify.\n\nThey’re especially sensitive to repeat-use conditions in shared spaces. For couch co-op, party games, and group sessions, they treat fairness/session-management controls (pause rules, role selection parity, who gets to do what) as the real value proof—more decisive than vibe, setlists, or generic ‘fun with friends’ framing. For physical goods, they elevate livability frictions that many reviewers minimize—weight/heft, persistent packaging odor with a realistic fade timeline, and the pick-up → use → set-down loop. A single regression on the most-used control can outweigh added features because it predicts daily irritation.\n\nAcross categories, you can predict their review behavior as: identify the narrowest decisive gate; judge products by lived viability today (including whether the community is actually active now); anchor the verdict to one verified receipt; and use trust shortcuts (official licensing, packaging/warranty forensics) as fit/spec certainty rather than as vague ‘quality feel.’",
+      "userCount": 27,
+      "traitSource": "evolution_state.json",
       "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_1/micro_20_details.json",
-        "products": "Clustering/micro_cluster_details/cluster_1/micro_20_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_1/micro_20_summary_enhanced_delta_corrected.json",
-        "traits": "micro_cluster_details (seed)"
+        "users": "Clustering/micro_cluster_details/cluster_0/micro_4_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_0/micro_4_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_0/micro_4_summary_enhanced_delta_corrected.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "outputs/amazon_sgo/cluster_0/micro_4/best_delta_predictions.json"
       },
       "traitCounts": {
-        "behavioral": 7,
-        "motivations": 6,
-        "triggers": 5,
-        "friction": 5,
-        "goals": 3
-      }
-    },
-    {
-      "id": "cluster_1-micro_17",
-      "name": "Effusive Cheerleaders",
-      "cluster": "cluster_1",
-      "microId": "micro_17",
-      "domain": "video_games",
-      "reviewCount": 18,
-      "description": "Effusive Cheerleaders write lightning-fast, high-energy reviews meant to spread good vibes more than in-depth guidance. Their micro-posts mirror their core trait of spontaneous enthusiasm: repetitive superlatives, emojis, and simple adjectives dominate, making each review feel like a quick thumbs-up broadcast.",
-      "userCount": 8,
-      "traitSource": "micro_cluster_details (seed)",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_1/micro_17_details.json",
-        "products": "Clustering/micro_cluster_details/cluster_1/micro_17_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_1/micro_17_summary_enhanced_delta_corrected.json",
-        "traits": "micro_cluster_details (seed)"
-      },
-      "traitCounts": {
-        "behavioral": 6,
-        "motivations": 6,
-        "triggers": 5,
-        "friction": 5,
-        "goals": 3
-      }
-    },
-    {
-      "id": "cluster_4-micro_10",
-      "name": "Family-Fun Enthusiasts",
-      "cluster": "cluster_4",
-      "microId": "micro_10",
-      "domain": "video_games",
-      "reviewCount": 19,
-      "description": "Family-Fun Enthusiasts judge every purchase by the smiles it puts on their children and loved ones. Their reviews mirror this outlook—quick, emoji-laden or repetitive bursts of praise focused far more on happiness, cuteness and shared laughs than on technical specs or exhaustive detail.",
-      "userCount": 13,
-      "traitSource": "micro_cluster_details (seed)",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_4/micro_10_details.json",
-        "products": "Clustering/micro_cluster_details/cluster_4/micro_10_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_10_summary_enhanced_delta_corrected.json",
-        "traits": "micro_cluster_details (seed)"
-      },
-      "traitCounts": {
-        "behavioral": 7,
-        "motivations": 6,
-        "triggers": 5,
-        "friction": 5,
-        "goals": 3
-      }
-    },
-    {
-      "id": "cluster_1-micro_10",
-      "name": "Joy-First Enthusiasts",
-      "cluster": "cluster_1",
-      "microId": "micro_10",
-      "domain": "video_games",
-      "reviewCount": 19,
-      "description": "Joy-First Enthusiasts write quick, high-energy endorsements aimed at celebrating how entertaining, cute, or gratifying a product feels. Their writing style mirrors their characteristics: brief sentences, lots of exclamation points or emojis, and a near-universal 5-star rating that prioritizes emotional delight over technical detail.",
-      "userCount": 13,
-      "traitSource": "micro_cluster_details (seed)",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_1/micro_10_details.json",
-        "products": "Clustering/micro_cluster_details/cluster_1/micro_10_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_1/micro_10_summary_enhanced_delta_corrected.json",
-        "traits": "micro_cluster_details (seed)"
-      },
-      "traitCounts": {
-        "behavioral": 7,
-        "motivations": 6,
-        "triggers": 5,
-        "friction": 5,
-        "goals": 3
-      }
-    },
-    {
-      "id": "cluster_4-micro_11",
-      "name": "Practical Family Caregivers",
-      "cluster": "cluster_4",
-      "microId": "micro_11",
-      "domain": "video_games",
-      "reviewCount": 16,
-      "description": "This micro-cluster consists of hands-on parents, grandparents, and caregivers who quickly test products with their kids, then leave short, enthusiastic reviews to reassure similar shoppers. They value practical details—accurate sizing, softness, sturdiness, and straightforward functionality—over lengthy technical analysis, and their tone is usually optimistic unless a product fails outright.",
-      "userCount": 6,
-      "traitSource": "micro_cluster_details (seed)",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_4/micro_11_details.json",
-        "products": "Clustering/micro_cluster_details/cluster_4/micro_11_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_11_summary_enhanced_delta_corrected.json",
-        "traits": "micro_cluster_details (seed)"
-      },
-      "traitCounts": {
-        "behavioral": 7,
-        "motivations": 6,
-        "triggers": 5,
-        "friction": 5,
-        "goals": 3
-      }
-    },
-    {
-      "id": "cluster_4-micro_14",
-      "name": "Value-Seeking Parent Shoppers",
-      "cluster": "cluster_4",
-      "microId": "micro_14",
-      "domain": "video_games",
-      "reviewCount": 16,
-      "description": "This cluster consists of budget-minded parents who purchase across gaming, apparel, and digital media ecosystems with one question in mind: \"Will this keep the kids happy without breaking the bank?\" Their reviews are short, practical, and peppered with price references, highlighting real-world outcomes rather than technical jargon.",
-      "userCount": 7,
-      "traitSource": "micro_cluster_details (seed)",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_4/micro_14_details.json",
-        "products": "Clustering/micro_cluster_details/cluster_4/micro_14_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_14_summary_enhanced_delta_corrected.json",
-        "traits": "micro_cluster_details (seed)"
-      },
-      "traitCounts": {
-        "behavioral": 7,
-        "motivations": 6,
-        "triggers": 5,
-        "friction": 5,
-        "goals": 3
-      }
-    },
-    {
-      "id": "cluster_4-micro_2",
-      "name": "Gift-Focused Grand Givers",
-      "cluster": "cluster_4",
-      "microId": "micro_2",
-      "domain": "video_games",
-      "reviewCount": 14,
-      "description": "This micro-cluster is composed mainly of grandparents and other family-oriented shoppers who purchase items as gifts and then rate them based on the recipient’s reaction. Their writing style is brief, upbeat, and practical—often just a sentence or two that confirms the item ‘works great,’ ‘fits well,’ or ‘arrived on time,’ mirroring their core goal of quickly reassuring fellow gift buyers.",
-      "userCount": 7,
-      "traitSource": "micro_cluster_details (seed)",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_4/micro_2_details.json",
-        "products": "Clustering/micro_cluster_details/cluster_4/micro_2_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_2_summary_enhanced_delta_corrected.json",
-        "traits": "micro_cluster_details (seed)"
-      },
-      "traitCounts": {
-        "behavioral": 7,
-        "motivations": 6,
-        "triggers": 5,
-        "friction": 5,
+        "behavioral": 12,
+        "motivations": 3,
+        "triggers": 0,
+        "friction": 0,
         "goals": 3
       }
     },
@@ -566,19 +423,19 @@
       }
     },
     {
-      "id": "cluster_1-micro_22",
-      "name": "Upbeat Fun-First Shoppers",
-      "cluster": "cluster_1",
-      "microId": "micro_22",
+      "id": "cluster_0-micro_0",
+      "name": "Pragmatic Value Advocates",
+      "cluster": "cluster_0",
+      "microId": "micro_0",
       "domain": "video_games",
-      "reviewCount": 12,
-      "description": "This group is comprised of enthusiastic, experience-oriented reviewers who write short, exclamation-laden posts to tell others how a game, app, or piece of clothing *feels* in real life. Their informal tone, emojis, and rapid switches between praise and critique echo the youthful, practical nature described in their characteristic summaries.",
-      "userCount": 5,
+      "reviewCount": 60,
+      "description": "This micro-cluster consists of hands-on, result-oriented shoppers who test items immediately, benchmark them against previous experiences, and speak up whenever marketing promises don’t match reality. Their writing style is concise yet pointed: short blurbs if a product simply works, longer rants when flaws affect everyday use or fairness.",
+      "userCount": 17,
       "traitSource": "micro_cluster_details (seed)",
       "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_1/micro_22_details.json",
-        "products": "Clustering/micro_cluster_details/cluster_1/micro_22_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_1/micro_22_summary_enhanced_delta_corrected.json",
+        "users": "Clustering/micro_cluster_details/cluster_0/micro_0_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_0/micro_0_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_0/micro_0_summary_enhanced_delta_corrected.json",
         "traits": "micro_cluster_details (seed)"
       },
       "traitCounts": {
@@ -590,44 +447,236 @@
       }
     },
     {
-      "id": "cluster_0-micro_4",
-      "name": "Community-Minded Enthusiasts",
+      "id": "cluster_0-micro_9",
+      "name": "Pragmatic Value Gamers",
       "cluster": "cluster_0",
-      "microId": "micro_4",
+      "microId": "micro_9",
       "domain": "video_games",
-      "reviewCount": 60,
-      "description": "This tribe reviews like “fit-and-friction auditors”: they believe buyer regret doesn’t come from not knowing every feature—it comes from assuming the product will behave in your real routine, household, or access setup when it won’t. Their reviews are built to make ownership predictable. They collapse the decision to the few checks that actually decide success: what must already be true to use it (entitlements, region, subscription, launcher/account, community activity), what you get immediately, and what single interaction will determine whether it becomes habitual or becomes a daily annoyance.\n\nTheir first move is always a reality gate. If they hit a hard block (can’t redeem yet, wrong edition/region, core mode broken), they treat that as the whole product for the buyer and give a direct directive—refund, wait, or buy the correct version—without padding the review with content impressions they didn’t reach. But they’re equally strict in the opposite direction: if a commonly-feared dependency didn’t block them in real use (always-online on weak internet, minor shared glitches), they refuse to inflate it into a PSA veto. They keep risk scoped to what they personally observed and will explicitly mark uncertainty rather than turning guesses into warnings.\n\nWhen the product clears the gate, they stop as soon as they have one honest proof that answers the buyer’s real question. That proof might be usage accounting (“played it for months,” “finished it,” “bought it again after trying it elsewhere”), a single retellable payoff, or a recipient/household outcome (“the person I bought it for loves it”). They don’t “earn” enthusiasm by inventing mechanics, performance claims, or long-horizon durability narratives they didn’t verify.\n\nThey’re especially sensitive to repeat-use conditions in shared spaces. For couch co-op, party games, and group sessions, they treat fairness/session-management controls (pause rules, role selection parity, who gets to do what) as the real value proof—more decisive than vibe, setlists, or generic ‘fun with friends’ framing. For physical goods, they elevate livability frictions that many reviewers minimize—weight/heft, persistent packaging odor with a realistic fade timeline, and the pick-up → use → set-down loop. A single regression on the most-used control can outweigh added features because it predicts daily irritation.\n\nAcross categories, you can predict their review behavior as: identify the narrowest decisive gate; judge products by lived viability today (including whether the community is actually active now); anchor the verdict to one verified receipt; and use trust shortcuts (official licensing, packaging/warranty forensics) as fit/spec certainty rather than as vague ‘quality feel.’",
-      "userCount": 27,
-      "traitSource": "evolution_state.json",
+      "reviewCount": 53,
+      "description": "This cluster consists of technically adept gamers and hobbyists who treat every purchase like a hands-on test bench. Their reviews read like mini-benchmarks—long on specs, pros/cons lists, and honest cost–benefit math—mirroring the price-sensitive, performance-first traits described in their profiles.",
+      "userCount": 26,
+      "traitSource": "micro_cluster_details (seed)",
       "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_0/micro_4_details.json",
-        "products": "Clustering/micro_cluster_details/cluster_0/micro_4_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_0/micro_4_summary_enhanced_delta_corrected.json",
-        "traits": "evolution_state.json",
-        "best_predictions": "outputs/amazon_sgo/cluster_0/micro_4/best_delta_predictions.json"
+        "users": "Clustering/micro_cluster_details/cluster_0/micro_9_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_0/micro_9_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_0/micro_9_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
       },
       "traitCounts": {
-        "behavioral": 12,
-        "motivations": 3,
-        "triggers": 0,
-        "friction": 0,
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
         "goals": 3
       }
     },
     {
-      "id": "cluster_4-micro_3",
-      "name": "Kid-Approval Shoppers",
-      "cluster": "cluster_4",
-      "microId": "micro_3",
+      "id": "cluster_0-micro_1",
+      "name": "Practical Setup Optimizers",
+      "cluster": "cluster_0",
+      "microId": "micro_1",
       "domain": "video_games",
-      "reviewCount": 19,
-      "description": "Kid-Approval Shoppers are family-centric caregivers—often grandparents—who buy with the goal of delighting youngsters and making shared moments easy. Their reviews mirror this: short, enthusiastic endorsements (or blunt dismissals) that highlight whether the kids had fun, if the product worked right away, and if it felt sturdy enough for repeated family use.",
-      "userCount": 12,
+      "reviewCount": 52,
+      "description": "This micro-cluster consists of tech-savvy gamers who treat accessories as practical upgrades to a larger ecosystem. Their writing is brief but informative, stressing how well an item plugs in, charges, or fits without clutter while sprinkling in quick pros/cons so fellow buyers can decide at a glance.",
+      "userCount": 25,
       "traitSource": "micro_cluster_details (seed)",
       "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_4/micro_3_details.json",
-        "products": "Clustering/micro_cluster_details/cluster_4/micro_3_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_3_summary_enhanced_delta_corrected.json",
+        "users": "Clustering/micro_cluster_details/cluster_0/micro_1_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_0/micro_1_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_0/micro_1_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_0-micro_2",
+      "name": "Analytical Quality Guardians",
+      "cluster": "cluster_0",
+      "microId": "micro_2",
+      "domain": "video_games",
+      "reviewCount": 49,
+      "description": "This micro-cluster consists of seasoned, detail-oriented gamers who treat every purchase as a case study. They dissect mechanics, graphics, story, and monetization in long, structured reviews that reference past franchise entries and competitor titles. Their writing style mirrors their characteristics—analytical, comparative, and often corrective—serving as both a buying guide and an open letter to developers.",
+      "userCount": 30,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_0/micro_2_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_0/micro_2_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_0/micro_2_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_0-micro_8",
+      "name": "Practical Nostalgia Gamers",
+      "cluster": "cluster_0",
+      "microId": "micro_8",
+      "domain": "video_games",
+      "reviewCount": 41,
+      "description": "This micro-cluster consists of long-time gamers who long to re-live cherished classics yet refuse to overpay or overlook practical flaws. Their writing style mirrors this split: they gush about ‘vintage joy’ or ‘Atari days,’ but immediately pivot to sizing tips, cost comparisons, or promises to update on wear-and-tear, showing an intent to give balanced, experience-based advice.",
+      "userCount": 15,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_0/micro_8_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_0/micro_8_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_0/micro_8_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_0-micro_7",
+      "name": "Performance-Value Gamers",
+      "cluster": "cluster_0",
+      "microId": "micro_7",
+      "domain": "video_games",
+      "reviewCount": 47,
+      "description": "This micro-cluster consists of tech-savvy gaming enthusiasts who test hardware and software in depth, then translate those findings into community-oriented advice. Their writing style mirrors their characteristics: reviews are often specification-rich, comparison-driven, and peppered with troubleshooting guidance or price-to-performance judgments.",
+      "userCount": 21,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_0/micro_7_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_0/micro_7_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_0/micro_7_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_0-micro_20",
+      "name": "Pragmatic Value Gamers",
+      "cluster": "cluster_0",
+      "microId": "micro_20",
+      "domain": "video_games",
+      "reviewCount": 40,
+      "description": "This micro-cluster is made up of technically savvy gamers who treat every purchase like a field test. They dissect specs, compare against prior hardware, and write bullet-point or step-by-step reviews that spotlight real-world performance and hidden costs. Their writing style mirrors their mindset: concise yet rich with practical diagnostics meant to save others money and frustration.",
+      "userCount": 20,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_0/micro_20_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_0/micro_20_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_0/micro_20_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_0-micro_3",
+      "name": "Hands-On Gear Analysts",
+      "cluster": "cluster_0",
+      "microId": "micro_3",
+      "domain": "video_games",
+      "reviewCount": 40,
+      "description": "This tribe buys like “lived-routine forecasters.” They assume most products can work in a clean, first-use scenario; what they are really testing is whether the product will still feel effortless once it has to survive real life: wet hands, cramped counters, travel, missing accessories, worn consumables, and the need to replace one part without re-buying the whole system. They treat a product as a chain of small rituals—charge, store, dock, clean, attach, swap, and source replacements—and they predict satisfaction by looking for the weak link that will quietly turn the item into a drawer resident.\n\nTheir central belief is continuity beats capability. Performance features matter, but only if the ownership loop stays coherent over time. That’s why they audit interfaces with almost forensic granularity: which charging standard each component uses, whether a kit mixes standards, and whether replacement heads/tips/consumables match a dominant ecosystem. Mixed standards are not “a minor annoyance” to them; they interpret the inconsistency itself as evidence of incoherent design thinking, which predicts downtime (lost-cable events), travel friction, and replacement scarcity later. When they praise a product, they often phrase it as ownership relief—“this matches the common ecosystem, so I’m not trapped”—and they’ll be specific about which consumable category is standardized versus locked-in.\n\nThey also treat mundane mechanics as truth-tellers. Reviews from this tribe don’t stop at “charging is awkward”; they describe the physical ritual required (how a cover is accessed, whether a tool is needed to pry something open, and the exact posture the device must sit in while charging). They see those micro-frictions as compounding costs that drive non-adoption even when core performance is fine. Similarly, bulkiness and unnatural handling aren’t framed as preferences—they are adoption predictors. If it’s annoying to hold, place, or manipulate repeatedly, they assume it won’t stay in the routine.\n\nWhen evaluating kits and bundles, they refuse bundle-level verdicts. They split the purchase into separate products, benchmark each against a named baseline or category standard, then recombine the conclusion around the component that sets the ceiling on satisfaction. Their value logic is “the weakest link determines lived value,” so readers can tell which piece carries the purchase and which one will generate regret.\n\nThey write reviews as evidence-based ownership math. They verify listing claims through hands-on observations, elevate any spec-to-experience mismatch as a return predictor, and calibrate build concerns through concrete mechanical tells (wobble, looseness, fit tolerances) often compared against a known standard. When design implies extra intensity or risk, they don’t just warn; they infer a mechanism and give a practical start protocol, because they see reviewing as preventing avoidable bad first uses. You can predict their reviews will read like a field report on continuity: what will integrate cleanly, what will create future dependency, and which small physical choices will become daily friction later.",
+      "userCount": 18,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_0/micro_3_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_0/micro_3_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_0/micro_3_summary_enhanced_delta_corrected.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "outputs/amazon_sgo_health_care/cluster_0/micro_3/best_delta_predictions.json"
+      },
+      "traitCounts": {
+        "behavioral": 10,
+        "motivations": 6,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 6
+      }
+    },
+    {
+      "id": "cluster_0-micro_16",
+      "name": "Family Tech Pragmatists",
+      "cluster": "cluster_0",
+      "microId": "micro_16",
+      "domain": "video_games",
+      "reviewCount": 35,
+      "description": "This cluster consists of detail-oriented parents and gamers who personally test hardware, games and accessories on multiple platforms, then write structured, anecdotal reviews that list pros, cons and practical tips. Their commentary blends technical benchmarks with household stories, revealing a mission to protect both wallet and family playtime.",
+      "userCount": 11,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_0/micro_16_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_0/micro_16_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_0/micro_16_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_0-micro_10",
+      "name": "Discerning Nostalgic Collectors",
+      "cluster": "cluster_0",
+      "microId": "micro_10",
+      "domain": "video_games",
+      "reviewCount": 32,
+      "description": "This micro-cluster consists of veteran gamers and hobbyists who buy both software and physical goods with an eye toward preserving beloved experiences and curating long-lasting collections. Their writing style mirrors their traits: lengthy, evidence-based reviews that compare new releases to classic benchmarks, list concrete pros/cons, and flag even minor discrepancies to protect fellow enthusiasts.",
+      "userCount": 13,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_0/micro_10_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_0/micro_10_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_0/micro_10_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
+      },
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_0-micro_17",
+      "name": "Technical Performance Enthusiasts",
+      "cluster": "cluster_0",
+      "microId": "micro_17",
+      "domain": "video_games",
+      "reviewCount": 31,
+      "description": "This micro-cluster consists of highly technical, detail-oriented hobbyists—primarily gamers and peripheral tinkerers—who rigorously test products and write structured, comparison-rich reviews. Their writing style mirrors their characteristics: they list measurable pros/cons, reference previous benchmarks, and call out even minor engineering oversights to help fellow power users and keep manufacturers accountable.",
+      "userCount": 16,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_0/micro_17_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_0/micro_17_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_0/micro_17_summary_enhanced_delta_corrected.json",
         "traits": "micro_cluster_details (seed)"
       },
       "traitCounts": {
@@ -663,67 +712,19 @@
       }
     },
     {
-      "id": "cluster_4-micro_23",
-      "name": "Practical Kid-Centric Parents",
-      "cluster": "cluster_4",
-      "microId": "micro_23",
-      "domain": "video_games",
-      "reviewCount": 15,
-      "description": "This cluster is composed of hands-on, family-focused parents who buy and review products chiefly to keep their kids happily occupied while learning. Their writing is concise, experience-based, and balances enthusiasm with practical caveats—mirroring their stated characteristics that spotlight utility and child enjoyment over personal hobbyist depth.",
-      "userCount": 10,
-      "traitSource": "micro_cluster_details (seed)",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_4/micro_23_details.json",
-        "products": "Clustering/micro_cluster_details/cluster_4/micro_23_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_23_summary_enhanced_delta_corrected.json",
-        "traits": "micro_cluster_details (seed)"
-      },
-      "traitCounts": {
-        "behavioral": 7,
-        "motivations": 6,
-        "triggers": 5,
-        "friction": 5,
-        "goals": 3
-      }
-    },
-    {
-      "id": "cluster_4-micro_17",
-      "name": "Family-Focused Pragmatists",
-      "cluster": "cluster_4",
-      "microId": "micro_17",
-      "domain": "video_games",
-      "reviewCount": 22,
-      "description": "This cluster consists of detail-oriented parents who personally test products—or delegate the testing to their spouse or kids—and then deliver thorough, experience-based write-ups. Their reviews mirror their characteristics: structured pros-and-cons, concrete feature lists, and practical tips that help fellow families avoid surprises.",
-      "userCount": 9,
-      "traitSource": "micro_cluster_details (seed)",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_4/micro_17_details.json",
-        "products": "Clustering/micro_cluster_details/cluster_4/micro_17_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_17_summary_enhanced_delta_corrected.json",
-        "traits": "micro_cluster_details (seed)"
-      },
-      "traitCounts": {
-        "behavioral": 7,
-        "motivations": 6,
-        "triggers": 5,
-        "friction": 5,
-        "goals": 3
-      }
-    },
-    {
-      "id": "cluster_3-micro_30",
-      "name": "Utility-Driven Pragmatists",
+      "id": "cluster_3-micro_9",
+      "name": "Practical Performance Seekers",
       "cluster": "cluster_3",
-      "microId": "micro_30",
+      "microId": "micro_9",
       "domain": "video_games",
-      "reviewCount": 14,
-      "description": "Utility-Driven Pragmatists are hands-on, detail-oriented buyers who gauge success by how well an item withstands daily wear and genuinely solves a need. Their reviews mirror their traits: usually concise yet descriptive, peppered with first-hand usage notes (e.g., travel, family, gaming) and quick verdicts that help peers judge reliability, comfort, and protection at a glance.",
-      "userCount": 12,
+      "reviewCount": 28,
+      "description": "This micro-cluster consists of detail-oriented shoppers who stress-test products in everyday or high-demand scenarios, then share precise, scenario-anchored feedback. Their writing is balanced yet candid, mixing quick verdicts with technical or fit-based specifics so fellow consumers can predict performance before buying.",
+      "userCount": 15,
       "traitSource": "micro_cluster_details (seed)",
       "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_3/micro_30_details.json",
-        "products": "Clustering/micro_cluster_details/cluster_3/micro_30_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_3/micro_30_summary_enhanced_delta_corrected.json",
+        "users": "Clustering/micro_cluster_details/cluster_3/micro_9_details.json",
+        "products": "Clustering/micro_cluster_details/cluster_3/micro_9_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_3/micro_9_summary_enhanced_delta_corrected.json",
         "traits": "micro_cluster_details (seed)"
       },
       "traitCounts": {

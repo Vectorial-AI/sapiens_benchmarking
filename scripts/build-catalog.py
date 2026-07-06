@@ -40,6 +40,7 @@ VIDEO_GAMES_PERFORMANCE_PATH = (
 )
 
 MIN_TRIBE_REVIEWS = 12
+MIN_VG_TRIBE_REVIEWS = 25
 TRIBES_PER_DOMAIN = 15
 HEALTH_MAIN = "Health & Personal Care"
 VIDEO_GAMES_MAIN = "Video Games"
@@ -248,6 +249,27 @@ def count_domain_reviews_in_details(
     return count
 
 
+def count_vg_users_in_details(
+    cluster: str,
+    micro: str,
+    sub_to_main: dict[str, str],
+) -> int:
+    """Users with at least one Video Games review in micro_cluster_details."""
+    details_path = CLUSTERING / "micro_cluster_details" / cluster / f"{micro}_details.json"
+    if not details_path.exists():
+        return 0
+    details = load_json(details_path)
+    users_with_vg = 0
+    for reviews in (details.get("members_grouped_by_user") or {}).values():
+        if any(
+            (review.get("main_category") or sub_to_main.get(review.get("category", ""), review.get("category", "")))
+            == VIDEO_GAMES_MAIN
+            for review in reviews
+        ):
+            users_with_vg += 1
+    return users_with_vg
+
+
 def load_video_games_tribe_stats() -> dict[tuple[str, str], dict[str, float | int | str]]:
     if not VIDEO_GAMES_PERFORMANCE_PATH.exists():
         return {}
@@ -303,16 +325,26 @@ def select_tribes(
     ]
     healthcare_keys = {(cluster, micro) for _, cluster, micro, _ in healthcare}
 
-    vg_stats = load_video_games_tribe_stats()
-    video_games_candidates = [
-        (tribe_key, int(meta["n_reviews"]), float(meta["mean_accuracy"]))
-        for tribe_key, meta in vg_stats.items()
-        if int(meta["n_reviews"]) >= MIN_TRIBE_REVIEWS and tribe_key not in healthcare_keys
-    ]
-    video_games_candidates.sort(key=lambda item: (-item[2], -item[1]))
+    video_games_candidates: list[tuple[tuple[str, str], int, int]] = []
+    for cluster_dir in sorted((CLUSTERING / "micro_cluster_details").glob("cluster_*")):
+        cluster = cluster_dir.name
+        for details_path in sorted(cluster_dir.glob("micro_*_details.json")):
+            micro = details_path.stem.replace("_details", "")
+            tribe_key = (cluster, micro)
+            if tribe_key in healthcare_keys:
+                continue
+            vg_reviews = count_domain_reviews_in_details(
+                cluster, micro, VIDEO_GAMES_MAIN, sub_to_main
+            )
+            if vg_reviews < MIN_VG_TRIBE_REVIEWS:
+                continue
+            vg_users = count_vg_users_in_details(cluster, micro, sub_to_main)
+            video_games_candidates.append((tribe_key, vg_reviews, vg_users))
+
+    video_games_candidates.sort(key=lambda item: (-item[1], -item[2]))
     video_games = [
-        ("video_games", tribe_key[0], tribe_key[1], review_count)
-        for tribe_key, review_count, _ in video_games_candidates[:TRIBES_PER_DOMAIN]
+        ("video_games", tribe_key[0], tribe_key[1], vg_reviews)
+        for tribe_key, vg_reviews, _ in video_games_candidates[:TRIBES_PER_DOMAIN]
     ]
 
     selected = healthcare + video_games

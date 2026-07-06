@@ -51,6 +51,22 @@ export function buildSapiensHistoryContext(args: {
     }));
 }
 
+export function buildSapiensReviewExamples(args: {
+  products: ReviewHistoryProduct[];
+  targetCategory?: string;
+  reviewKey?: string;
+}): HistoryContextItem[] {
+  const items = buildSapiensHistoryContext({
+    products: args.products,
+    targetCategory: args.targetCategory,
+  });
+  const key = args.reviewKey;
+  if (!key) return items;
+  const text = args.products.find((p) => p.reviewKey === key)?.groundTruthReview.trim();
+  if (!text) return items;
+  return [...items.filter((h) => h.reviewText.trim() !== text), { reviewText: text }];
+}
+
 /** Same main category as target, leave-one-out — history baseline context. */
 export function buildHistoryBaselineContext(args: {
   products: ReviewHistoryProduct[];

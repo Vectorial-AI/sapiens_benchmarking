@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { findContext } from "@/lib/master";
 import {
   buildHistoryBaselineContext,
-  buildSapiensHistoryContext,
+  buildSapiensReviewExamples,
   excludeTargetReviewText,
 } from "@/lib/review-history";
 
@@ -25,14 +25,16 @@ export async function GET(req: Request) {
 
   const items =
     mode === "sapiens"
-      ? excludeTargetReviewText(
-          buildSapiensHistoryContext({
-            products: user.products,
-            excludeReviewKey: reviewKey,
-            targetCategory,
-          }),
-          product?.groundTruthReview,
-        )
+      ? buildSapiensReviewExamples({
+          products: user.products.map((p) => ({
+            reviewKey: p.reviewKey,
+            productDescription: p.productDescription,
+            category: p.category,
+            groundTruthReview: p.groundTruthReview,
+          })),
+          targetCategory,
+          reviewKey,
+        })
       : excludeTargetReviewText(
           buildHistoryBaselineContext({
             products: user.products.map((p) => ({

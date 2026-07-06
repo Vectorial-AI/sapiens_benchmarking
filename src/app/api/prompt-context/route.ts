@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { findContext } from "@/lib/master";
-import {
-  buildSapiensHistoryContext,
-  excludeTargetReviewText,
-} from "@/lib/review-history";
+import { buildSapiensReviewExamples } from "@/lib/review-history";
 import { formatUserCharacteristics } from "@/lib/user-characteristics";
 
 export const runtime = "nodejs";
@@ -28,14 +25,11 @@ export async function GET(req: Request) {
   const q = tribe.qualitative;
   const nonEmpty = (items: string[]) => items.map((s) => s.trim()).filter(Boolean);
 
-  const historyItems = excludeTargetReviewText(
-    buildSapiensHistoryContext({
-      products: user.products,
-      excludeReviewKey: reviewKey,
-      targetCategory: category,
-    }),
-    product?.groundTruthReview,
-  );
+  const historyItems = buildSapiensReviewExamples({
+    products: user.products,
+    targetCategory: category,
+    reviewKey,
+  });
 
   return NextResponse.json({
     category,

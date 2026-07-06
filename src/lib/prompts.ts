@@ -5,7 +5,7 @@ import type { HistoryContextItem, Qualitative, ReviewSentiment } from "./types";
 import type { Product, Tribe, User } from "./master";
 import {
   buildHistoryBaselineContext,
-  buildSapiensHistoryContext,
+  buildSapiensReviewExamples,
   excludeTargetReviewText,
   formatLengthConstraint,
   wordCount,
@@ -92,14 +92,11 @@ function buildSapiensPromptSections(args: {
   const themes = themesForCategory(category);
   const userCharBlock = formatUserCharacteristics(user, category);
   const tribeTraitsBlock = formatTribeTraitSections(tribe.qualitative);
-  const historyItems = excludeTargetReviewText(
-    buildSapiensHistoryContext({
-      products: user.products,
-      excludeReviewKey,
-      targetCategory: category,
-    }),
-    product?.groundTruthReview,
-  );
+  const historyItems = buildSapiensReviewExamples({
+    products: user.products,
+    targetCategory: category,
+    reviewKey: excludeReviewKey,
+  });
   const historyTextBlock = formatHistoryExamples(historyItems);
   const tribeSection = tribeTraitsBlock
     ? `### Your Tribe (${tribe.name})
@@ -122,7 +119,7 @@ ${userCharBlock}
 Respond ONLY with valid JSON.
 
 ${tribeSection}${charSection}### Your Writing Style & Preferences
-To write this review, study your past reviews below (same broad product category, review text only — no product titles). Match their tone, length, paragraph structure, and level of detail.
+To understand how to write this review, analyze the following examples of reviews you have written in the past. Each example is review text only (no product titles or descriptions). Observe the tone, length, and what details you usually focus on.
 
 ${historyTextBlock}
 ### The New Task
