@@ -438,7 +438,8 @@ export default function Home() {
                       <div className="rounded-xl border border-border bg-muted/20 p-3.5">
                         <ExpandableText
                           text={product.bestPredictionReview}
-                          previewChars={280}
+                          className="text-[13px] text-foreground leading-relaxed"
+                          clampClass="line-clamp-4"
                           toggleLabel="reference prediction"
                         />
                       </div>
