@@ -89,6 +89,7 @@ export default function Home() {
 
   const effectiveProductDesc = customProductDesc.trim();
   const effectiveCategory = product?.category ?? "Health & Personal Care";
+  const canRun = Boolean(tribeId && userId && effectiveProductDesc);
 
   useEffect(() => {
     if (skipProductDescSyncRef.current) {
@@ -216,8 +217,6 @@ export default function Home() {
     setReviewKey(key);
     resetOutputs();
   }
-
-  const canRun = Boolean(tribeId && userId && effectiveProductDesc);
 
   function runPayload() {
     return {
