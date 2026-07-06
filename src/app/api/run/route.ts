@@ -16,7 +16,6 @@ import {
   REVIEW_SYSTEM,
 } from "@/lib/prompts";
 import {
-  buildHistoryContext,
   formatLengthConstraint,
 } from "@/lib/review-history";
 import { hasGatewayKey, mockPrediction, runModel } from "@/lib/ai";
