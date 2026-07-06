@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
+import { getCategoryThemes } from "@/lib/category-themes";
 import { findContext } from "@/lib/master";
-import { buildSapiensReviewExamples } from "@/lib/review-history";
+import { buildHistoryContext } from "@/lib/prompts";
 import { formatUserCharacteristics } from "@/lib/user-characteristics";
 
 export const runtime = "nodejs";
 
-/** Preview what the Sapiens prompt receives (tribe traits, user characteristics, prior reviews). */
+/** Preview what the Sapiens prompt receives (tribe traits, user characteristics, prior reviews, reference review, category themes). */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const tribeId = searchParams.get("tribeId") ?? "";
@@ -24,11 +25,15 @@ export async function GET(req: Request) {
     userCharacteristics.trim() !== "" && userCharacteristics !== "(none)";
   const q = tribe.qualitative;
   const nonEmpty = (items: string[]) => items.map((s) => s.trim()).filter(Boolean);
+  const groundTruthThemes = product?.predictedThemes ?? [];
+  const categoryThemes = getCategoryThemes(category);
+  const referenceReview = product?.groundTruthReview?.trim() ?? "";
 
-  const historyItems = buildSapiensReviewExamples({
-    products: user.products,
+  const historyItems = buildHistoryContext({
+    user,
+    excludeReviewKey: reviewKey,
+    excludeReviewText: product?.groundTruthReview,
     targetCategory: category,
-    reviewKey,
   });
 
   return NextResponse.json({
@@ -42,6 +47,8 @@ export async function GET(req: Request) {
       tribeImplicitGoals: nonEmpty(q.implicitGoals).length > 0,
       userCharacteristics: userCharacteristicsPopulated,
       priorReviews: historyItems.length > 0,
+      referenceReview: referenceReview.length > 0,
+      categoryThemes: categoryThemes.length > 0,
     },
     tribeTraits: {
       behavioralTraits: nonEmpty(q.inherentBehavioralTraits),
@@ -50,6 +57,9 @@ export async function GET(req: Request) {
       frictionPoints: nonEmpty(q.frictionPoints),
       implicitGoals: nonEmpty(q.implicitGoals),
     },
+    categoryThemes,
+    groundTruthThemes,
+    referenceReview: referenceReview || null,
     userCharacteristics: {
       text: userCharacteristics,
       populated: userCharacteristicsPopulated,
@@ -57,7 +67,7 @@ export async function GET(req: Request) {
     priorReviews: {
       items: historyItems,
       count: historyItems.length,
-      filter: `Same main category as target (${category})`,
+      filter: `Same main category as target (${category}), leave-one-out`,
     },
   });
 }

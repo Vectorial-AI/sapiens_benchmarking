@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { findContext } from "@/lib/master";
 import {
   buildHistoryBaselineContext,
-  buildSapiensReviewExamples,
   excludeTargetReviewText,
 } from "@/lib/review-history";
 
@@ -23,31 +22,21 @@ export async function GET(req: Request) {
 
   const targetCategory = categoryParam || product?.category || "";
 
-  const items =
-    mode === "sapiens"
-      ? buildSapiensReviewExamples({
-          products: user.products.map((p) => ({
-            reviewKey: p.reviewKey,
-            productDescription: p.productDescription,
-            category: p.category,
-            groundTruthReview: p.groundTruthReview,
-          })),
-          targetCategory,
-          reviewKey,
-        })
-      : excludeTargetReviewText(
-          buildHistoryBaselineContext({
-            products: user.products.map((p) => ({
-              reviewKey: p.reviewKey,
-              productDescription: p.productDescription,
-              category: p.category,
-              groundTruthReview: p.groundTruthReview,
-            })),
-            excludeReviewKey: reviewKey,
-            targetCategory,
-          }),
-          product?.groundTruthReview,
-        );
+  const toProduct = user.products.map((p) => ({
+    reviewKey: p.reviewKey,
+    productDescription: p.productDescription,
+    category: p.category,
+    groundTruthReview: p.groundTruthReview,
+  }));
+
+  const items = excludeTargetReviewText(
+    buildHistoryBaselineContext({
+      products: toProduct,
+      excludeReviewKey: reviewKey,
+      targetCategory,
+    }),
+    product?.groundTruthReview,
+  );
 
   return NextResponse.json({
     items,

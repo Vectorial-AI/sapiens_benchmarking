@@ -16,7 +16,7 @@ import {
   REVIEW_SYSTEM,
 } from "@/lib/prompts";
 import {
-  buildSapiensReviewExamples,
+  buildHistoryContext,
   formatLengthConstraint,
 } from "@/lib/review-history";
 import { hasGatewayKey, mockPrediction, runModel } from "@/lib/ai";
@@ -152,10 +152,11 @@ export async function POST(req: Request) {
 
   const metricsSource = hasGatewayKey() ? "pipeline" : "mock";
 
-  const sapiensHistoryContext = buildSapiensReviewExamples({
-    products: user.products,
+  const sapiensHistoryContext = buildHistoryContext({
+    user,
+    excludeReviewKey: reviewKey,
+    excludeReviewText: product?.groundTruthReview,
     targetCategory: category,
-    reviewKey,
   });
 
   const promptBase = {
@@ -165,6 +166,7 @@ export async function POST(req: Request) {
     productDescription,
     category,
     excludeReviewKey: reviewKey,
+    groundTruthThemes,
   };
 
   function logAllPrompts(sapiensPrompt: string, runModeLabel: "sapiens" | "mock") {

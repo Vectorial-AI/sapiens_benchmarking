@@ -5,7 +5,6 @@ import type { HistoryContextItem, Qualitative, ReviewSentiment } from "./types";
 import type { Product, Tribe, User } from "./master";
 import {
   buildHistoryBaselineContext,
-  buildSapiensReviewExamples,
   excludeTargetReviewText,
   formatLengthConstraint,
   wordCount,
@@ -75,8 +74,19 @@ function themesForCategory(category: string): string[] {
   return getCategoryThemes(category);
 }
 
+function referenceReviewSection(reviewText: string): string {
+  const text = reviewText.trim();
+  if (!text) return "";
+  return `### Reference Review
+Below is a review you wrote for another product. Use it only as inspiration — for tone, length, structure, and the kinds of themes you tend to emphasize. Do not reuse its wording or structure so closely that it reads like a copy.
+
+${text}
+
+`;
+}
+
 /**
- * SAPIENS — tribe traits (non-empty groups only) + user characteristics + prior-review style.
+ * SAPIENS — tribe traits + user characteristics + prior reviews + reference review.
  */
 function buildSapiensPromptSections(args: {
   tribe: Tribe;
@@ -85,19 +95,30 @@ function buildSapiensPromptSections(args: {
   productDescription: string;
   category: string;
   excludeReviewKey?: string;
+  groundTruthThemes: string[];
   lengthConstraint: number;
 }): string {
-  const { tribe, user, product, productDescription, category, excludeReviewKey, lengthConstraint } =
-    args;
+  const {
+    tribe,
+    user,
+    product,
+    productDescription,
+    category,
+    excludeReviewKey,
+    lengthConstraint,
+  } = args;
   const themes = themesForCategory(category);
   const userCharBlock = formatUserCharacteristics(user, category);
   const tribeTraitsBlock = formatTribeTraitSections(tribe.qualitative);
-  const historyItems = buildSapiensReviewExamples({
-    products: user.products,
+  const historyItems = buildHistoryContext({
+    user,
+    excludeReviewKey,
+    excludeReviewText: product?.groundTruthReview,
     targetCategory: category,
-    reviewKey: excludeReviewKey,
   });
   const historyTextBlock = formatHistoryExamples(historyItems);
+  const referenceReview = product?.groundTruthReview?.trim() ?? "";
+  const referenceBlock = referenceReviewSection(referenceReview);
   const tribeSection = tribeTraitsBlock
     ? `### Your Tribe (${tribe.name})
 Use these group traits when deciding what to notice and how to evaluate the product:
@@ -119,7 +140,7 @@ ${userCharBlock}
 Respond ONLY with valid JSON.
 
 ${tribeSection}${charSection}### Your Writing Style & Preferences
-To understand how to write this review, analyze the following examples of reviews you have written in the past. Each example is review text only (no product titles or descriptions). Observe the tone, length, what details you usually focus on, and how your more recent examples read.
+To understand how to write this review, analyze the following examples of reviews you have written in the past. Each example is review text only (no product titles or descriptions). Observe the tone, length, and what details you usually focus on.
 
 ${historyTextBlock}
 ### The New Task
@@ -129,20 +150,19 @@ Category: ${category}
 
 **The New Product:** ${productDescription}
 
-### Instructions
-1. Write review_text by **mimicking the style of your prior reviews** above — their tone, length, and which product aspects you actually bother to mention. Let your more recent examples guide how detailed you usually are. Apply your tribe traits and personal characteristics to decide what you notice and how you judge the product — but do not write like a product evaluator or list themes in the prose.
-2. Provide confidence scores (0.0 to 1.0) for EACH theme listed below — weight themes the way your example reviews imply you care about different aspects of a product.
+${referenceBlock}### Instructions
+1. Write review_text for the new product above from your persona's perspective — shaped by your tribe traits and personal characteristics. Take inspiration from the reference review for tone, length, and theme focus, but rewrite it properly for this product. It should feel like the same reviewer, not a paraphrase of the reference.
+2. After writing, infer which category themes are present in your review_text and provide confidence scores (0.0 to 1.0) for EACH theme listed below.
 ${SENTIMENT_INSTRUCTION}
 
-**Available Themes (you MUST score ALL of these):**
+**Category Themes (you MUST score ALL of these):**
 ${bullets(themes)}
 
 **CRITICAL:**
-- Match the voice, length, and specificity of your prior reviews; do not compress into a much shorter or vaguer summary than you normally write
 - Read review_text carefully — scores must match what you wrote
 - Theme names must match EXACTLY as shown above (case-sensitive)
 - sentiment must be exactly: Positive, Negative, or Neutral
-- Stay within a similar word count as your examples (do not exceed **${lengthConstraint}** words in review_text)
+- Do not exceed **${lengthConstraint}** words in review_text
 
 Provide the following in a single JSON object. Respond with *only* the JSON object and nothing else.
 
@@ -155,6 +175,7 @@ export function buildSapiensPrompt(args: {
   product: Product | null;
   productDescription: string;
   category: string;
+  groundTruthThemes: string[];
   lengthConstraint: number;
   excludeReviewKey?: string;
 }): string {
@@ -170,6 +191,7 @@ export function buildTribePersonaPrompt(args: {
   product: Product | null;
   productDescription: string;
   category: string;
+  groundTruthThemes: string[];
 }): string {
   const { tribe, product, productDescription, category } = args;
   const themes = themesForCategory(category);
@@ -199,10 +221,10 @@ ${productDescription}
 TASK
 
 1. Write review_text that you would plausibly write for this product.
-2. Provide confidence scores (0.0 to 1.0) for EACH theme listed below.
+2. After writing, infer which category themes are present in your review_text and provide confidence scores (0.0 to 1.0) for EACH theme listed below.
 ${SENTIMENT_INSTRUCTION}
 
-**Available Themes (you MUST score ALL of these):**
+**Category Themes (you MUST score ALL of these):**
 ${bullets(themes)}
 
 **CRITICAL:**
@@ -223,12 +245,13 @@ export function buildPopulationPersonaPrompt(args: {
   product: Product | null;
   productDescription: string;
   category: string;
+  groundTruthThemes: string[];
   populationDefinition?: string;
 }): string {
-  const { tribe, product, productDescription, category, populationDefinition } = args;
+  const { tribe, productDescription, category, populationDefinition } = args;
   const themes = themesForCategory(category);
   const popName = `${category} shoppers`;
-  const definition = populationDefinition?.trim() || tribe.populationDefinition;
+  const definition = populationDefinition?.trim() || args.tribe.populationDefinition;
   return `You are someone who belongs to ${popName}.
 
 Respond ONLY with valid JSON.
@@ -255,10 +278,10 @@ ${productDescription}
 TASK
 
 1. Write review_text that you would plausibly write for this product.
-2. Provide confidence scores (0.0 to 1.0) for EACH theme listed below.
+2. After writing, infer which category themes are present in your review_text and provide confidence scores (0.0 to 1.0) for EACH theme listed below.
 ${SENTIMENT_INSTRUCTION}
 
-**Available Themes (you MUST score ALL of these):**
+**Category Themes (you MUST score ALL of these):**
 ${bullets(themes)}
 
 **CRITICAL:**
@@ -301,6 +324,7 @@ export function buildHistoryPrompt(args: {
   productDescription: string;
   category: string;
   excludeReviewKey?: string;
+  groundTruthThemes: string[];
 }): string {
   const { product, productDescription, personaName, category } = args;
   const themes = themesForCategory(category);
@@ -326,10 +350,10 @@ You have just purchased and used a new product.
 
 ### Instructions
 1. Write a review for this new product mimicking the style in the examples.
-2. Provide confidence scores (0.0 to 1.0) for EACH theme listed below.
+2. After writing, infer which category themes are present in your review_text and provide confidence scores (0.0 to 1.0) for EACH theme listed below.
 ${SENTIMENT_INSTRUCTION}
 
-**Available Themes (you MUST score ALL of these):**
+**Category Themes (you MUST score ALL of these):**
 ${bullets(themes)}
 
 **CRITICAL:**
@@ -352,6 +376,7 @@ export function buildBaselinePrompt(
     productDescription: string;
     category: string;
     excludeReviewKey?: string;
+    groundTruthThemes: string[];
     populationDefinition?: string;
   },
 ): string {
@@ -364,6 +389,7 @@ export function buildBaselinePrompt(
         productDescription: args.productDescription,
         category: args.category,
         excludeReviewKey: args.excludeReviewKey,
+        groundTruthThemes: args.groundTruthThemes,
       });
     case "tribe_persona":
       return buildTribePersonaPrompt({
@@ -371,6 +397,7 @@ export function buildBaselinePrompt(
         product: args.product,
         productDescription: args.productDescription,
         category: args.category,
+        groundTruthThemes: args.groundTruthThemes,
       });
     case "population_persona":
       return buildPopulationPersonaPrompt({
@@ -378,6 +405,7 @@ export function buildBaselinePrompt(
         product: args.product,
         productDescription: args.productDescription,
         category: args.category,
+        groundTruthThemes: args.groundTruthThemes,
         populationDefinition: args.populationDefinition,
       });
   }

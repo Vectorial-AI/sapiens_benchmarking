@@ -508,6 +508,7 @@ export default function Home() {
                     loading={runningSapiens}
                     text={sapiens?.reviewText}
                     predictedThemes={sapiens?.predictedThemes}
+                    groundTruthThemes={groundTruthThemes}
                     sentiment={sapiens?.sentiment}
                     metrics={sapiens?.metrics}
                     error={sapiens?.error}
@@ -618,7 +619,11 @@ export default function Home() {
                       </p>
                     )}
                   </div>
-                </div>
+                  </div>
+
+                {groundTruthThemes.length > 0 && (
+                  <GroundTruthThemesPanel themes={groundTruthThemes} className="mb-4" />
+                )}
 
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   <ResultCard
@@ -634,6 +639,7 @@ export default function Home() {
                     title="Sapiens"
                     text={sapiens?.reviewText}
                     predictedThemes={sapiens?.predictedThemes}
+                    groundTruthThemes={groundTruthThemes}
                     sentiment={sapiens?.sentiment}
                     metrics={sapiens?.metrics}
                     error={sapiens?.error}
@@ -646,6 +652,7 @@ export default function Home() {
                       title={baselineDisplayLabel(b)}
                       text={b.reviewText}
                       predictedThemes={b.predictedThemes}
+                      groundTruthThemes={groundTruthThemes}
                       sentiment={b.sentiment}
                       metrics={b.metrics}
                       error={b.error}
@@ -1045,6 +1052,31 @@ function ScoreboardTable({
   );
 }
 
+function GroundTruthThemesPanel({
+  themes,
+  className = "mb-4",
+}: {
+  themes: string[];
+  className?: string;
+}) {
+  if (!themes.length) return null;
+  return (
+    <div className={`rounded-xl border border-border bg-surface-2/40 p-4 ${className}`}>
+      <p className="text-[13px] font-medium text-foreground mb-2">Ground truth themes (evaluation)</p>
+      <p className="text-[11px] text-muted-2 mb-2">
+        Not sent to the prompt. Models score the full category theme list; these are used afterward for recall scoring.
+      </p>
+      <ul className="space-y-1">
+        {themes.map((theme) => (
+          <li key={theme} className="text-[12px] text-foreground/90 leading-snug">
+            · {theme}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function HistoryContextPanel({
   items,
   loading,
@@ -1103,6 +1135,7 @@ function ResultCard({
   subtitle,
   text,
   predictedThemes,
+  groundTruthThemes,
   sentiment,
   metrics,
   loading,
@@ -1116,6 +1149,7 @@ function ResultCard({
   subtitle?: string;
   text?: string;
   predictedThemes?: Record<string, number>;
+  groundTruthThemes?: string[];
   sentiment?: ReviewSentiment | null;
   metrics?: PipelineMetrics;
   loading?: boolean;
@@ -1237,6 +1271,18 @@ function ResultCard({
                   <span className="text-muted-2">Sentiment:</span>{" "}
                   <span className="text-foreground/80">{sentiment}</span>
                 </p>
+              )}
+              {isGenerated && groundTruthThemes && groundTruthThemes.length > 0 && (
+                <div>
+                  <p className="text-[11px] text-muted-2 mb-1">Ground truth themes (evaluation)</p>
+                  <ul className="space-y-0.5">
+                    {groundTruthThemes.map((theme) => (
+                      <li key={theme} className="text-[11px] text-foreground/80">
+                        · {theme}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
               {themeEntries.length > 0 && (
                 <ul className="space-y-1">
