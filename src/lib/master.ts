@@ -100,20 +100,24 @@ function normalizeQualitative(raw: RawTribe["qualitative_summary"]): Qualitative
   };
 }
 
+function normalizeProduct(r: RawReview): Product {
+  return {
+    reviewKey: r.review_key,
+    productDescription: r.product_description,
+    category: r.category,
+    rating: typeof r.rating === "number" ? r.rating : null,
+    groundTruthReview: r.review_text,
+    predictedThemes: r.predicted_themes ?? [],
+    groundTruthSentiment: normalizeSentimentLabel(r.sentiment),
+    bestPredictionReview: r.best_prediction_review?.trim() || undefined,
+    healthcareBenchmark: Boolean(r.healthcare_benchmark),
+  };
+}
+
 function normalizeTribe(raw: RawTribe): Tribe {
   const users: User[] = raw.member_user_characteristics.map((u) => {
     const reviews = raw.members_grouped_by_user[u.user_id] ?? [];
-    const products: Product[] = reviews.map((r) => ({
-      reviewKey: r.review_key,
-      productDescription: r.product_description,
-      category: r.category,
-      rating: typeof r.rating === "number" ? r.rating : null,
-      groundTruthReview: r.review_text,
-      predictedThemes: r.predicted_themes ?? [],
-      groundTruthSentiment: normalizeSentimentLabel(r.sentiment),
-      bestPredictionReview: r.best_prediction_review?.trim() || undefined,
-      healthcareBenchmark: Boolean(r.healthcare_benchmark),
-    }));
+    const products: Product[] = reviews.map(normalizeProduct);
     return {
       id: u.user_id,
       characteristicSummary: u.characteristic_summary,

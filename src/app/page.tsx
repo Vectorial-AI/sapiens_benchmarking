@@ -18,6 +18,7 @@ import type {
   CatalogTribe,
   CatalogTribeIndex,
   EngineResult,
+  HistoryContextItem,
   PipelineMetrics,
   ReviewSentiment,
   SapiensRunResponse,
@@ -74,6 +75,8 @@ export default function Home() {
   const [runningBaselineKey, setRunningBaselineKey] = useState<string | null>(null);
   const [runningBaselineMethod, setRunningBaselineMethod] = useState<BaselineMethod | null>(null);
   const [runningBaselineModel, setRunningBaselineModel] = useState<BaselineModel | null>(null);
+  const [historyPreview, setHistoryPreview] = useState<HistoryContextItem[] | null>(null);
+  const [historyPreviewLoading, setHistoryPreviewLoading] = useState(false);
 
   const user = useMemo(
     () => tribe?.users.find((u) => u.id === userId) ?? null,
@@ -150,6 +153,26 @@ export default function Home() {
       .catch(() => {})
       .finally(() => setTribeLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (step !== 4 || baselineMethod !== "history" || !canRun) {
+      setHistoryPreview(null);
+      return;
+    }
+    const params = new URLSearchParams({
+      tribeId,
+      userId,
+      mode: "history",
+      category: effectiveCategory,
+    });
+    if (reviewKey) params.set("reviewKey", reviewKey);
+    setHistoryPreviewLoading(true);
+    fetch(`/api/history-context?${params}`)
+      .then((r) => r.json())
+      .then((d) => setHistoryPreview((d.items as HistoryContextItem[]) ?? []))
+      .catch(() => setHistoryPreview([]))
+      .finally(() => setHistoryPreviewLoading(false));
+  }, [step, baselineMethod, tribeId, userId, reviewKey, effectiveCategory, canRun]);
 
   function resetOutputs() {
     setSapiens(null);
@@ -532,6 +555,14 @@ export default function Home() {
                     </div>
                   </div>
 
+                  {baselineMethod === "history" && (
+                    <HistoryContextPanel
+                      items={historyPreview}
+                      loading={historyPreviewLoading}
+                      targetCategory={effectiveCategory}
+                    />
+                  )}
+
                   {baselineMethod === "population_persona" && (
                     <div className="rounded-xl border border-border bg-surface-2/40 p-4 space-y-3">
                       <label className="flex items-center gap-2 text-[13px] cursor-pointer">
@@ -620,6 +651,7 @@ export default function Home() {
                       metrics={b.metrics}
                       error={b.error}
                       latencyMs={b.latencyMs}
+                      historyContext={b.method === "history" ? b.historyContext : undefined}
                       onRemove={() => removeBaseline(b.key)}
                     />
                   ))}
@@ -1014,6 +1046,58 @@ function ScoreboardTable({
   );
 }
 
+function HistoryContextPanel({
+  items,
+  loading,
+  targetCategory,
+}: {
+  items: HistoryContextItem[] | null;
+  loading: boolean;
+  targetCategory: string;
+}) {
+  const [open, setOpen] = useState(true);
+  const count = items?.length ?? 0;
+  return (
+    <div className="rounded-xl border border-border bg-surface-2/40 p-4 space-y-3">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center justify-between w-full text-left gap-3"
+      >
+        <div>
+          <p className="text-[13px] font-medium text-foreground">Prior reviews sent as context</p>
+          <p className="text-[11px] text-muted-2 mt-0.5">
+            Same category as the target product, leave-one-out (review text only)
+          </p>
+        </div>
+        <span className="text-[12px] text-muted shrink-0">
+          {loading ? "Loading…" : `${count} review${count === 1 ? "" : "s"}`}
+        </span>
+      </button>
+      {open && !loading && (
+        <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+          {count === 0 ? (
+            <p className="text-[12px] text-muted-2">
+              No other reviews from this user in the same category (history baseline needs at least one prior review in {targetCategory || "that category"}).
+            </p>
+          ) : (
+            items?.map((item, i) => (
+              <div key={i} className="rounded-lg border border-border bg-surface-1 p-3">
+                <p className="text-[10px] uppercase tracking-wide text-muted-2 mb-1.5">
+                  Example {i + 1}
+                </p>
+                <p className="text-[12.5px] text-foreground/90 whitespace-pre-wrap leading-relaxed">
+                  {item.reviewText.replace(/<br\s*\/?>/gi, "\n")}
+                </p>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ResultCard({
   tone,
   title,
@@ -1025,6 +1109,7 @@ function ResultCard({
   loading,
   error,
   latencyMs,
+  historyContext,
   onRemove,
 }: {
   tone: Tone;
@@ -1037,9 +1122,11 @@ function ResultCard({
   loading?: boolean;
   error?: string;
   latencyMs?: number;
+  historyContext?: HistoryContextItem[];
   onRemove?: () => void;
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [contextOpen, setContextOpen] = useState(false);
   const isGenerated = tone !== "real";
   const showSkeleton = loading && isGenerated && !text;
   const themeEntries = Object.entries(predictedThemes ?? {}).sort((a, b) => b[1] - a[1]);
@@ -1110,6 +1197,29 @@ function ResultCard({
         </p>
       ) : (
         <p className="text-[12.5px] text-muted-2">{loading ? "Generating…" : "No review yet."}</p>
+      )}
+      {historyContext && historyContext.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-border">
+          <button
+            type="button"
+            onClick={() => setContextOpen((v) => !v)}
+            className="flex items-center gap-1.5 text-[11px] text-muted-2 hover:text-muted transition w-full text-left"
+          >
+            <span className={`transition-transform text-[10px] ${contextOpen ? "rotate-90" : ""}`}>▶</span>
+            Context reviews ({historyContext.length})
+          </button>
+          {contextOpen && (
+            <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
+              {historyContext.map((item, i) => (
+                <p key={i} className="text-[11px] text-muted leading-relaxed whitespace-pre-wrap">
+                  <span className="text-muted-2">Ex {i + 1}: </span>
+                  {item.reviewText.slice(0, 280)}
+                  {item.reviewText.length > 280 ? "…" : ""}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
       )}
       {hasDetails && text && (
         <div className="mt-3 pt-3 border-t border-border">

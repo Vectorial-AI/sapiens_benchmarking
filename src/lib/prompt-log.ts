@@ -1,9 +1,13 @@
 import type { BaselineMethod } from "./baselines";
 import type { HistoryContextItem } from "./types";
-import type { Product, Tribe, User } from "./master";
+import type { Tribe, User } from "./master";
 import { formatUserCharacteristics } from "./user-characteristics";
 
 const PROMPT_LOG_CHUNK = 12_000;
+
+function nonEmptyTraits(items: string[]): string[] {
+  return items.map((s) => s.trim()).filter(Boolean);
+}
 
 /** Full prompt body — search Vercel logs for `[prompt-full:sapiens]` etc. */
 export function logFullPrompt(
@@ -32,9 +36,7 @@ export function logSapiensPromptContext(args: {
   category: string;
   tribe: Tribe;
   user: User;
-  product: Product | null;
   historyItems: HistoryContextItem[];
-  hasBestPredictionReference: boolean;
   promptCharLength?: number;
   mode: "sapiens" | "mock";
 }): void {
@@ -45,14 +47,12 @@ export function logSapiensPromptContext(args: {
     category,
     tribe,
     user,
-    product,
     historyItems,
-    hasBestPredictionReference,
     promptCharLength,
     mode,
   } = args;
 
-  const section2 = formatUserCharacteristics(user, category);
+  const userCharacteristics = formatUserCharacteristics(user, category);
   const q = tribe.qualitative;
 
   const payload = {
@@ -63,33 +63,34 @@ export function logSapiensPromptContext(args: {
     category,
     mode,
     checklist: {
-      section1TribeTraits:
-        q.inherentBehavioralTraits.length > 0 || q.latentMotivations.length > 0,
-      section2UserCharacteristics:
-        section2.trim() !== "" && section2 !== "(none)",
-      section3PriorReviews: historyItems.length > 0,
-      section4SgoReference: hasBestPredictionReference,
+      tribeBehavioralTraits: nonEmptyTraits(q.inherentBehavioralTraits).length > 0,
+      tribeMotivations: nonEmptyTraits(q.latentMotivations).length > 0,
+      tribeValidationTriggers: nonEmptyTraits(q.validationTriggers).length > 0,
+      tribeFrictionPoints: nonEmptyTraits(q.frictionPoints).length > 0,
+      tribeImplicitGoals: nonEmptyTraits(q.implicitGoals).length > 0,
+      userCharacteristics:
+        userCharacteristics.trim() !== "" && userCharacteristics !== "(none)",
+      priorReviews: historyItems.length > 0,
     },
-    section1: {
-      tribeName: tribe.name,
-      behavioralTraits: q.inherentBehavioralTraits.length,
-      motivations: q.latentMotivations.length,
+    tribeName: tribe.name,
+    tribeTraits: {
+      behavioralTraits: nonEmptyTraits(q.inherentBehavioralTraits).length,
+      motivations: nonEmptyTraits(q.latentMotivations).length,
+      validationTriggers: nonEmptyTraits(q.validationTriggers).length,
+      frictionPoints: nonEmptyTraits(q.frictionPoints).length,
+      implicitGoals: nonEmptyTraits(q.implicitGoals).length,
     },
-    section2: {
-      charLength: section2.length,
-      preview: section2.slice(0, 400),
+    userCharacteristics: {
+      charLength: userCharacteristics.length,
+      preview: userCharacteristics.slice(0, 400),
     },
-    section3: {
+    priorReviews: {
       count: historyItems.length,
       reviews: historyItems.map((item, i) => ({
         index: i + 1,
         reviewCharLength: item.reviewText.length,
         preview: item.reviewText.slice(0, 200),
       })),
-    },
-    section4: {
-      hasBestPredictionReference,
-      referenceCharLength: product?.bestPredictionReview?.length ?? 0,
     },
     promptCharLength: promptCharLength ?? null,
     fullPromptLogTags: [

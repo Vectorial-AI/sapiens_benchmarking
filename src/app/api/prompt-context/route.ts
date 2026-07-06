@@ -8,7 +8,7 @@ import { formatUserCharacteristics } from "@/lib/user-characteristics";
 
 export const runtime = "nodejs";
 
-/** Preview what the Sapiens prompt receives (Sections 2–4 metadata; SGO text never exposed). */
+/** Preview what the Sapiens prompt receives (tribe traits, user characteristics, prior reviews). */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const tribeId = searchParams.get("tribeId") ?? "";
@@ -22,8 +22,11 @@ export async function GET(req: Request) {
   }
 
   const category = categoryParam || product?.category || "Health & Personal Care";
-  const section2Text = formatUserCharacteristics(user, category);
-  const section2Populated = section2Text.trim() !== "" && section2Text !== "(none)";
+  const userCharacteristics = formatUserCharacteristics(user, category);
+  const userCharacteristicsPopulated =
+    userCharacteristics.trim() !== "" && userCharacteristics !== "(none)";
+  const q = tribe.qualitative;
+  const nonEmpty = (items: string[]) => items.map((s) => s.trim()).filter(Boolean);
 
   const historyItems = excludeTargetReviewText(
     buildSapiensHistoryContext({
@@ -34,37 +37,33 @@ export async function GET(req: Request) {
     product?.groundTruthReview,
   );
 
-  const hasBestPredictionReference = Boolean(product?.bestPredictionReview?.trim());
-  const q = tribe.qualitative;
-
   return NextResponse.json({
     category,
+    tribeName: tribe.name,
     checklist: {
-      section1TribeTraits:
-        q.inherentBehavioralTraits.length > 0 || q.latentMotivations.length > 0,
-      section2UserCharacteristics: section2Populated,
-      section3PriorReviews: historyItems.length > 0,
-      section4SgoReference: hasBestPredictionReference,
+      tribeBehavioralTraits: nonEmpty(q.inherentBehavioralTraits).length > 0,
+      tribeMotivations: nonEmpty(q.latentMotivations).length > 0,
+      tribeValidationTriggers: nonEmpty(q.validationTriggers).length > 0,
+      tribeFrictionPoints: nonEmpty(q.frictionPoints).length > 0,
+      tribeImplicitGoals: nonEmpty(q.implicitGoals).length > 0,
+      userCharacteristics: userCharacteristicsPopulated,
+      priorReviews: historyItems.length > 0,
     },
-    section1: {
-      tribeName: tribe.name,
-      behavioralTraits: q.inherentBehavioralTraits.length,
-      motivations: q.latentMotivations.length,
+    tribeTraits: {
+      behavioralTraits: nonEmpty(q.inherentBehavioralTraits),
+      motivations: nonEmpty(q.latentMotivations),
+      validationTriggers: nonEmpty(q.validationTriggers),
+      frictionPoints: nonEmpty(q.frictionPoints),
+      implicitGoals: nonEmpty(q.implicitGoals),
     },
-    section2: {
-      text: section2Text,
-      populated: section2Populated,
+    userCharacteristics: {
+      text: userCharacteristics,
+      populated: userCharacteristicsPopulated,
     },
-    section3: {
+    priorReviews: {
       items: historyItems,
       count: historyItems.length,
       filter: `Same main category as target (${category})`,
-    },
-    section4: {
-      hasBestPredictionReference,
-      note: hasBestPredictionReference
-        ? "SGO best-delta reference is included in the server prompt (text not shown)."
-        : "No best_delta_predictions entry for this product in bundled tribe data.",
     },
   });
 }

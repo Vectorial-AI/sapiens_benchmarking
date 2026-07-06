@@ -1,14 +1,13 @@
 import type { BaselineMethod } from "./baselines";
 import { getCategoryThemes } from "./category-themes";
 import { DEFAULT_THEMES } from "./prompts-constants";
-import type { HistoryContextItem, ReviewSentiment } from "./types";
+import type { HistoryContextItem, Qualitative, ReviewSentiment } from "./types";
 import type { Product, Tribe, User } from "./master";
 import {
   buildHistoryBaselineContext,
   buildSapiensHistoryContext,
   excludeTargetReviewText,
   formatLengthConstraint,
-  formatReviewHistoryText,
   wordCount,
 } from "./review-history";
 import { formatUserCharacteristics } from "./user-characteristics";
@@ -26,6 +25,32 @@ export const REVIEW_SYSTEM =
 
 const bullets = (items: string[]) =>
   items.length ? items.map((i) => `- ${i}`).join("\n") : "- (none provided)";
+
+function nonEmptyTraits(items: string[]): string[] {
+  return items.map((s) => s.trim()).filter(Boolean);
+}
+
+/** Omit empty trait groups — never emit "(none provided)" placeholders. */
+function formatTribeTraitSections(q: Qualitative): string {
+  const sections: string[] = [];
+  const add = (title: string, items: string[]) => {
+    const filtered = nonEmptyTraits(items);
+    if (filtered.length) {
+      sections.push(`**${title}:**\n${filtered.map((i) => `- ${i}`).join("\n")}`);
+    }
+  };
+  add("Inherent Behavioral Traits (DO)", q.inherentBehavioralTraits);
+  add("Latent Motivations (DRIVE)", q.latentMotivations);
+  add("Validation Triggers", q.validationTriggers);
+  add("Friction Points", q.frictionPoints);
+  add("Implicit Goals (ACHIEVE)", q.implicitGoals);
+  return sections.join("\n\n");
+}
+
+function formatHistoryExamples(items: HistoryContextItem[]): string {
+  if (!items.length) return "(no prior reviews available)";
+  return items.map((h, i) => `Example ${i + 1}:\n${h.reviewText.trim()}\n`).join("\n");
+}
 
 const themesJson = (themes: string[]) =>
   themes.map((t) => `    ${JSON.stringify(t)}: 0.0`).join(",\n");
@@ -51,8 +76,7 @@ function themesForCategory(category: string): string[] {
 }
 
 /**
- * SAPIENS — evolved tribe traits + user characteristics.
- * Aligned with amazon_sgo_pipeline_service/prompts/amazon/i0_initial_prediction_confidence_amazon.txt
+ * SAPIENS — tribe traits (non-empty groups only) + user characteristics + prior-review style.
  */
 function buildSapiensPromptSections(args: {
   tribe: Tribe;
@@ -65,9 +89,9 @@ function buildSapiensPromptSections(args: {
 }): string {
   const { tribe, user, product, productDescription, category, excludeReviewKey, lengthConstraint } =
     args;
-  const q = tribe.qualitative;
   const themes = themesForCategory(category);
   const userCharBlock = formatUserCharacteristics(user, category);
+  const tribeTraitsBlock = formatTribeTraitSections(tribe.qualitative);
   const historyItems = excludeTargetReviewText(
     buildSapiensHistoryContext({
       products: user.products,
@@ -76,130 +100,56 @@ function buildSapiensPromptSections(args: {
     }),
     product?.groundTruthReview,
   );
-  const historyBlock = formatReviewHistoryText(historyItems);
-  const bestPrediction = product?.bestPredictionReview?.trim();
+  const historyTextBlock = formatHistoryExamples(historyItems);
+  const tribeSection = tribeTraitsBlock
+    ? `### Your Tribe (${tribe.name})
+Use these group traits when deciding what to notice and how to evaluate the product:
 
-  let section = 1;
-  const next = () => section++;
-
-  const section1 = next();
-  const section2 = next();
-  const section3 = next();
-  const sectionBest = bestPrediction ? next() : null;
-  const sectionProduct = next();
-  const sectionThemes = next();
-
-  const introExtras = bestPrediction
-    ? `, and the SGO best-delta reference (Section ${sectionBest})`
-    : "";
-
-  const taskThemeLine = `After you have written review_text, score EVERY theme in Section ${sectionThemes} (0.0 to 1.0).`;
-
-  const bestPredictionBlock = bestPrediction
-    ? `---
-SECTION ${sectionBest}: SGO Best-Delta Prediction (reference)
-
-This review comes from the SGO pipeline's best_delta_predictions output for this review key.
-It is the best prediction previously generated for this exact product and user.
-
-**How to use it**
-Write a new review that is similar to this reference in tone, length, paragraph structure, and level of detail.
-Do not copy it word-for-word. Stay in character using Sections 1–3, but aim for something close to this style and shape.
-
-${bestPrediction}
+${tribeTraitsBlock}
 
 `
     : "";
+  const charSection =
+    userCharBlock.trim() && userCharBlock !== "(none)"
+      ? `### Who You Are (shopping & reviewing)
+${userCharBlock}
 
-  const styleGuidance = bestPrediction
-    ? `\n- When Section ${sectionBest} is present, write something similar to that SGO reference in tone, length, and structure.`
-    : "";
+`
+      : "";
 
-  return `You are someone from ${tribe.name} — a real person who shops on Amazon and writes honest reviews.
-
-You have NOT seen anyone else's review of this product. You only know the product description, your tribe profile (Section ${section1}), your personal user characteristics (Section ${section2}), and your own prior reviews (Section ${section3})${introExtras}.
+  return `You are someone who belongs to ${tribe.name}.
 
 Respond ONLY with valid JSON.
 
----
-SECTION ${section1}: Your Tribe (group profile)
+${tribeSection}${charSection}### Your Writing Style & Preferences
+To write this review, study your past reviews below (same broad product category, review text only — no product titles). Match their tone, length, paragraph structure, and level of detail.
 
-Read this carefully. It tells you **who your tribe is** and **how people in your group tend to write reviews**.
-
-**1A. Group summary** — the big picture of your tribe:
-${tribe.description}
-
-**Group traits** — as you evaluate this product, **behave like the tribe below**:
-
-**Inherent Behavioral Traits (DO):**
-${bullets(q.inherentBehavioralTraits)}
-
-**Latent Motivations (DRIVE):**
-${bullets(q.latentMotivations)}
-
-**Validation Triggers:**
-${bullets(q.validationTriggers)}
-
-**Friction Points:**
-${bullets(q.frictionPoints)}
-
-**Implicit Goals (ACHIEVE):**
-${bullets(q.implicitGoals)}
-
----
-SECTION ${section2}: Your User Characteristics (you personally)
-
-Beyond the tribe, **you** personally behave like this when you shop and review:
-
-${userCharBlock}
-
----
-SECTION ${section3}: Your Prior Reviews
-
-These are **other reviews written by this same user**. The target review you are writing is NOT included here.
-Each example is **review text only** — no product titles or descriptions.
-
-**How to use them**
-1. Read all examples first and note this user's normal review length and structure.
-2. Match that length and structure in your review.
-3. Match their voice: casual vs detailed, blunt vs explanatory.
-4. Use Section ${section3} for **style and length only**.
-
-${historyBlock}
-
-${bestPredictionBlock}---
-SECTION ${sectionProduct}: The Product
+${historyTextBlock}
+### The New Task
+You have just purchased and used a new product.
 
 Category: ${category}
 
-Product Description:
-${productDescription}
+**The New Product:** ${productDescription}
 
----
-SECTION ${sectionThemes}: Themes People Discuss in This Category
-
-${bullets(themes)}
-
----
-YOUR TASK (two steps — do them in this order)
-
-**STEP 1 — Write a high-quality review**
-
-Write the Amazon review YOU would actually post for this product.
-- First person, natural voice — not like a product evaluator.
-- Flowing paragraphs — no theme headings, no pros/cons lists unless your prior reviews use that style.
-- Match the tone, length, structure, and detail density of your prior reviews in Section ${section3}.${styleGuidance}
-
-**STEP 2 — Assign theme confidence scores**
-
-${taskThemeLine}
+### Instructions
+1. Write review_text by **mimicking the style of your prior reviews** above. Apply your tribe traits and personal characteristics to decide what you notice and how you judge the product — but do not write like a product evaluator or list themes in the prose.
+2. Provide confidence scores (0.0 to 1.0) for EACH theme listed below.
 ${SENTIMENT_INSTRUCTION}
 
-Make sure not to cross the review **${lengthConstraint}** words.
+**Available Themes (you MUST score ALL of these):**
+${bullets(themes)}
 
-${predictionOutputBlock(themes, "predicted_themes")}
+**CRITICAL:**
+- Match the voice and length of your prior reviews
+- Read review_text carefully — scores must match what you wrote
+- Theme names must match EXACTLY as shown above (case-sensitive)
+- sentiment must be exactly: Positive, Negative, or Neutral
+- Stay under **${lengthConstraint}** words in review_text
 
-Write your review now:`;
+Provide the following in a single JSON object. Respond with *only* the JSON object and nothing else.
+
+${predictionOutputBlock(themes, "predicted_themes")}`;
 }
 
 export function buildSapiensPrompt(args: {
@@ -323,20 +273,25 @@ Generate the review now:`;
 }
 
 /**
- * HISTORY BASELINE — leave-one-out: ALL other reviews for this user (no cap).
- * Matches Clustering/prediction_micro_cluster_history.py:
- *   history_reviews = reviews[:review_index] + reviews[review_index + 1:]
- * Prompt from create_prompt_confidence() — review text only in examples.
+ * HISTORY BASELINE — leave-one-out prior reviews in the same main category as the target.
  */
 export function buildHistoryContext(args: {
   user: User;
   excludeReviewKey?: string;
   excludeReviewText?: string;
+  targetCategory?: string;
 }): HistoryContextItem[] {
+  const toHistoryProduct = (p: Product) => ({
+    reviewKey: p.reviewKey,
+    productDescription: p.productDescription,
+    category: p.category,
+    groundTruthReview: p.groundTruthReview,
+  });
   return excludeTargetReviewText(
     buildHistoryBaselineContext({
-      products: args.user.products,
+      products: args.user.products.map(toHistoryProduct),
       excludeReviewKey: args.excludeReviewKey,
+      targetCategory: args.targetCategory,
     }),
     args.excludeReviewText,
   );
@@ -355,6 +310,7 @@ export function buildHistoryPrompt(args: {
   const historyItems = buildHistoryContext({
     ...args,
     excludeReviewText: product?.groundTruthReview,
+    targetCategory: category,
   });
 
   const historyTextBlock = historyItems

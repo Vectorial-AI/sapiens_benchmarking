@@ -51,20 +51,13 @@ export function buildSapiensHistoryContext(args: {
     }));
 }
 
-/** All other reviews for history baseline (leave-one-out, no category cap). */
+/** Same main category as target, leave-one-out — history baseline context. */
 export function buildHistoryBaselineContext(args: {
   products: ReviewHistoryProduct[];
   excludeReviewKey?: string;
+  targetCategory?: string;
 }): HistoryContextItem[] {
-  return args.products
-    .filter(
-      (p) =>
-        p.reviewKey !== args.excludeReviewKey &&
-        p.groundTruthReview.trim().length > 0,
-    )
-    .map((p) => ({
-      reviewText: p.groundTruthReview,
-    }));
+  return buildSapiensHistoryContext(args);
 }
 
 export function formatReviewHistoryText(

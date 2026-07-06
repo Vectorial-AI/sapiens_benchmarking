@@ -1,25 +1,50 @@
 {
   "tribes": [
     {
-      "id": "cluster_4-micro_25",
-      "name": "Practical Family Evaluators",
+      "id": "cluster_4-micro_21",
+      "name": "Value-Seeking Self-Care Caregivers",
       "cluster": "cluster_4",
-      "microId": "micro_25",
+      "microId": "micro_21",
       "domain": "healthcare",
-      "reviewCount": 52,
-      "description": "This tribe evaluates purchases the way a household “systems operator” would: they start with the real constraint that forced the buy (no time, no access to a service, need to do it at home) and then judge the product by whether it reliably restores the routine with fewer downstream chores. They aren’t persuaded by feature claims in isolation; they want proof the product can become the new default without creating a second problem (extra cleanup, noisy disruption, finicky upkeep, or uncomfortable use). A product is “good” only if it works inside the household’s actual workflow.\n\nIn reviews, they run a fairness-based comparison rather than a dramatic failure story. They often describe a mini-tournament of acceptable alternatives and then explain why this one wins—typically because it reduces friction across repeated uses, not because every competitor was unusable. Their “best so far” language is earned by cumulative advantages: smoother operation, easier cleanup, better readiness, or a more tolerable experience over time.\n\nThey use concrete pass/fail checks instead of abstract quality talk. For body-contact or grooming tools, comfort is mechanical and specific: no scraping, no pulling, no irritation. That isn’t a “nice-to-have” or a family-drama narrative; it’s the primary evidence that the product is well-made and suitable for repeat use. Likewise, convenience is interpreted as logistics: where the task happens and what the cleanup looks like afterward. If a feature enables a workflow shift (like doing the messy part outside so the bathroom stays clean), they call it out as the real value.\n\nReliability, to them, is readiness. They trust products that charge easily and quickly, clean up without ceremony, and don’t require special handling to be usable next time. Only after the core job clears these gates do they treat extras—attachments, accessories, add-ons—as an “added bonus,” not the reason to buy. Their reviews aim to help other practical households predict day-to-day friction before spending money.",
+      "reviewCount": 92,
+      "description": "This tribe shops and reviews like a case-closer: they believe a recommendation is only “fair” when it can be defended from what happened on first handling and first use, using proof another person could repeat. They don’t try to be comprehensive, and they don’t reward a product for imagined comfort, lifestyle fit, or long-term outcomes. Instead, they pick one credibility anchor that maps directly to the product’s core promise—one measured result, one charge-time/runtime pairing, one obvious speed difference versus a known baseline—and they let that single anchor carry the verdict.\n\nYou can predict their reviews will read like a transferable verification rather than a user diary. They’ll state what arrived (build impression, what’s in the box, any certification that matters), then jump to the one operational proof point that “settles” the claim. If the product has many modes or settings, they treat that range as controllability evidence—proof it can be tuned for sensitivity or different users—without converting it into rich sensation language unless they actually experienced and reported those sensations. Likewise, extras are counted as additive value; they don’t feel obligated to justify each attachment with a usage scenario just to make the purchase sound smart.\n\nThey also refuse to resolve uncertainty on the reader’s behalf. If fit, retention, or stability is questionable, they keep it alive as a decision-relevant caveat even while recommending the product. And when there’s obvious misuse risk, excessive power, or loud output, they elevate it into a blunt, memorable constraint (“be careful,” “follow directions,” “turn it down”) rather than softening it with coaching scripts or burying it under feature talk. In their logic, helpfulness isn’t persuasion—it’s giving a buyer decision-grade proof plus the one rule or limitation that prevents a bad first use.\n\nFinally, their value logic is concrete: certifications, included items, and one decisive comparison (“performs like the expensive one,” “faster than what we had”) justify the spend. Convenience claims only ‘count’ when tied to a real routine constraint—travel, grab-and-go readiness, or a shared-household bottleneck—often supported with simple battery/charge math. Overall, they write reviews to close the case quickly: here’s the proof that matters, here’s what I didn’t verify, and here’s the constraint that could still make it fail in everyday life.",
       "userCount": 6,
       "traitSource": "evolution_state.json",
       "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_4/micro_25_details.json",
-        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_25_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_25_summary_enhanced_delta_corrected.json",
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_21_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_21_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_21_summary_enhanced_delta_corrected.json",
         "traits": "evolution_state.json",
-        "best_predictions": "outputs/amazon_sgo_health_care/cluster_4/micro_25/best_delta_predictions.json"
+        "best_predictions": "outputs/amazon_sgo_health_care/cluster_4/micro_21/best_delta_predictions.json"
       },
       "traitCounts": {
-        "behavioral": 8,
-        "motivations": 4,
+        "behavioral": 9,
+        "motivations": 3,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_9",
+      "name": "Practical Beauty Enthusiasts",
+      "cluster": "cluster_4",
+      "microId": "micro_9",
+      "domain": "healthcare",
+      "reviewCount": 66,
+      "description": "They shop for at-home grooming, beauty, and therapeutic devices the way a pragmatic pro would stock a kit: the product only becomes “real” when it produces a specific finished end-state and keeps doing it under normal, repeatable use. They don’t treat spec lists, accessory callouts, or “advanced tech” language as evidence. The proof they trust is either (a) a socially legible result that reads as done—portrait-ready grooming, a clean hairline, a maintained bald/finished look—or (b) durable body progress that survives a protocol over weeks.\n\nThis tribe’s default stance is corrective realism. When marketing implies the device will do the work, they translate the claim into the actual partnership: what the user must still do (pressure, motion, angles, pacing) and what the tool genuinely amplifies (power, consistency, speed). But they also have a second mode: when something is truly hands-off and still delivers, autonomy becomes the headline, and they’ll validate it with a near-professional benchmark (“only a pro would beat it”) rather than walking the reader through features.\n\nTheir reviews are built around fairness-through-constraints, but not as a mandatory script. If the reviewer’s proof is already decisive—finished outcome plus obvious kit completeness—they may skip the technique caveats, battery talk, or extra justifications entirely. Constraints show up when they’re necessary to protect another shopper from fantasy: when results depend on skill, when performance has a ceiling (“good in a pinch”), or when a ‘pro’ promise needs a cause→effect chain grounded in lived results.\n\nValue, for them, is not abstract “usefulness.” It’s ownership that sticks: a tool is worth it when it locks into rotation (nightly, travel-ready, hard to imagine not having it), or when a kit feels complete and pro-grade in hand—solving multiple real grooming problems without forcing the buyer into add-ons. They’ll sometimes endorse merely adequate core performance if readiness is the real reason it stays used.\n\nThey also allow identity to be a primary justification when baseline competence is cleared. Sleek, sexy, modern design and the way a tool protects feeling feminine/put-together can be treated as performance—without inventing technical explanations to launder an aesthetic win. Across categories, their reviews read like decision-grade reality checks: what outcome you can honestly expect, whether it’s you-or-the-tool doing the work, what makes it a keeper, and what kind of buyer will actually be satisfied.",
+      "userCount": 4,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_9_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_9_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_9_summary_enhanced_delta_corrected.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "outputs/amazon_sgo_health_care/cluster_4/micro_9/best_delta_predictions.json"
+      },
+      "traitCounts": {
+        "behavioral": 10,
+        "motivations": 7,
         "triggers": 0,
         "friction": 0,
         "goals": 3
@@ -51,75 +76,25 @@
       }
     },
     {
-      "id": "cluster_4-micro_21",
-      "name": "Value-Seeking Self-Care Caregivers",
+      "id": "cluster_4-micro_25",
+      "name": "Practical Family Evaluators",
       "cluster": "cluster_4",
-      "microId": "micro_21",
+      "microId": "micro_25",
       "domain": "healthcare",
-      "reviewCount": 88,
-      "description": "This tribe shops and reviews like a case-closer: they believe a recommendation is only “fair” when it can be defended from what happened on first handling and first use, using proof another person could repeat. They don’t try to be comprehensive, and they don’t reward a product for imagined comfort, lifestyle fit, or long-term outcomes. Instead, they pick one credibility anchor that maps directly to the product’s core promise—one measured result, one charge-time/runtime pairing, one obvious speed difference versus a known baseline—and they let that single anchor carry the verdict.\n\nYou can predict their reviews will read like a transferable verification rather than a user diary. They’ll state what arrived (build impression, what’s in the box, any certification that matters), then jump to the one operational proof point that “settles” the claim. If the product has many modes or settings, they treat that range as controllability evidence—proof it can be tuned for sensitivity or different users—without converting it into rich sensation language unless they actually experienced and reported those sensations. Likewise, extras are counted as additive value; they don’t feel obligated to justify each attachment with a usage scenario just to make the purchase sound smart.\n\nThey also refuse to resolve uncertainty on the reader’s behalf. If fit, retention, or stability is questionable, they keep it alive as a decision-relevant caveat even while recommending the product. And when there’s obvious misuse risk, excessive power, or loud output, they elevate it into a blunt, memorable constraint (“be careful,” “follow directions,” “turn it down”) rather than softening it with coaching scripts or burying it under feature talk. In their logic, helpfulness isn’t persuasion—it’s giving a buyer decision-grade proof plus the one rule or limitation that prevents a bad first use.\n\nFinally, their value logic is concrete: certifications, included items, and one decisive comparison (“performs like the expensive one,” “faster than what we had”) justify the spend. Convenience claims only ‘count’ when tied to a real routine constraint—travel, grab-and-go readiness, or a shared-household bottleneck—often supported with simple battery/charge math. Overall, they write reviews to close the case quickly: here’s the proof that matters, here’s what I didn’t verify, and here’s the constraint that could still make it fail in everyday life.",
+      "reviewCount": 53,
+      "description": "This tribe evaluates purchases the way a household “systems operator” would: they start with the real constraint that forced the buy (no time, no access to a service, need to do it at home) and then judge the product by whether it reliably restores the routine with fewer downstream chores. They aren’t persuaded by feature claims in isolation; they want proof the product can become the new default without creating a second problem (extra cleanup, noisy disruption, finicky upkeep, or uncomfortable use). A product is “good” only if it works inside the household’s actual workflow.\n\nIn reviews, they run a fairness-based comparison rather than a dramatic failure story. They often describe a mini-tournament of acceptable alternatives and then explain why this one wins—typically because it reduces friction across repeated uses, not because every competitor was unusable. Their “best so far” language is earned by cumulative advantages: smoother operation, easier cleanup, better readiness, or a more tolerable experience over time.\n\nThey use concrete pass/fail checks instead of abstract quality talk. For body-contact or grooming tools, comfort is mechanical and specific: no scraping, no pulling, no irritation. That isn’t a “nice-to-have” or a family-drama narrative; it’s the primary evidence that the product is well-made and suitable for repeat use. Likewise, convenience is interpreted as logistics: where the task happens and what the cleanup looks like afterward. If a feature enables a workflow shift (like doing the messy part outside so the bathroom stays clean), they call it out as the real value.\n\nReliability, to them, is readiness. They trust products that charge easily and quickly, clean up without ceremony, and don’t require special handling to be usable next time. Only after the core job clears these gates do they treat extras—attachments, accessories, add-ons—as an “added bonus,” not the reason to buy. Their reviews aim to help other practical households predict day-to-day friction before spending money.",
       "userCount": 6,
       "traitSource": "evolution_state.json",
       "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_4/micro_21_details.json",
-        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_21_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_21_summary_enhanced_delta_corrected.json",
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_25_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_25_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_25_summary_enhanced_delta_corrected.json",
         "traits": "evolution_state.json",
-        "best_predictions": "outputs/amazon_sgo_health_care/cluster_4/micro_21/best_delta_predictions.json"
+        "best_predictions": "outputs/amazon_sgo_health_care/cluster_4/micro_25/best_delta_predictions.json"
       },
       "traitCounts": {
-        "behavioral": 9,
-        "motivations": 3,
-        "triggers": 0,
-        "friction": 0,
-        "goals": 3
-      }
-    },
-    {
-      "id": "cluster_4-micro_9",
-      "name": "Practical Beauty Enthusiasts",
-      "cluster": "cluster_4",
-      "microId": "micro_9",
-      "domain": "healthcare",
-      "reviewCount": 60,
-      "description": "They shop for at-home grooming, beauty, and therapeutic devices the way a pragmatic pro would stock a kit: the product only becomes “real” when it produces a specific finished end-state and keeps doing it under normal, repeatable use. They don’t treat spec lists, accessory callouts, or “advanced tech” language as evidence. The proof they trust is either (a) a socially legible result that reads as done—portrait-ready grooming, a clean hairline, a maintained bald/finished look—or (b) durable body progress that survives a protocol over weeks.\n\nThis tribe’s default stance is corrective realism. When marketing implies the device will do the work, they translate the claim into the actual partnership: what the user must still do (pressure, motion, angles, pacing) and what the tool genuinely amplifies (power, consistency, speed). But they also have a second mode: when something is truly hands-off and still delivers, autonomy becomes the headline, and they’ll validate it with a near-professional benchmark (“only a pro would beat it”) rather than walking the reader through features.\n\nTheir reviews are built around fairness-through-constraints, but not as a mandatory script. If the reviewer’s proof is already decisive—finished outcome plus obvious kit completeness—they may skip the technique caveats, battery talk, or extra justifications entirely. Constraints show up when they’re necessary to protect another shopper from fantasy: when results depend on skill, when performance has a ceiling (“good in a pinch”), or when a ‘pro’ promise needs a cause→effect chain grounded in lived results.\n\nValue, for them, is not abstract “usefulness.” It’s ownership that sticks: a tool is worth it when it locks into rotation (nightly, travel-ready, hard to imagine not having it), or when a kit feels complete and pro-grade in hand—solving multiple real grooming problems without forcing the buyer into add-ons. They’ll sometimes endorse merely adequate core performance if readiness is the real reason it stays used.\n\nThey also allow identity to be a primary justification when baseline competence is cleared. Sleek, sexy, modern design and the way a tool protects feeling feminine/put-together can be treated as performance—without inventing technical explanations to launder an aesthetic win. Across categories, their reviews read like decision-grade reality checks: what outcome you can honestly expect, whether it’s you-or-the-tool doing the work, what makes it a keeper, and what kind of buyer will actually be satisfied.",
-      "userCount": 4,
-      "traitSource": "evolution_state.json",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_4/micro_9_details.json",
-        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_9_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_9_summary_enhanced_delta_corrected.json",
-        "traits": "evolution_state.json",
-        "best_predictions": "outputs/amazon_sgo_health_care/cluster_4/micro_9/best_delta_predictions.json"
-      },
-      "traitCounts": {
-        "behavioral": 10,
-        "motivations": 7,
-        "triggers": 0,
-        "friction": 0,
-        "goals": 3
-      }
-    },
-    {
-      "id": "cluster_4-micro_26",
-      "name": "Analytical Supplement Sleuths",
-      "cluster": "cluster_4",
-      "microId": "micro_26",
-      "domain": "healthcare",
-      "reviewCount": 92,
-      "description": "This tribe shops the way a practical investigator makes decisions: they are trying to eliminate regret, not chase upside. A product is only “good” if it behaves predictably in their real routine—when they’re tired, rushed, traveling, or using it in less-than-ideal conditions (cramped space, low patience, dim light, no reading glasses). They assume the true cost of ownership is the nuisance tax: extra steps, unclear controls, features that chatter or nag, settings that don’t stay put, and any purchase that quietly forces more shopping just to reach day‑one usability. So they don’t get pulled into spec-sheet theater; they judge whether the core job stays simple under normal human use.\n\nThey grant trust through proof they can reproduce at home. Marketing claims are treated as hypotheses, and credibility is earned by agreement with a household reference they already believe—another device, a familiar baseline, or a routine benchmark they can rerun without special tools. When numbers or outcomes don’t line up, they don’t accept “best practices” as an excuse or soothe the mismatch with vibes; they retest, check defaults, and then state which device seems more believable and why. For livability claims (like noise, speed, convenience), they don’t rely on abstract micro-metrics; they anchor praise in concrete comparisons that readers can picture, because transferability matters more than technical-sounding detail.\n\nFairness is part of performance in their worldview. They perform an in-the-box inventory and treat “ready to operate immediately” as a value verdict, not a footnote—power/batteries, spares, and storage/case signal whether the purchase is complete or whether the brand is shifting hassle onto the buyer. They extend the same fairness audit to risk terms: explicitly stated warranty length and a clear return window are read as brand honesty and respect for the buyer’s time. Vague policy language is treated as hidden downside, and no amount of routine-care advice substitutes for clear terms.\n\nIn reviews, they write as consumer-protection and decision closure. They narrate a keep/return path: (1) does the core function match baseline reality, (2) is it livable day-to-day (readability, noise, speed, packability, state retention), and (3) is the decision closed—complete enough and transparent enough that you can stop shopping. When a product passes their threshold, they don’t invent a token “only ding” that would reopen the search; they explain the minimal “sanity setup” (what to disable, which settings matter) that makes it quiet, stable infrastructure. When something threatens closure—missing essentials, inconsistent outputs, or unclear warranty/returns—they elevate it as a deal-breaker because those are the traps that create repeat purchases, ongoing friction, and buyer regret.",
-      "userCount": 10,
-      "traitSource": "evolution_state.json",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_4/micro_26_details.json",
-        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_26_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_26_summary_enhanced_delta_corrected.json",
-        "traits": "evolution_state.json",
-        "best_predictions": "outputs/amazon_sgo_health_care/cluster_4/micro_26/best_delta_predictions.json"
-      },
-      "traitCounts": {
-        "behavioral": 14,
-        "motivations": 7,
+        "behavioral": 8,
+        "motivations": 4,
         "triggers": 0,
         "friction": 0,
         "goals": 3
@@ -131,7 +106,7 @@
       "cluster": "cluster_4",
       "microId": "micro_15",
       "domain": "healthcare",
-      "reviewCount": 79,
+      "reviewCount": 83,
       "description": "This tribe evaluates products like field testers for ordinary life: the item earns trust only if it performs its primary job on the first realistic attempt in the exact scenario they bought it for (a rushed morning, a quick touch-up, in the car, at a desk, on a trip). Their core belief is that “baseline success” should not require the customer to invent technique, add vigilance, or perform ongoing manual compensation. If it needs multiple passes, awkward hand repositioning, or workaround pressure just to do what it claims, they treat that as a design failure—and the review typically opens with the single observable symptom that proves the mismatch.\n\nThey practice a disciplined, non-theatrical form of evidence. Instead of building a long case with speculative downstream problems, they choose one decisive constraint (a geometry that can’t reach, a mechanism that jams, a surface that won’t conform) and treat it as sufficient to explain why the product won’t map onto real routines. Even when something is “fine in the spots it can reach,” they won’t inflate that into broad capability; they keep “limited-but-okay” separate from “works as advertised.” Just as importantly, they refuse to downgrade performance based on mere adjustment costs. If the form factor is different (shorter, smaller, unusual grip), they’ll label it as “getting used to it” unless it demonstrably reduces results.\n\nRisk changes their proof style. For skin/hair-contact devices and powered tools, they treat the absence of harm events as affirmative evidence and will explicitly certify what did not happen (no tugging, no cuts, no irritation). They don’t automatically add technique warnings to sound responsible; if it was safe in normal use, that safety is part of the performance claim. But when a credible hazard happens even once—especially an entrapment or jam that takes meaningful time to undo—their stance flips from evaluation to consumer-protection. They won’t bargain with “be careful” workarounds; the review becomes a veto anchored to how easily the hazard occurs in normal use and how hard it is to recover.\n\nWith multi-mode or multi-head products, they assume calibration is real work, and they describe that learning curve honestly. They will admit icons aren’t self-explanatory and endorse trial-and-error when that is the only truthful path to usability—but they also believe the product must teach safe first use without guesswork. When they do recommend something, the praise comes packaged as a repeatable protocol (what to use first vs what finishes, placement, settings boundaries by body area) and is validated in real contexts like driving or working. Secondary features are scored separately: they name the exact ownership tax (profiles, where data is stored, what you must redo), because their end goal is to make another buyer’s regret predictable and to define the product’s correct role (travel/backup vs home primary) based on its actual use architecture, not generic category rubrics.",
       "userCount": 13,
       "traitSource": "evolution_state.json",
@@ -151,62 +126,12 @@
       }
     },
     {
-      "id": "cluster_4-micro_18",
-      "name": "Expert Helper Reviewers",
-      "cluster": "cluster_4",
-      "microId": "micro_18",
-      "domain": "healthcare",
-      "reviewCount": 17,
-      "description": "They shop like routine-guardians and credibility accountants: a product “works” only if it preserves an already-lived workflow while restoring real agency under constraints the user cannot negotiate away (time, bodily limits, care responsibilities, or repeated prior failures). They do not treat marketing claims or broad category promises as persuasive evidence. Instead, they translate the purchase into a strict compatibility question: can this tool complete the exact session they need—inside the same effort ceiling, time budget, and definition of “done”—without forcing them into a different routine just to make the product look successful.\n\nBecause of that, they read controls and control-logic as performance, not UX decoration. They proactively map modes, interlocks, and hidden couplings against the combinations their routine requires, and they treat any forced pairing or “simplified” presets as functional exclusion. If the brand frames restrictions as “safer,” “for kids,” or “for beginners,” they don’t experience that as reassurance; they interpret it as a signal the manufacturer designed around the wrong user and may be papering over lost capability.\n\nTheir trust threshold is governed by hard stops. A session-stopping failure—device-level death, inconsistent operation, anything that interrupts the routine—collapses the entire value proposition in their logic. That’s why their reviews lead with veto conditions and only then mention secondary positives as context.\n\nIn health-adjacent or measurement tools, they judge value as day-to-day navigability under high-stakes, non-textbook realities. They reward trend visibility, plain-language interpretation, and embedded guidance that reduces guesswork and anxiety—especially when the tool is replacing a history of “letdowns” from prior methods. They also practice explicit epistemic scoping: they will recommend strongly based on current fit and early directional improvement while clearly labeling what is still unproven, separating “this supports the routine now” from the hoped-for end outcome.\n\nThey write reviews as boundary maps meant to reduce reader risk. They segment hard by user type, demand level, and constraint, calling out who will be blocked at the top end and who needs gentle handling but still requires full capability. When writing from a caretaker/advocate stance, they treat transparent attribution (“who used it,” what was observed, what was reported) as part of honesty—because credibility, to them, comes from specifying evidence strength and constraints, not from sounding universally certain.",
-      "userCount": 1,
-      "traitSource": "evolution_state.json",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_4/micro_18_details.json",
-        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_18_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_18_summary_enhanced_delta_corrected.json",
-        "traits": "evolution_state.json",
-        "best_predictions": "outputs/amazon_sgo_health_care/cluster_4/micro_18/best_delta_predictions.json"
-      },
-      "traitCounts": {
-        "behavioral": 10,
-        "motivations": 6,
-        "triggers": 0,
-        "friction": 0,
-        "goals": 4
-      }
-    },
-    {
-      "id": "cluster_3-micro_21",
-      "name": "Reliability-Driven Tech Pragmatists",
-      "cluster": "cluster_3",
-      "microId": "micro_21",
-      "domain": "healthcare",
-      "reviewCount": 22,
-      "description": "This tribe shops like platform auditors in a marketplace of re-skins: they assume many “different” products are the same underlying device with a new badge, so their first job is to establish identity and only then judge performance. They don’t trust the listing to define reality; they reconcile claims against what’s physically marked on the unit and packaging, and they treat missing or inconsistent labeling as decision-relevant evidence about traceability. Once they’ve anchored the item to a model family (often by comparing to something they already own), they keep the rest of the review constrained to a declared test frame—what they actually used it for, what they didn’t test, and why the conclusions should or shouldn’t generalize.\n\nTheir evaluation style is “translate marketing into mechanics.” Big numbers—modes, heads, settings, “X‑in‑1”—get converted into a finite set of real functional states and bottlenecks. They map what each control position truly does, collapse redundant states, and call inflated counts informational noise rather than capability. For kits and bundles, they refuse to average: they score each attachment as if it were a standalone tool and then give readers an operating plan (use this piece, ignore that filler, or buy a dedicated device instead). They also do compatibility/lineage work in clone categories: they name the underlying platform when possible, list the only differences that matter (especially interfaces and interchangeability), and leave shoppers with a bounded price-shopping map rather than vague “rebrand” suspicion.\n\nWhat decides their verdict is not first-week output but predictable ownership taxes: the single recurring loop that will happen every time. That loop might be a cleaning choke point, a UI state-memory/reset behavior, a market-fit mismatch like region-inappropriate units, or a portability claim that fails when you simulate the full choreography of use (what you must hold, what gets yanked, what spills). They write reviews as pre-mortems: here is the repeatable failure mode, here is the failure chain they expect (often tied to retention and stress under heat/vibration), and here’s the mitigation rule if you insist on keeping it.\n\nTheir value judgment is lifecycle economics grounded in evidence, not generic pessimism. They look for standardized, multi-source replaceability at the interface level, but they only raise “disposable” alarms when the connection is clearly proprietary or the sourcing path is truly unclear. And when body-adjacent accessories are included, they treat credible external expertise as sufficient to veto use: “included” is not “safe,” so their review may explicitly warn readers off a risky attachment even without personal testing. Overall, they aim to reduce marketplace confusion and prevent post-return-window regret by making product identity, real capabilities, and repeatable ownership costs legible.",
-      "userCount": 9,
-      "traitSource": "evolution_state.json",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_3/micro_21_details.json",
-        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_3/micro_21_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_3/micro_21_summary_enhanced_delta_corrected.json",
-        "traits": "evolution_state.json",
-        "best_predictions": "outputs/amazon_sgo_health_care/cluster_3/micro_21/best_delta_predictions.json"
-      },
-      "traitCounts": {
-        "behavioral": 10,
-        "motivations": 3,
-        "triggers": 0,
-        "friction": 0,
-        "goals": 4
-      }
-    },
-    {
       "id": "cluster_4-micro_6",
       "name": "Sensory-Savvy Pragmatists",
       "cluster": "cluster_4",
       "microId": "micro_6",
       "domain": "healthcare",
-      "reviewCount": 119,
+      "reviewCount": 124,
       "description": "They shop like constraint auditors, not feature collectors. Their core belief is that the real question isn’t whether a product can work in ideal conditions, but whether it can be used safely, predictably, and repeatedly inside the boundaries a normal person will actually keep—limited visibility, awkward angles, sensitive zones, rushed mornings, travel setups, and “I’m not risking my skin/eyes for marginal gains.” As a result, their reviews read less like enthusiasm or disappointment and more like an operational verdict: what the product can reliably do under a sane technique, and where the promise collapses when the situation gets precise.\n\nThey treat manufacturer instructions and advertised use cases as stress claims, not guidance. If the recommended workflow feels risky or requires perfect technique near high-consequence areas, they will deliberately choose a safer method and then grade the product on what’s achievable within that self-imposed safety boundary. They do not frame that as user error; they frame it as rational use. Weak results are often attributed to the constraint they refused to cross—because the constraint is the point—while the product is judged on whether it still delivers something worthwhile without gambling on harm.\n\nThis tribe also separates “the core device is competent” from “the precision task is inherently harder.” When precision-zone use turns out to be its own skill-and-handling problem (visibility, angle, grip, wrist contortions), they foreground that difficulty as the main truth instead of forcing the explanation into generic power complaints. They describe the learning curve and handling realities so other buyers don’t confuse a passable main-task performance with a guaranteed win in tight, contoured, or sensitive areas.\n\nTheir dealbreakers are mechanical and repeatable, not vibes. If an attachment that’s supposed to improve control instead creates interference—snagging, catching, blocked angles—they treat that as a functional failure mode worth naming, even if the base unit “works.” Likewise, they judge adjustable intensity by the low end: level 1 must be genuinely gentle and increments must be usable. “Level 1 already strong / level 2 too much” is, to them, a calibration defect because it breaks routine-safe controllability.\n\nThey validate big claims with pragmatic baselines and are comfortable concluding “no meaningful difference.” When the product is marketed as a replacement (especially cordless/travel tools), they apply a hard gate against a full-power reference and will explain the specific levers that cause regret (e.g., peak output plus geometry/time-throughput), not just “needs more passes.” And when everything is simply fine—no surprises, no failures—they will stop at an unqualified “works as expected” and cite only the few reliability signals they care about, because passing the controllability-and-repeatability gate is the whole story.\n\nValue, for them, is a credibility test. They reject inflated or irrelevant premium anchors and argue fairness using concrete market references and personal baselines. If the price story feels manipulative, trust collapses and every other claim becomes harder for the product to earn back.",
       "userCount": 13,
       "traitSource": "evolution_state.json",
@@ -226,12 +151,137 @@
       }
     },
     {
+      "id": "cluster_4-micro_1",
+      "name": "Hands-On Value Advocates",
+      "cluster": "cluster_4",
+      "microId": "micro_1",
+      "domain": "healthcare",
+      "reviewCount": 127,
+      "description": "This tribe shops like a failure-mode forecaster: they assume a product will look acceptable in a listing or a calm first try, so they go hunting for the one real-world condition that will decide whether it survives normal household life. They translate marketing into a small set of falsifiable gates—can you use it correctly without extra choreography, can you verify its state without guessing, does it fit the body/space/social context it claims to serve, and does owning it reduce labor rather than create a new maintenance loop. They don’t try to be comprehensive; they try to be decisive. If one blunt test settles the core promise, they stop and treat the product as “good enough to quit thinking about.”\n\nTheir reviews therefore read less like product diaries and more like operational rules. They lead with the decisive gate (the first thing that would force a return), then supply the rerunnable proof: the exact condition, the one job, the one comparison that certifies or disqualifies. When a product merely meets the competent baseline, they say so plainly (“as close as my usual/standard”) and refuse to inflate the story into hedged quality tiers. Conversely, when a product fails at a core interface—can’t be opened tool-free when it’s meant for on-the-spot use, can’t stay retained/assembled, can’t be operated in-position, or makes the promised problem worse—they treat it as non-viable rather than a minor inconvenience.\n\nThey also evaluate “fit” more broadly than sizing. For body-worn aids, the deciding performance question is often social invisibility: does it disappear in practice with no telltale outline or behavior change. For caregiving and household tools, their proof standard is workflow liberation under constraint—can it immediately remove a recurring conflict point (especially with sensory-sensitive users) without a training arc, or can it enable parallel caregiving (doing a second task while the primary task continues) in a way you can trust. Cleanability is not an afterthought in that calculus; if cleanup is fast and reliable, they may treat it as one of the main benefits because it predicts whether the item will actually get used daily.\n\nThey are literal about readiness. “Kits,” bundles, and multi-part purchases are judged by an in-box inventory and assembly audit: what arrived, what counts are real, what components exist, and whether setup is straightforward enough to deploy immediately. They avoid inventing prerequisites they didn’t test (special sizing, special tips, ideal technique) because, in their worldview, adding speculative requirements is just another way reviews mislead shoppers.\n\nNet: expect a review that begins with the one gate that matters, proves it with a concrete household scenario or baseline comparison, and ends by naming exactly who should buy—and who should skip—based on that boundary condition.",
+      "userCount": 10,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_1_details.json (user characteristics)",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_1_details.json",
+        "similarity": "outputs/amazon_sgo/cluster_4/micro_1/best_delta_predictions.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "outputs/amazon_sgo/cluster_4/micro_1/best_delta_predictions.json"
+      },
+      "traitCounts": {
+        "behavioral": 38,
+        "motivations": 4,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_4-micro_26",
+      "name": "Analytical Supplement Sleuths",
+      "cluster": "cluster_4",
+      "microId": "micro_26",
+      "domain": "healthcare",
+      "reviewCount": 91,
+      "description": "This tribe shops the way a practical investigator makes decisions: they are trying to eliminate regret, not chase upside. A product is only “good” if it behaves predictably in their real routine—when they’re tired, rushed, traveling, or using it in less-than-ideal conditions (cramped space, low patience, dim light, no reading glasses). They assume the true cost of ownership is the nuisance tax: extra steps, unclear controls, features that chatter or nag, settings that don’t stay put, and any purchase that quietly forces more shopping just to reach day‑one usability. So they don’t get pulled into spec-sheet theater; they judge whether the core job stays simple under normal human use.\n\nThey grant trust through proof they can reproduce at home. Marketing claims are treated as hypotheses, and credibility is earned by agreement with a household reference they already believe—another device, a familiar baseline, or a routine benchmark they can rerun without special tools. When numbers or outcomes don’t line up, they don’t accept “best practices” as an excuse or soothe the mismatch with vibes; they retest, check defaults, and then state which device seems more believable and why. For livability claims (like noise, speed, convenience), they don’t rely on abstract micro-metrics; they anchor praise in concrete comparisons that readers can picture, because transferability matters more than technical-sounding detail.\n\nFairness is part of performance in their worldview. They perform an in-the-box inventory and treat “ready to operate immediately” as a value verdict, not a footnote—power/batteries, spares, and storage/case signal whether the purchase is complete or whether the brand is shifting hassle onto the buyer. They extend the same fairness audit to risk terms: explicitly stated warranty length and a clear return window are read as brand honesty and respect for the buyer’s time. Vague policy language is treated as hidden downside, and no amount of routine-care advice substitutes for clear terms.\n\nIn reviews, they write as consumer-protection and decision closure. They narrate a keep/return path: (1) does the core function match baseline reality, (2) is it livable day-to-day (readability, noise, speed, packability, state retention), and (3) is the decision closed—complete enough and transparent enough that you can stop shopping. When a product passes their threshold, they don’t invent a token “only ding” that would reopen the search; they explain the minimal “sanity setup” (what to disable, which settings matter) that makes it quiet, stable infrastructure. When something threatens closure—missing essentials, inconsistent outputs, or unclear warranty/returns—they elevate it as a deal-breaker because those are the traps that create repeat purchases, ongoing friction, and buyer regret.",
+      "userCount": 10,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_26_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_26_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_26_summary_enhanced_delta_corrected.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "outputs/amazon_sgo_health_care/cluster_4/micro_26/best_delta_predictions.json"
+      },
+      "traitCounts": {
+        "behavioral": 14,
+        "motivations": 7,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      }
+    },
+    {
+      "id": "cluster_3-micro_21",
+      "name": "Reliability-Driven Tech Pragmatists",
+      "cluster": "cluster_3",
+      "microId": "micro_21",
+      "domain": "healthcare",
+      "reviewCount": 21,
+      "description": "This tribe shops like platform auditors in a marketplace of re-skins: they assume many “different” products are the same underlying device with a new badge, so their first job is to establish identity and only then judge performance. They don’t trust the listing to define reality; they reconcile claims against what’s physically marked on the unit and packaging, and they treat missing or inconsistent labeling as decision-relevant evidence about traceability. Once they’ve anchored the item to a model family (often by comparing to something they already own), they keep the rest of the review constrained to a declared test frame—what they actually used it for, what they didn’t test, and why the conclusions should or shouldn’t generalize.\n\nTheir evaluation style is “translate marketing into mechanics.” Big numbers—modes, heads, settings, “X‑in‑1”—get converted into a finite set of real functional states and bottlenecks. They map what each control position truly does, collapse redundant states, and call inflated counts informational noise rather than capability. For kits and bundles, they refuse to average: they score each attachment as if it were a standalone tool and then give readers an operating plan (use this piece, ignore that filler, or buy a dedicated device instead). They also do compatibility/lineage work in clone categories: they name the underlying platform when possible, list the only differences that matter (especially interfaces and interchangeability), and leave shoppers with a bounded price-shopping map rather than vague “rebrand” suspicion.\n\nWhat decides their verdict is not first-week output but predictable ownership taxes: the single recurring loop that will happen every time. That loop might be a cleaning choke point, a UI state-memory/reset behavior, a market-fit mismatch like region-inappropriate units, or a portability claim that fails when you simulate the full choreography of use (what you must hold, what gets yanked, what spills). They write reviews as pre-mortems: here is the repeatable failure mode, here is the failure chain they expect (often tied to retention and stress under heat/vibration), and here’s the mitigation rule if you insist on keeping it.\n\nTheir value judgment is lifecycle economics grounded in evidence, not generic pessimism. They look for standardized, multi-source replaceability at the interface level, but they only raise “disposable” alarms when the connection is clearly proprietary or the sourcing path is truly unclear. And when body-adjacent accessories are included, they treat credible external expertise as sufficient to veto use: “included” is not “safe,” so their review may explicitly warn readers off a risky attachment even without personal testing. Overall, they aim to reduce marketplace confusion and prevent post-return-window regret by making product identity, real capabilities, and repeatable ownership costs legible.",
+      "userCount": 9,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_3/micro_21_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_3/micro_21_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_3/micro_21_summary_enhanced_delta_corrected.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "outputs/amazon_sgo_health_care/cluster_3/micro_21/best_delta_predictions.json"
+      },
+      "traitCounts": {
+        "behavioral": 10,
+        "motivations": 3,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 4
+      }
+    },
+    {
+      "id": "cluster_4-micro_18",
+      "name": "Expert Helper Reviewers",
+      "cluster": "cluster_4",
+      "microId": "micro_18",
+      "domain": "healthcare",
+      "reviewCount": 18,
+      "description": "They shop like routine-guardians and credibility accountants: a product “works” only if it preserves an already-lived workflow while restoring real agency under constraints the user cannot negotiate away (time, bodily limits, care responsibilities, or repeated prior failures). They do not treat marketing claims or broad category promises as persuasive evidence. Instead, they translate the purchase into a strict compatibility question: can this tool complete the exact session they need—inside the same effort ceiling, time budget, and definition of “done”—without forcing them into a different routine just to make the product look successful.\n\nBecause of that, they read controls and control-logic as performance, not UX decoration. They proactively map modes, interlocks, and hidden couplings against the combinations their routine requires, and they treat any forced pairing or “simplified” presets as functional exclusion. If the brand frames restrictions as “safer,” “for kids,” or “for beginners,” they don’t experience that as reassurance; they interpret it as a signal the manufacturer designed around the wrong user and may be papering over lost capability.\n\nTheir trust threshold is governed by hard stops. A session-stopping failure—device-level death, inconsistent operation, anything that interrupts the routine—collapses the entire value proposition in their logic. That’s why their reviews lead with veto conditions and only then mention secondary positives as context.\n\nIn health-adjacent or measurement tools, they judge value as day-to-day navigability under high-stakes, non-textbook realities. They reward trend visibility, plain-language interpretation, and embedded guidance that reduces guesswork and anxiety—especially when the tool is replacing a history of “letdowns” from prior methods. They also practice explicit epistemic scoping: they will recommend strongly based on current fit and early directional improvement while clearly labeling what is still unproven, separating “this supports the routine now” from the hoped-for end outcome.\n\nThey write reviews as boundary maps meant to reduce reader risk. They segment hard by user type, demand level, and constraint, calling out who will be blocked at the top end and who needs gentle handling but still requires full capability. When writing from a caretaker/advocate stance, they treat transparent attribution (“who used it,” what was observed, what was reported) as part of honesty—because credibility, to them, comes from specifying evidence strength and constraints, not from sounding universally certain.",
+      "userCount": 1,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_18_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_18_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_4/micro_18_summary_enhanced_delta_corrected.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "outputs/amazon_sgo_health_care/cluster_4/micro_18/best_delta_predictions.json"
+      },
+      "traitCounts": {
+        "behavioral": 10,
+        "motivations": 6,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 4
+      }
+    },
+    {
+      "id": "cluster_4-micro_7",
+      "name": "Health-Safe Detailers",
+      "cluster": "cluster_4",
+      "microId": "micro_7",
+      "domain": "healthcare",
+      "reviewCount": 252,
+      "description": "This tribe shops like deployment auditors: they don’t treat a product as “real” until the exact item in-hand can be identified, inventoried, and used immediately in the way the listing implies. Their first review move is to prove (or break) the received-condition contract—sealed/new/clean, correct variant, correct count, and a kit that includes every essential needed for first use. If anything in that readiness chain is missing (a required component, batteries/tools/solution that makes the kit usable, a design piece that enables the promised interface), they don’t frame it as a preference or inconvenience; it becomes a decisive scenario failure because it means the marketed job cannot be executed as purchased.\n\nAfter the item clears readiness, they collapse evaluation to the niche differentiator and the single gate that motivated the purchase: the one mechanism that makes this product “not like the others.” They lead with that differentiating hardware/feature and test it with the lightest fair trial that should force the promise to show itself. If the differentiator works, they’ll happily de-scope everything else as “nice but not needed,” recording extras only as operational specs—not as reasons to inflate the product into stories or use-cases they didn’t actually run.\n\nTheir reviews are built around buyer-repeatable checkpoints and boundaries. For fit and comfort, they don’t stop at “works for me”; they use their own body geometry as a calibration point and translate the result into a range implication a stranger can apply (who it will likely be too wide/tight for, where the seal breaks, what interface fails—like glasses compatibility). If a product requires finesse, they publish micro-mechanical handling rules that prevent damage (the specific move that avoids breaking an alignment-sensitive connection), because they see correct technique as part of safe, fair evaluation.\n\nIn ingestibles and supplements, they protect credibility by matching the claim to the right evidence window. They’ll only “recommend” once they’ve done a full run when that’s the relevant threshold, but they’re also willing to certify equivalence if it performs as well as known favorites. When something underperforms, they often attribute it to formulation/type or processing differences (extract vs oil, ingredient form variance) rather than defaulting to dosing scripts. They also actively control for perception traps—using taste/aftertaste intensity as a placebo risk variable, re-testing against other baselines, and expressing results as operational deltas (e.g., a concrete drop in workout effectiveness) rather than softened vibe summaries.\n\nAcross categories, they treat early QC anomalies (broken pieces, inconsistent taste, signs of heat damage, parts that dull quickly or separate in use) as trust-breaks that can void efficacy interpretation entirely. Their endpoint is a reusable buyer rule: what to count/inspect on arrival, what single gate decides yes/no, what is merely “nice,” and what narrow reroute (or market-routing to better options) follows if the core contract fails.",
+      "userCount": 21,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details/cluster_4/micro_7_details.json (user characteristics)",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_7_details.json",
+        "similarity": "outputs/amazon_sgo/cluster_4/micro_7_best/sapiens_vs_baselines_final_dataset.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "outputs/amazon_sgo/cluster_4/micro_7/best_delta_predictions.json"
+      },
+      "traitCounts": {
+        "behavioral": 19,
+        "motivations": 7,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 5
+      }
+    },
+    {
       "id": "cluster_4-micro_12",
       "name": "Safety-Savvy Budget Parents",
       "cluster": "cluster_4",
       "microId": "micro_12",
       "domain": "healthcare",
-      "reviewCount": 82,
+      "reviewCount": 84,
       "description": "This tribe evaluates products the way a careful household would accept (or refuse) a new tool into the home: the item must arrive in a state that makes correct use obvious and accountable, and it must be operable on day one without improvisation. They assume that responsible sellers design the unboxing moment to prevent misuse—through official-feeling packaging, clear “what’s included,” and basic instructions. When those procedural signals are missing, they don’t treat it as a puzzle to solve; they treat it as a credibility and liability problem and often stop before meaningful testing.\n\nTheir decision process is gate-based and front-loaded. Gate one is legitimacy-at-arrival: packaging, inserts, and documentation are interpreted as evidence that someone will stand behind the product and that the buyer can classify it correctly. Gate two is category coherence: if the form factor looks like a different device than the listing implies, they use plain visual reclassification (“this looks like X”) as sufficient reason to pause intended use until the mismatch is resolved. Gate three is first-use manageability: charging, controls, and basic handling should be self-evident without external research.\n\nThey define value less as “how many features do I get” and more as “how much extra do I have to buy or figure out to use it safely and correctly.” Hidden prerequisites, unclear setup, or missing guidance feel unfair because they create extra errands, time cost, or pressure to guess. Importantly, they don’t automatically run a comprehensive feature audit when things seem fine; satisfaction is often based on no-drama basics (it charges easily, it works simply), not on verifying every mode, accessory, or maintenance promise the listing might imply.\n\nIn reviews, they act like an accountability check for other caregivers: they lead with the single decision-critical gate that passed or failed (instructions included or not, what arrived in the box, whether the product matches its category, whether they could immediately operate it). They keep claims tightly tied to what they personally observed in setup and first use, and they avoid filling in long-term durability, safety, or performance narratives they haven’t lived through. When everything seems straightforward, they may give a minimal “works/fun” endorsement and add only a generic caution without building a detailed safety argument; but when an instruction or legitimacy signal is missing, that absence becomes the headline because, to them, that’s where other households get surprised into risk or wasted money.",
       "userCount": 10,
       "traitSource": "evolution_state.json",
@@ -256,7 +306,7 @@
       "cluster": "cluster_4",
       "microId": "micro_13",
       "domain": "healthcare",
-      "reviewCount": 10,
+      "reviewCount": 12,
       "description": "This tribe buys like operators who expect to own a small system, not “try a product.” They treat the product page as an implied contract—what arrives, what connects, what’s required to function—and they judge the purchase by whether it can be integrated into a repeatable household routine without a single fragile dependency turning the whole thing into waste. Their first read of quality isn’t aesthetics or even performance; it’s system integrity. Unboxing is an audit: if anything is missing, abnormal, empty, or nonsensical, they treat it as a concrete quality-control breach and they say so explicitly, because to them it predicts downstream failure rates.\n\nTheir core evaluation move is mechanism-first testing. They benchmark against a known reference (a prior tool, a professional standard, a familiar device) and will grant straightforward credit when results are “close enough” in normal conditions. But they don’t stop at “works/doesn’t work”: they hunt for the one repeatable behavior that breaks confidence and define its boundary conditions (when it shows up, what it does, and whether you can anticipate it). They don’t inflate that into generalized distrust unless the error is ungovernable or feels random; instead, they translate it into a targeted risk forecast so another buyer can predict whether their own routine will trigger the same failure mode.\n\nOwnership survivability is a hard gate, especially around maintenance and servicing. They simulate real hand positions and real removal/swap steps and treat unsafe instructions, accidental-activation layouts during servicing, or immediate deformation under normal handling as decisive design failures—not “tight fit,” “learning curve,” or “minor inconvenience.” If a product requires your hands to be in a danger zone to keep it running, they consider the product to have failed the “survive ownership” test even if the core function is strong.\n\nThey apply the same governance rule to ‘smart’ or guidance features: any prompts, voice, or automation are judged as ongoing cognitive load. Guidance earns praise only if it is meaningfully controllable (off/volume/timing/settings) and appropriately timed; if it becomes chatty or intrusive, they flag it as routine friction that will erode adherence over time.\n\nIn reviews, they act as peer-protectors who turn short trials into operational boundaries. They inventory what arrived, call out the exact trust-breaker (QC anomaly, proprietary single-point-of-failure, unsafe servicing mechanics, accidental-actuation risk, or a specific repeatable error mechanism), and then draw a crisp recommendation line: “great if you can avoid X / don’t buy if you need Y.” Their fairness rule is consistent: buyers should receive what’s implied, and continued use shouldn’t hinge on proprietary, fragile, hard-to-replace dependencies that can strand the product the moment one accessory is lost or damaged.",
       "userCount": 2,
       "traitSource": "evolution_state.json",
@@ -276,53 +326,27 @@
       }
     },
     {
-      "id": "cluster_4-micro_1",
-      "name": "Hands-On Value Advocates",
-      "cluster": "cluster_4",
-      "microId": "micro_1",
+      "id": "cluster_3-micro_14",
+      "name": "Pragmatic Value Seekers",
+      "cluster": "cluster_3",
+      "microId": "micro_14",
       "domain": "healthcare",
-      "reviewCount": 124,
-      "description": "This tribe shops like a failure-mode forecaster: they assume a product will look acceptable in a listing or a calm first try, so they go hunting for the one real-world condition that will decide whether it survives normal household life. They translate marketing into a small set of falsifiable gates—can you use it correctly without extra choreography, can you verify its state without guessing, does it fit the body/space/social context it claims to serve, and does owning it reduce labor rather than create a new maintenance loop. They don’t try to be comprehensive; they try to be decisive. If one blunt test settles the core promise, they stop and treat the product as “good enough to quit thinking about.”\n\nTheir reviews therefore read less like product diaries and more like operational rules. They lead with the decisive gate (the first thing that would force a return), then supply the rerunnable proof: the exact condition, the one job, the one comparison that certifies or disqualifies. When a product merely meets the competent baseline, they say so plainly (“as close as my usual/standard”) and refuse to inflate the story into hedged quality tiers. Conversely, when a product fails at a core interface—can’t be opened tool-free when it’s meant for on-the-spot use, can’t stay retained/assembled, can’t be operated in-position, or makes the promised problem worse—they treat it as non-viable rather than a minor inconvenience.\n\nThey also evaluate “fit” more broadly than sizing. For body-worn aids, the deciding performance question is often social invisibility: does it disappear in practice with no telltale outline or behavior change. For caregiving and household tools, their proof standard is workflow liberation under constraint—can it immediately remove a recurring conflict point (especially with sensory-sensitive users) without a training arc, or can it enable parallel caregiving (doing a second task while the primary task continues) in a way you can trust. Cleanability is not an afterthought in that calculus; if cleanup is fast and reliable, they may treat it as one of the main benefits because it predicts whether the item will actually get used daily.\n\nThey are literal about readiness. “Kits,” bundles, and multi-part purchases are judged by an in-box inventory and assembly audit: what arrived, what counts are real, what components exist, and whether setup is straightforward enough to deploy immediately. They avoid inventing prerequisites they didn’t test (special sizing, special tips, ideal technique) because, in their worldview, adding speculative requirements is just another way reviews mislead shoppers.\n\nNet: expect a review that begins with the one gate that matters, proves it with a concrete household scenario or baseline comparison, and ends by naming exactly who should buy—and who should skip—based on that boundary condition.",
-      "userCount": 10,
-      "traitSource": "evolution_state.json",
+      "reviewCount": 22,
+      "description": "These shoppers approach every purchase like a quick cost-benefit equation: does it work, does it last, and is it worth the price? They apply the same no-nonsense lens to their reviews—often bullet-pointed, comparison-oriented, and focused on concrete takeaways—so fellow consumers can decide in seconds.",
+      "userCount": 9,
+      "traitSource": "micro_cluster_details (seed)",
       "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_4/micro_1_details.json (user characteristics)",
-        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_1_details.json",
-        "similarity": "outputs/amazon_sgo/cluster_4/micro_1/best_delta_predictions.json",
-        "traits": "evolution_state.json",
-        "best_predictions": "outputs/amazon_sgo/cluster_4/micro_1/best_delta_predictions.json"
+        "users": "Clustering/micro_cluster_details/cluster_3/micro_14_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_3/micro_14_details.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_3/micro_14_summary_enhanced_delta_corrected.json",
+        "traits": "micro_cluster_details (seed)"
       },
       "traitCounts": {
-        "behavioral": 38,
-        "motivations": 4,
-        "triggers": 0,
-        "friction": 0,
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
         "goals": 3
-      }
-    },
-    {
-      "id": "cluster_4-micro_7",
-      "name": "Health-Safe Detailers",
-      "cluster": "cluster_4",
-      "microId": "micro_7",
-      "domain": "healthcare",
-      "reviewCount": 244,
-      "description": "This tribe shops like deployment auditors: they don’t treat a product as “real” until the exact item in-hand can be identified, inventoried, and used immediately in the way the listing implies. Their first review move is to prove (or break) the received-condition contract—sealed/new/clean, correct variant, correct count, and a kit that includes every essential needed for first use. If anything in that readiness chain is missing (a required component, batteries/tools/solution that makes the kit usable, a design piece that enables the promised interface), they don’t frame it as a preference or inconvenience; it becomes a decisive scenario failure because it means the marketed job cannot be executed as purchased.\n\nAfter the item clears readiness, they collapse evaluation to the niche differentiator and the single gate that motivated the purchase: the one mechanism that makes this product “not like the others.” They lead with that differentiating hardware/feature and test it with the lightest fair trial that should force the promise to show itself. If the differentiator works, they’ll happily de-scope everything else as “nice but not needed,” recording extras only as operational specs—not as reasons to inflate the product into stories or use-cases they didn’t actually run.\n\nTheir reviews are built around buyer-repeatable checkpoints and boundaries. For fit and comfort, they don’t stop at “works for me”; they use their own body geometry as a calibration point and translate the result into a range implication a stranger can apply (who it will likely be too wide/tight for, where the seal breaks, what interface fails—like glasses compatibility). If a product requires finesse, they publish micro-mechanical handling rules that prevent damage (the specific move that avoids breaking an alignment-sensitive connection), because they see correct technique as part of safe, fair evaluation.\n\nIn ingestibles and supplements, they protect credibility by matching the claim to the right evidence window. They’ll only “recommend” once they’ve done a full run when that’s the relevant threshold, but they’re also willing to certify equivalence if it performs as well as known favorites. When something underperforms, they often attribute it to formulation/type or processing differences (extract vs oil, ingredient form variance) rather than defaulting to dosing scripts. They also actively control for perception traps—using taste/aftertaste intensity as a placebo risk variable, re-testing against other baselines, and expressing results as operational deltas (e.g., a concrete drop in workout effectiveness) rather than softened vibe summaries.\n\nAcross categories, they treat early QC anomalies (broken pieces, inconsistent taste, signs of heat damage, parts that dull quickly or separate in use) as trust-breaks that can void efficacy interpretation entirely. Their endpoint is a reusable buyer rule: what to count/inspect on arrival, what single gate decides yes/no, what is merely “nice,” and what narrow reroute (or market-routing to better options) follows if the core contract fails.",
-      "userCount": 21,
-      "traitSource": "evolution_state.json",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_4/micro_7_details.json (user characteristics)",
-        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_7_details.json",
-        "similarity": "outputs/amazon_sgo/cluster_4/micro_7_best/sapiens_vs_baselines_final_dataset.json",
-        "traits": "evolution_state.json",
-        "best_predictions": "outputs/amazon_sgo/cluster_4/micro_7/best_delta_predictions.json"
-      },
-      "traitCounts": {
-        "behavioral": 19,
-        "motivations": 7,
-        "triggers": 0,
-        "friction": 0,
-        "goals": 5
       }
     },
     {
@@ -339,30 +363,6 @@
         "users": "Clustering/micro_cluster_details/cluster_3/micro_23_details.json",
         "products": "Clustering/micro_cluster_details/cluster_3/micro_23_details.json",
         "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_3/micro_23_summary_enhanced_delta_corrected.json",
-        "traits": "micro_cluster_details (seed)"
-      },
-      "traitCounts": {
-        "behavioral": 7,
-        "motivations": 6,
-        "triggers": 5,
-        "friction": 5,
-        "goals": 3
-      }
-    },
-    {
-      "id": "cluster_3-micro_14",
-      "name": "Pragmatic Value Seekers",
-      "cluster": "cluster_3",
-      "microId": "micro_14",
-      "domain": "healthcare",
-      "reviewCount": 22,
-      "description": "These shoppers approach every purchase like a quick cost-benefit equation: does it work, does it last, and is it worth the price? They apply the same no-nonsense lens to their reviews—often bullet-pointed, comparison-oriented, and focused on concrete takeaways—so fellow consumers can decide in seconds.",
-      "userCount": 9,
-      "traitSource": "micro_cluster_details (seed)",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details/cluster_3/micro_14_details.json",
-        "products": "Clustering/micro_cluster_details/cluster_3/micro_14_details.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_3/micro_14_summary_enhanced_delta_corrected.json",
         "traits": "micro_cluster_details (seed)"
       },
       "traitCounts": {
@@ -595,7 +595,7 @@
       "cluster": "cluster_0",
       "microId": "micro_4",
       "domain": "video_games",
-      "reviewCount": 69,
+      "reviewCount": 60,
       "description": "This tribe reviews like “fit-and-friction auditors”: they believe buyer regret doesn’t come from not knowing every feature—it comes from assuming the product will behave in your real routine, household, or access setup when it won’t. Their reviews are built to make ownership predictable. They collapse the decision to the few checks that actually decide success: what must already be true to use it (entitlements, region, subscription, launcher/account, community activity), what you get immediately, and what single interaction will determine whether it becomes habitual or becomes a daily annoyance.\n\nTheir first move is always a reality gate. If they hit a hard block (can’t redeem yet, wrong edition/region, core mode broken), they treat that as the whole product for the buyer and give a direct directive—refund, wait, or buy the correct version—without padding the review with content impressions they didn’t reach. But they’re equally strict in the opposite direction: if a commonly-feared dependency didn’t block them in real use (always-online on weak internet, minor shared glitches), they refuse to inflate it into a PSA veto. They keep risk scoped to what they personally observed and will explicitly mark uncertainty rather than turning guesses into warnings.\n\nWhen the product clears the gate, they stop as soon as they have one honest proof that answers the buyer’s real question. That proof might be usage accounting (“played it for months,” “finished it,” “bought it again after trying it elsewhere”), a single retellable payoff, or a recipient/household outcome (“the person I bought it for loves it”). They don’t “earn” enthusiasm by inventing mechanics, performance claims, or long-horizon durability narratives they didn’t verify.\n\nThey’re especially sensitive to repeat-use conditions in shared spaces. For couch co-op, party games, and group sessions, they treat fairness/session-management controls (pause rules, role selection parity, who gets to do what) as the real value proof—more decisive than vibe, setlists, or generic ‘fun with friends’ framing. For physical goods, they elevate livability frictions that many reviewers minimize—weight/heft, persistent packaging odor with a realistic fade timeline, and the pick-up → use → set-down loop. A single regression on the most-used control can outweigh added features because it predicts daily irritation.\n\nAcross categories, you can predict their review behavior as: identify the narrowest decisive gate; judge products by lived viability today (including whether the community is actually active now); anchor the verdict to one verified receipt; and use trust shortcuts (official licensing, packaging/warranty forensics) as fit/spec certainty rather than as vague ‘quality feel.’",
       "userCount": 27,
       "traitSource": "evolution_state.json",
@@ -650,7 +650,7 @@
       "traitSource": "micro_cluster_details (seed)",
       "dataSources": {
         "users": "Clustering/micro_cluster_details/cluster_0/micro_6_details.json",
-        "products": "Clustering/micro_cluster_details/cluster_0/micro_6_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_0/micro_6_details.json",
         "similarity": "Clustering/Prediction_Accuracy_Refined/cluster_0/micro_6_summary_enhanced_delta_corrected.json",
         "traits": "micro_cluster_details (seed)"
       },

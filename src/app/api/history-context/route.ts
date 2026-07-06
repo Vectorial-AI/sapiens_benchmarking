@@ -33,15 +33,24 @@ export async function GET(req: Request) {
           }),
           product?.groundTruthReview,
         )
-      : buildHistoryBaselineContext({
-          products: user.products,
-          excludeReviewKey: reviewKey,
-        });
+      : excludeTargetReviewText(
+          buildHistoryBaselineContext({
+            products: user.products.map((p) => ({
+              reviewKey: p.reviewKey,
+              productDescription: p.productDescription,
+              category: p.category,
+              groundTruthReview: p.groundTruthReview,
+            })),
+            excludeReviewKey: reviewKey,
+            targetCategory,
+          }),
+          product?.groundTruthReview,
+        );
 
   return NextResponse.json({
     items,
     count: items.length,
     targetCategory,
-    hasBestPredictionReference: Boolean(product?.bestPredictionReview?.trim()),
+    filter: `Same main category as target (${targetCategory || "unknown"}), leave-one-out`,
   });
 }

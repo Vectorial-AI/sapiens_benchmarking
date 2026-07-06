@@ -161,7 +161,6 @@ export async function POST(req: Request) {
     }),
     product?.groundTruthReview,
   );
-  const hasBestPredictionReference = Boolean(product?.bestPredictionReview?.trim());
 
   const promptBase = {
     tribe,
@@ -186,9 +185,7 @@ export async function POST(req: Request) {
       category,
       tribe,
       user,
-      product,
       historyItems: sapiensHistoryContext,
-      hasBestPredictionReference,
       promptCharLength: sapiensPrompt.length,
       mode: runModeLabel,
     });
@@ -267,6 +264,7 @@ export async function POST(req: Request) {
           user,
           excludeReviewKey: reviewKey,
           excludeReviewText: product?.groundTruthReview,
+          targetCategory: category,
         })
       : undefined;
 

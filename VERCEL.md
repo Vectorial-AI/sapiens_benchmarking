@@ -69,7 +69,7 @@ Each Sapiens run logs structured context to **Vercel function logs**. Search for
 2. Run Sapiens in the app
 3. Filter/search: `sapiens-prompt`
 
-The log includes checklist flags, Section 2 preview, Section 3 review count/previews, and whether Section 4 SGO reference was included (char length only — not full reference text).
+The log includes checklist flags (tribe trait groups present, user characteristics, prior reviews), trait counts, user-characteristics preview, and prior-review count/previews.
 
 **Full prompt text** (chunked if long) — search these tags after a run:
 

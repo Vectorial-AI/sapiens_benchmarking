@@ -14,11 +14,19 @@ Sources:
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
 WORKSPACE = Path(__file__).resolve().parents[2]
 CLUSTERING = WORKSPACE / "Clustering"
+sys.path.insert(0, str(CLUSTERING))
+from global_review_keys import (  # noqa: E402
+    assert_products_have_global_keys,
+    load_global_review_key_index,
+    normalize_product_key,
+    resolve_review_key,
+)
 OUTPUTS = WORKSPACE / "outputs"
 DATA_EXTRACTION = WORKSPACE / "Data extraction"
 OUT_DIR = Path(__file__).resolve().parents[1] / "src" / "data"
@@ -146,8 +154,8 @@ def load_healthcare_benchmark_index() -> tuple[
         if not review_key:
             continue
         su = review.get("sgo_update") or {}
-        cluster = su.get("cluster_id")
-        micro = su.get("micro_id")
+        cluster = review.get("cluster_id") or su.get("cluster_id")
+        micro = review.get("micro_id") or su.get("micro_id")
         if not cluster or not micro:
             mapped = key_to_tribe.get(review_key)
             if mapped:
@@ -169,10 +177,10 @@ def load_healthcare_benchmark_index() -> tuple[
     return by_tribe_user, scores, entries
 
 
-def healthcare_product_from_entry(entry: dict) -> dict:
+def healthcare_product_from_entry(entry: dict, *, review_key: str) -> dict:
     gt = entry.get("ground_truth") or {}
     return {
-        "review_key": entry["review_key"],
+        "review_key": review_key,
         "product_description": entry.get("product_description", ""),
         "review_text": gt.get("review", ""),
         "rating": gt.get("rating"),
@@ -367,8 +375,20 @@ def user_similarity_scores(cluster: str, micro: str) -> dict[str, float]:
     return {uid: sum(v) / len(v) for uid, v in scores.items() if v}
 
 
-def normalize_product_key(text: str) -> str:
-    return " ".join(str(text or "").split()).casefold()
+def canonicalize_product_review_key(
+    product: dict,
+    user_id: str,
+    global_keys: dict[tuple[str, str], str],
+) -> str | None:
+    rk = resolve_review_key(
+        user_id,
+        str(product.get("product_description") or ""),
+        global_keys,
+        existing_key=str(product.get("review_key") or ""),
+    )
+    if rk:
+        product["review_key"] = rk
+    return rk
 
 
 def load_best_delta_predictions(
@@ -420,16 +440,14 @@ def attach_best_predictions(
     *,
     user_id: str,
 ) -> list[dict]:
-    """Attach best_prediction_review when a matching best_delta_predictions entry exists."""
-    if not best_by_key and not best_by_user_desc:
+    """Attach best_prediction_review when review_key matches SGO best_delta output."""
+    if not best_by_key:
         return products
 
     for product in products:
         review_key = str(product.get("review_key") or "").strip()
-        desc_key = normalize_product_key(product.get("product_description", ""))
-        best_text = best_by_key.get(review_key) or best_by_user_desc.get((user_id, desc_key))
-        if best_text:
-            product["best_prediction_review"] = best_text
+        if review_key and review_key in best_by_key:
+            product["best_prediction_review"] = best_by_key[review_key]
     return products
 
 
@@ -524,12 +542,23 @@ def apply_product_ordering(
 ) -> list[dict]:
     """Merge digital healthcare benchmark products when available; order HC benchmark → VG → HPC."""
     bench = (hc_by_tribe_user.get(tribe_key) or {}).get(uid) or []
-    priority_keys = {entry["review_key"] for entry in bench}
-    priority_descs = {
-        normalize_product_key(entry.get("product_description", ""))
-        for entry in bench
-        if normalize_product_key(entry.get("product_description", ""))
+    # Canonical review_key for each product comes from tribe/SGO products, not healthcare file indices.
+    desc_to_key = {
+        normalize_product_key(p.get("product_description", "")): p["review_key"]
+        for p in products
+        if p.get("review_key") and normalize_product_key(p.get("product_description", ""))
     }
+    priority_keys: set[str] = set()
+    priority_descs: set[str] = set()
+    for entry in bench:
+        desc_key = normalize_product_key(entry.get("product_description", ""))
+        if not desc_key:
+            continue
+        priority_descs.add(desc_key)
+        canonical_key = desc_to_key.get(desc_key) or str(entry.get("review_key") or "").strip()
+        if canonical_key:
+            priority_keys.add(canonical_key)
+
     by_key: dict[str, dict] = {}
 
     for product in products:
@@ -539,10 +568,14 @@ def apply_product_ordering(
         by_key[product["review_key"]] = product
 
     for entry in bench:
-        rk = entry["review_key"]
-        product = healthcare_product_from_entry(entry)
+        desc_key = normalize_product_key(entry.get("product_description", ""))
+        canonical_key = desc_to_key.get(desc_key)
+        if not canonical_key:
+            # Healthcare entry has no matching tribe product — skip merge (wrong tribe/user slot).
+            continue
+        product = healthcare_product_from_entry(entry, review_key=canonical_key)
         product["healthcare_benchmark"] = True
-        by_key[rk] = product
+        by_key[canonical_key] = product
 
     products = list(by_key.values())
     ordered = sort_user_products(
@@ -573,6 +606,7 @@ def build_tribe(
     hc_scores: dict[str, float],
     hc_entries: dict[str, dict],
     sub_to_main: dict[str, str],
+    global_keys: dict[tuple[str, str], str],
 ) -> dict | None:
     details_path = CLUSTERING / "micro_cluster_details" / cluster / f"{micro}_details.json"
     if not details_path.exists():
@@ -640,6 +674,10 @@ def build_tribe(
                 }
                 for r in reviews
             ]
+            products = [
+                p for p in products
+                if canonicalize_product_review_key(p, uid, global_keys)
+            ]
             products = apply_product_ordering(
                 products,
                 domain=domain,
@@ -679,18 +717,20 @@ def build_tribe(
             reviews = grouped.get(uid) or []
             benchmark_product_count = len((hc_by_tribe_user.get(tribe_key) or {}).get(uid) or [])
             products = []
-            for i, r in enumerate(reviews):
-                products.append(
-                    {
-                        "review_key": f"{uid}_review_{i}",
-                        "product_description": r.get("product_description", ""),
-                        "review_text": r.get("review_text", ""),
-                        "rating": r.get("rating"),
-                        "category": r.get("category", "Health & Personal Care"),
-                        "predicted_themes": r.get("predicted_themes") or r.get("themes") or [],
-                        "sentiment": r.get("sentiment"),
-                    }
-                )
+            for r in reviews:
+                product = {
+                    "product_description": r.get("product_description", ""),
+                    "review_text": r.get("review_text", ""),
+                    "rating": r.get("rating"),
+                    "category": r.get("category", "Health & Personal Care"),
+                    "predicted_themes": r.get("predicted_themes") or r.get("themes") or [],
+                    "sentiment": r.get("sentiment"),
+                }
+                if r.get("review_key"):
+                    product["review_key"] = r["review_key"]
+                if not canonicalize_product_review_key(product, uid, global_keys):
+                    continue
+                products.append(product)
             products = apply_product_ordering(
                 products,
                 domain=domain,
@@ -733,6 +773,12 @@ def build_tribe(
             f"{HEALTHCARE_ACCURACY_PATH.relative_to(WORKSPACE)}"
             f" + Clustering/micro_cluster_details/{cluster}/{micro}_details.json"
         )
+
+    assert_products_have_global_keys(
+        [{**p, "user_id": uid} for u in users_out for uid in [u["user_id"]] for p in u["products"]],
+        global_keys,
+        context=f"{cluster}/{micro}",
+    )
 
     best_prediction_count = sum(
         1
@@ -795,6 +841,8 @@ def main() -> None:
 
     user_cat_chars = load_user_category_characteristics()
     sub_to_main = load_category_mapping()
+    global_keys = load_global_review_key_index()
+    print(f"Loaded {len(global_keys)} global review_key mappings")
     hc_by_tribe_user, hc_scores, hc_entries = load_healthcare_benchmark_index()
     selected_tribes, tribe_review_counts = select_tribes(sub_to_main, hc_by_tribe_user, hc_scores)
     print(f"Loaded category characteristics for {len(user_cat_chars)} users")
@@ -834,6 +882,7 @@ def main() -> None:
             hc_scores,
             hc_entries,
             sub_to_main,
+            global_keys,
         )
         if not tribe:
             continue
