@@ -176,16 +176,7 @@ function normalizeTribe(raw: RawTribe): Tribe {
     };
   });
 
-  if (raw.domain === "healthcare") {
-    // Healthcare: most reviews first, then higher similarity (matches build-catalog ordering).
-    users.sort(
-      (a, b) =>
-        b.products.length - a.products.length ||
-        b.similarityScore - a.similarityScore,
-    );
-  } else {
-    users.sort((a, b) => b.similarityScore - a.similarityScore);
-  }
+  users.sort((a, b) => b.similarityScore - a.similarityScore);
 
   return {
     id: raw.id,

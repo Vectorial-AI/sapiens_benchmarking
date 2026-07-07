@@ -460,6 +460,64 @@ def user_similarity_scores(cluster: str, micro: str) -> dict[str, float]:
     return {uid: sum(v) / len(v) for uid, v in scores.items() if v}
 
 
+def product_accuracy_scores(cluster: str, micro: str) -> dict[str, float]:
+    """Per-review overall_accuracy from benchmark predictions."""
+    p = CLUSTERING / "Prediction_Accuracy_Refined" / cluster / f"{micro}_summary_enhanced_delta_corrected.json"
+    if not p.exists():
+        return {}
+    data = load_json(p)
+    preds = data.get("user_predictions") or {}
+    scores: dict[str, float] = {}
+    for reviews in preds.values():
+        for rev in reviews:
+            rk = str(rev.get("review_key") or "").strip()
+            acc = (rev.get("metrics") or {}).get("overall_accuracy")
+            if rk and acc is not None:
+                scores[rk] = float(acc)
+    return scores
+
+
+def product_performance_score(product: dict, *, fallback_scores: dict[str, float]) -> float:
+    rk = str(product.get("review_key") or "")
+    if product.get("overall_similarity_score") is not None:
+        return float(product["overall_similarity_score"])
+    if product.get("similarity_score") is not None:
+        return float(product["similarity_score"])
+    if rk and rk in fallback_scores:
+        return float(fallback_scores[rk])
+    return 0.0
+
+
+def sort_products_by_performance(
+    products: list[dict],
+    *,
+    fallback_scores: dict[str, float] | None = None,
+) -> list[dict]:
+    fallback_scores = fallback_scores or {}
+    return sorted(
+        products,
+        key=lambda p: (
+            -product_performance_score(p, fallback_scores=fallback_scores),
+            str(p.get("review_key") or ""),
+        ),
+    )
+
+
+def mean_product_score(products: list[dict], *, fallback_scores: dict[str, float]) -> float:
+    if not products:
+        return 0.0
+    return sum(
+        product_performance_score(p, fallback_scores=fallback_scores) for p in products
+    ) / len(products)
+
+
+def sort_users_by_performance(users: list[dict]) -> list[dict]:
+    return sorted(
+        users,
+        key=lambda u: (-float(u.get("similarity_score") or 0), str(u.get("user_id") or "")),
+    )
+
+
 def canonicalize_product_review_key(
     product: dict,
     user_id: str,
@@ -720,7 +778,7 @@ def apply_product_ordering(
         desc = normalize_product_key(product.get("product_description", ""))
         rk = product.get("review_key", "")
         product["healthcare_benchmark"] = rk in priority_keys or desc in priority_descs
-    return ordered
+    return sort_products_by_performance(ordered, fallback_scores=hc_scores)
 
 
 def build_healthcare_digital_tribe(
@@ -783,17 +841,14 @@ def build_healthcare_digital_tribe(
 
         products.sort(
             key=lambda p: (
-                -float(p.get("overall_similarity_score") or hc_scores.get(p.get("review_key", ""), 0)),
+                -product_performance_score(p, fallback_scores=hc_scores),
                 p.get("review_key", ""),
             )
         )
         if not products:
             continue
 
-        mean_sim = sum(
-            float(p.get("overall_similarity_score") or hc_scores.get(p.get("review_key", ""), 0))
-            for p in products
-        ) / len(products)
+        mean_sim = mean_product_score(products, fallback_scores=hc_scores)
 
         user_history = build_user_history_reviews(
             cluster, micro, uid, target_main=HEALTH_MAIN, sub_to_main=sub_to_main
@@ -815,10 +870,7 @@ def build_healthcare_digital_tribe(
     if not users_out:
         return None
 
-    users_out.sort(
-        key=lambda u: (u.get("benchmark_product_count", 0), u["similarity_score"]),
-        reverse=True,
-    )
+    users_out = sort_users_by_performance(users_out)
 
     assert_products_have_global_keys(
         [{**p, "user_id": uid} for u in users_out for uid in [u["user_id"]] for p in u["products"]],
@@ -947,6 +999,9 @@ def build_tribe(
     )
     tribe_key = (cluster, micro)
     users_out: list[dict] = []
+    prod_scores = product_accuracy_scores(cluster, micro)
+    all_scores = {**hc_scores, **prod_scores}
+    sim_scores = user_similarity_scores(cluster, micro)
 
     if sgo:
         sgo_rows, products_source = sgo
@@ -956,7 +1011,6 @@ def build_tribe(
             by_user.setdefault(row["user_id"], []).append(row)
 
         for uid, reviews in by_user.items():
-            mean_sim = sum(r["similarity_score"] for r in reviews) / len(reviews)
             benchmark_product_count = len((hc_by_tribe_user.get(tribe_key) or {}).get(uid) or [])
             products = [
                 {
@@ -967,6 +1021,7 @@ def build_tribe(
                     "category": r["category"],
                     "predicted_themes": r["predicted_themes"],
                     "sentiment": r.get("sentiment"),
+                    "overall_similarity_score": float(r["similarity_score"]),
                 }
                 for r in reviews
             ]
@@ -992,6 +1047,8 @@ def build_tribe(
             products = attach_best_predictions(
                 products, best_by_key, best_by_user_desc, user_id=uid
             )
+            products = sort_products_by_performance(products, fallback_scores=all_scores)
+            mean_sim = mean_product_score(products, fallback_scores=all_scores)
             user_history = build_user_history_reviews(
                 cluster, micro, uid, target_main=target_main, sub_to_main=sub_to_main
             )
@@ -1002,7 +1059,7 @@ def build_tribe(
                     "category_characteristics": domain_category_characteristics(
                         uid, user_cat_chars, domain
                     ),
-                    "similarity_score": round(mean_sim, 4),
+                    "similarity_score": round(sim_scores.get(uid, mean_sim), 4),
                     "benchmark_product_count": benchmark_product_count,
                     "products": products,
                     "user_history_reviews": user_history,
@@ -1013,7 +1070,6 @@ def build_tribe(
             + " (user characteristics)"
         )
     else:
-        sim_scores = user_similarity_scores(cluster, micro)
         for m in members:
             uid = m["user_id"]
             reviews = grouped.get(uid) or []
@@ -1051,6 +1107,12 @@ def build_tribe(
             products = attach_best_predictions(
                 products, best_by_key, best_by_user_desc, user_id=uid
             )
+            for product in products:
+                rk = str(product.get("review_key") or "")
+                if product.get("overall_similarity_score") is None and rk in all_scores:
+                    product["overall_similarity_score"] = all_scores[rk]
+            products = sort_products_by_performance(products, fallback_scores=all_scores)
+            mean_sim = mean_product_score(products, fallback_scores=all_scores)
             user_history = build_user_history_reviews(
                 cluster, micro, uid, target_main=target_main, sub_to_main=sub_to_main
             )
@@ -1063,20 +1125,14 @@ def build_tribe(
                     "category_characteristics": domain_category_characteristics(
                         uid, user_cat_chars, domain
                     ),
-                    "similarity_score": round(sim_scores.get(uid, 0.5), 4),
+                    "similarity_score": round(sim_scores.get(uid, mean_sim), 4),
                     "benchmark_product_count": benchmark_product_count,
                     "products": products,
                     "user_history_reviews": user_history,
                 }
             )
 
-    if domain == "healthcare":
-        users_out.sort(
-            key=lambda u: (u.get("benchmark_product_count", 0), u["similarity_score"]),
-            reverse=True,
-        )
-    else:
-        users_out.sort(key=lambda u: u["similarity_score"], reverse=True)
+    users_out = sort_users_by_performance(users_out)
 
     if tribe_key in hc_by_tribe_user:
         products_source = (
