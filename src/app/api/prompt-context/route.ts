@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import { getCategoryThemes } from "@/lib/category-themes";
-import { findContext, getPromptReferenceReview } from "@/lib/master";
-import { buildHistoryContext } from "@/lib/prompts";
+import { findContext, getUserHistoryReview, getUserHistoryThemes } from "@/lib/master";
 import { formatUserCharacteristics } from "@/lib/user-characteristics";
 
 export const runtime = "nodejs";
 
-/** Preview what the Sapiens prompt receives (tribe traits, user characteristics, prior reviews, reference review, category themes). */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const tribeId = searchParams.get("tribeId") ?? "";
@@ -27,18 +25,13 @@ export async function GET(req: Request) {
   const nonEmpty = (items: string[]) => items.map((s) => s.trim()).filter(Boolean);
   const groundTruthThemes = product?.predictedThemes ?? [];
   const categoryThemes = getCategoryThemes(category);
-  const referenceReview = getPromptReferenceReview(product);
-
-  const historyItems = buildHistoryContext({
-    user,
-    excludeReviewKey: reviewKey,
-    excludeReviewText: product?.groundTruthReview,
-    targetCategory: category,
-  });
+  const userHistoryReview = getUserHistoryReview(product);
+  const userHistoryThemes = getUserHistoryThemes(product);
 
   return NextResponse.json({
     category,
     tribeName: tribe.name,
+    domain: tribe.domain,
     checklist: {
       tribeBehavioralTraits: nonEmpty(q.inherentBehavioralTraits).length > 0,
       tribeMotivations: nonEmpty(q.latentMotivations).length > 0,
@@ -46,28 +39,19 @@ export async function GET(req: Request) {
       tribeFrictionPoints: nonEmpty(q.frictionPoints).length > 0,
       tribeImplicitGoals: nonEmpty(q.implicitGoals).length > 0,
       userCharacteristics: userCharacteristicsPopulated,
-      priorReviews: historyItems.length > 0,
-      referenceReview: referenceReview.length > 0,
+      userHistory: userHistoryReview.length > 0,
+      userHistoryThemes: userHistoryThemes.length > 0,
       categoryThemes: categoryThemes.length > 0,
-    },
-    tribeTraits: {
-      behavioralTraits: nonEmpty(q.inherentBehavioralTraits),
-      motivations: nonEmpty(q.latentMotivations),
-      validationTriggers: nonEmpty(q.validationTriggers),
-      frictionPoints: nonEmpty(q.frictionPoints),
-      implicitGoals: nonEmpty(q.implicitGoals),
     },
     categoryThemes,
     groundTruthThemes,
-    referenceReview: referenceReview || null,
+    userHistory: {
+      review: userHistoryReview || null,
+      themes: userHistoryThemes,
+    },
     userCharacteristics: {
       text: userCharacteristics,
       populated: userCharacteristicsPopulated,
-    },
-    priorReviews: {
-      items: historyItems,
-      count: historyItems.length,
-      filter: `Same main category as target (${category}), leave-one-out`,
     },
   });
 }

@@ -349,12 +349,9 @@ export default function Home() {
               <span className="text-[13px] font-semibold text-foreground">{tribe.name}</span>
             </div>
             {tribe.tribeDefinition && (
-              <ExpandableText
-                text={tribe.tribeDefinition}
-                className="text-[12px] text-muted mt-2 ml-4 leading-relaxed"
-                clampClass="line-clamp-2"
-                toggleLabel="tribe definition"
-              />
+              <p className="text-[12px] text-muted mt-2 ml-4 leading-relaxed">
+                {tribe.tribeDefinition}
+              </p>
             )}
           </div>
         )}
@@ -810,36 +807,6 @@ function TraitGroup({ label, items }: { label: string; items: string[] }) {
   );
 }
 
-function ExpandableText({
-  text,
-  className,
-  clampClass = "line-clamp-3",
-  toggleLabel = "description",
-}: {
-  text: string;
-  className?: string;
-  clampClass?: string;
-  toggleLabel?: string;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const canExpand = text.length > 160;
-
-  return (
-    <div>
-      <p className={`${className ?? ""} ${expanded ? "" : clampClass}`}>{text}</p>
-      {canExpand && (
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="text-[11px] text-accent hover:underline mt-1.5 ml-4"
-        >
-          {expanded ? "Show less" : `Show full ${toggleLabel}`}
-        </button>
-      )}
-    </div>
-  );
-}
-
 function TribeSelectCard({
   tribe,
   selected,
@@ -849,44 +816,29 @@ function TribeSelectCard({
   selected: boolean;
   onSelect: () => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
   const description = tribe.description?.trim() ?? "";
-  const canExpand = description.length > 160;
 
   return (
-    <div
-      className={`rounded-xl border p-3.5 transition ${
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`w-full text-left rounded-xl border p-3.5 transition ${
         selected ? "border-accent bg-accent/[0.04]" : "border-border hover:border-border-strong"
       }`}
     >
-      <button type="button" onClick={onSelect} className="w-full text-left">
-        <div className="flex items-center gap-2 mb-1">
-          <Dot tone="sapiens" />
-          <span className="text-[13px] font-semibold leading-snug">{tribe.name}</span>
-          {tribe.domain && (
-            <span className="text-[10px] uppercase tracking-wide text-muted-2 ml-auto shrink-0">
-              {tribe.domain === "healthcare" ? "Healthcare" : "Video Games"}
-            </span>
-          )}
-        </div>
-        <p
-          className={`text-[12px] text-muted leading-relaxed ${
-            expanded ? "" : "line-clamp-3"
-          }`}
-        >
-          {description}
-        </p>
-      </button>
-      {canExpand && (
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="text-[11px] text-accent hover:underline mt-2"
-        >
-          {expanded ? "Show less" : "Show full tribe definition"}
-        </button>
+      <div className="flex items-center gap-2 mb-1">
+        <Dot tone="sapiens" />
+        <span className="text-[13px] font-semibold leading-snug">{tribe.name}</span>
+        {tribe.domain && (
+          <span className="text-[10px] uppercase tracking-wide text-muted-2 ml-auto shrink-0">
+            {tribe.domain === "healthcare" ? "Healthcare" : "Video Games"}
+          </span>
+        )}
+      </div>
+      {description && (
+        <p className="text-[12px] text-muted leading-relaxed">{description}</p>
       )}
-    </div>
+    </button>
   );
 }
 
@@ -1062,9 +1014,9 @@ function HistoryContextPanel({
         className="flex items-center justify-between w-full text-left gap-3"
       >
         <div>
-          <p className="text-[13px] font-medium text-foreground">Prior reviews sent as context</p>
+          <p className="text-[13px] font-medium text-foreground">User history sent as context</p>
           <p className="text-[11px] text-muted-2 mt-0.5">
-            Same category as the target product, leave-one-out (review text only)
+            Reviews from this user&apos;s history (review text only)
           </p>
         </div>
         <span className="text-[12px] text-muted shrink-0">
@@ -1075,7 +1027,7 @@ function HistoryContextPanel({
         <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
           {count === 0 ? (
             <p className="text-[12px] text-muted-2">
-              No other reviews from this user in the same category (history baseline needs at least one prior review in {targetCategory || "that category"}).
+              No user history is available for this user.
             </p>
           ) : (
             items?.map((item, i) => (

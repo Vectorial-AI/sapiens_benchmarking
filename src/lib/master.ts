@@ -14,7 +14,10 @@ type RawReview = {
   category: string;
   predicted_themes?: string[];
   sentiment?: string | null;
+  user_history_review?: string;
+  user_history_themes?: string[];
   best_prediction_review?: string;
+  best_prediction_themes?: string[];
   healthcare_benchmark?: boolean;
 };
 type RawTribe = {
@@ -45,8 +48,16 @@ type RawTribe = {
     characteristic_summary: string;
     category_characteristics?: Record<string, string>;
     similarity_score?: number;
+    user_history_reviews?: RawUserHistoryReview[];
+    history_noise_reviews?: RawUserHistoryReview[];
   }[];
   members_grouped_by_user: Record<string, RawReview[]>;
+};
+
+type RawUserHistoryReview = {
+  review_text: string;
+  category?: string;
+  main_category?: string;
 };
 
 export type Product = {
@@ -57,17 +68,30 @@ export type Product = {
   groundTruthReview: string;
   predictedThemes: string[];
   groundTruthSentiment: ReviewSentiment | null;
-  bestPredictionReview?: string;
+  userHistoryReview?: string;
+  userHistoryThemes?: string[];
   healthcareBenchmark?: boolean;
 };
 
-/** Prompt reference text for healthcare digital products (best prediction from accuracy file). */
-export function getPromptReferenceReview(product: Product | null | undefined): string {
-  if (product?.healthcareBenchmark && product.bestPredictionReview?.trim()) {
-    return product.bestPredictionReview.trim();
+/** User history review text for healthcare Sapiens context. */
+export function getUserHistoryReview(product: Product | null | undefined): string {
+  if (product?.healthcareBenchmark && product.userHistoryReview?.trim()) {
+    return product.userHistoryReview.trim();
   }
   return product?.groundTruthReview?.trim() || "";
 }
+
+/** Themes from user history (healthcare digital products). */
+export function getUserHistoryThemes(product: Product | null | undefined): string[] {
+  if (!product?.healthcareBenchmark) return [];
+  return (product.userHistoryThemes ?? []).map((t) => t.trim()).filter(Boolean);
+}
+
+export type UserHistoryReview = {
+  reviewText: string;
+  category: string;
+  mainCategory: string;
+};
 
 export type User = {
   id: string;
@@ -75,6 +99,7 @@ export type User = {
   categoryCharacteristics: Record<string, string>;
   similarityScore: number;
   products: Product[];
+  userHistoryReviews: UserHistoryReview[];
 };
 
 export type Tribe = {
@@ -119,7 +144,11 @@ function normalizeProduct(r: RawReview): Product {
     groundTruthReview: r.review_text,
     predictedThemes: r.predicted_themes ?? [],
     groundTruthSentiment: normalizeSentimentLabel(r.sentiment),
-    bestPredictionReview: r.best_prediction_review?.trim() || undefined,
+    userHistoryReview:
+      (r.user_history_review ?? r.best_prediction_review)?.trim() || undefined,
+    userHistoryThemes: (r.user_history_themes ?? r.best_prediction_themes)?.length
+      ? (r.user_history_themes ?? r.best_prediction_themes)
+      : undefined,
     healthcareBenchmark: Boolean(r.healthcare_benchmark),
   };
 }
@@ -128,12 +157,22 @@ function normalizeTribe(raw: RawTribe): Tribe {
   const users: User[] = raw.member_user_characteristics.map((u) => {
     const reviews = raw.members_grouped_by_user[u.user_id] ?? [];
     const products: Product[] = reviews.map(normalizeProduct);
+    const userHistoryReviews: UserHistoryReview[] = (
+      u.user_history_reviews ?? u.history_noise_reviews ?? []
+    )
+      .filter((r) => r.review_text?.trim())
+      .map((r) => ({
+        reviewText: r.review_text.trim(),
+        category: r.category ?? "",
+        mainCategory: r.main_category ?? r.category ?? "",
+      }));
     return {
       id: u.user_id,
       characteristicSummary: u.characteristic_summary,
       categoryCharacteristics: u.category_characteristics ?? {},
       similarityScore: u.similarity_score ?? 0.5,
       products,
+      userHistoryReviews,
     };
   });
 

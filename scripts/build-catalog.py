@@ -186,7 +186,7 @@ def load_healthcare_benchmark_index() -> tuple[
 
 
 def healthcare_product_from_entry(entry: dict, *, review_key: str) -> dict:
-    """Digital healthcare benchmark: GT for scoring/display, best prediction for prompt reference."""
+    """Digital healthcare benchmark: GT for scoring/display, user history for Sapiens context."""
     gt = entry.get("ground_truth") or {}
     pred = entry.get("prediction") or {}
     acc = entry.get("accuracy") or {}
@@ -198,7 +198,8 @@ def healthcare_product_from_entry(entry: dict, *, review_key: str) -> dict:
         "category": entry.get("main_category", "Health & Personal Care"),
         "predicted_themes": gt.get("themes") or [],
         "sentiment": gt.get("sentiment"),
-        "best_prediction_review": str(pred.get("review") or "").strip(),
+        "user_history_review": str(pred.get("review") or "").strip(),
+        "user_history_themes": pred.get("themes") or [],
         "healthcare_benchmark": True,
     }
     score = acc.get("overall_similarity_score")
@@ -613,6 +614,49 @@ def filter_products_to_tribe_categories(
     return kept
 
 
+MAX_USER_HISTORY_REVIEWS = 6
+
+
+def build_user_history_reviews(
+    cluster: str,
+    micro: str,
+    uid: str,
+    *,
+    target_main: str,
+    sub_to_main: dict[str, str],
+) -> list[dict]:
+    """User review history from micro_cluster_details (for history baseline context)."""
+    details_path = CLUSTERING / "micro_cluster_details" / cluster / f"{micro}_details.json"
+    if not details_path.exists():
+        return []
+    details = load_json(details_path)
+    reviews = (details.get("members_grouped_by_user") or {}).get(uid) or []
+    out: list[dict] = []
+    seen: set[str] = set()
+    for r in reviews:
+        cat = r.get("category", "")
+        main = r.get("main_category") or sub_to_main.get(cat, cat)
+        if main == target_main:
+            continue
+        text = str(r.get("review_text") or "").strip()
+        if not text:
+            continue
+        key = normalize_product_key(text)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(
+            {
+                "review_text": text,
+                "category": cat,
+                "main_category": main,
+            }
+        )
+        if len(out) >= MAX_USER_HISTORY_REVIEWS:
+            break
+    return out
+
+
 def apply_product_ordering(
     products: list[dict],
     *,
@@ -751,6 +795,9 @@ def build_healthcare_digital_tribe(
             for p in products
         ) / len(products)
 
+        user_history = build_user_history_reviews(
+            cluster, micro, uid, target_main=HEALTH_MAIN, sub_to_main=sub_to_main
+        )
         users_out.append(
             {
                 "user_id": uid,
@@ -761,6 +808,7 @@ def build_healthcare_digital_tribe(
                 "similarity_score": round(sim_scores.get(uid, mean_sim), 4),
                 "benchmark_product_count": len(products),
                 "products": products,
+                "user_history_reviews": user_history,
             }
         )
 
@@ -817,6 +865,7 @@ def build_healthcare_digital_tribe(
                 "characteristic_summary": u["characteristic_summary"],
                 "category_characteristics": u.get("category_characteristics") or {},
                 "similarity_score": u["similarity_score"],
+                "user_history_reviews": u.get("user_history_reviews") or [],
             }
             for u in users_out
         ],
@@ -857,6 +906,7 @@ def build_tribe(
         print(f"  SKIP {cluster}/{micro}: no details file")
         return None
 
+    target_main = DOMAIN_MAIN_CATEGORY.get(domain, VIDEO_GAMES_MAIN)
     details = load_json(details_path)
     evo = find_evolution(cluster, micro)
     tribe_def = find_tribe_definition(definitions, cluster, micro)
@@ -942,6 +992,9 @@ def build_tribe(
             products = attach_best_predictions(
                 products, best_by_key, best_by_user_desc, user_id=uid
             )
+            user_history = build_user_history_reviews(
+                cluster, micro, uid, target_main=target_main, sub_to_main=sub_to_main
+            )
             users_out.append(
                 {
                     "user_id": uid,
@@ -952,6 +1005,7 @@ def build_tribe(
                     "similarity_score": round(mean_sim, 4),
                     "benchmark_product_count": benchmark_product_count,
                     "products": products,
+                    "user_history_reviews": user_history,
                 }
             )
         users_source = (
@@ -997,6 +1051,9 @@ def build_tribe(
             products = attach_best_predictions(
                 products, best_by_key, best_by_user_desc, user_id=uid
             )
+            user_history = build_user_history_reviews(
+                cluster, micro, uid, target_main=target_main, sub_to_main=sub_to_main
+            )
             users_out.append(
                 {
                     "user_id": uid,
@@ -1009,6 +1066,7 @@ def build_tribe(
                     "similarity_score": round(sim_scores.get(uid, 0.5), 4),
                     "benchmark_product_count": benchmark_product_count,
                     "products": products,
+                    "user_history_reviews": user_history,
                 }
             )
 
@@ -1067,6 +1125,7 @@ def build_tribe(
                 "characteristic_summary": u["characteristic_summary"],
                 "category_characteristics": u.get("category_characteristics") or {},
                 "similarity_score": u["similarity_score"],
+                "user_history_reviews": u.get("user_history_reviews") or [],
             }
             for u in users_out
         ],

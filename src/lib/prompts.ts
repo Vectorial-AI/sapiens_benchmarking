@@ -3,7 +3,7 @@ import { getCategoryThemes } from "./category-themes";
 import { DEFAULT_THEMES } from "./prompts-constants";
 import type { HistoryContextItem, Qualitative, ReviewSentiment } from "./types";
 import type { Product, Tribe, User } from "./master";
-import { getPromptReferenceReview } from "./master";
+import { getUserHistoryReview, getUserHistoryThemes } from "./master";
 import {
   buildHistoryBaselineContext,
   excludeTargetReviewText,
@@ -75,19 +75,23 @@ function themesForCategory(category: string): string[] {
   return getCategoryThemes(category);
 }
 
-function referenceReviewSection(reviewText: string): string {
+function userHistorySection(reviewText: string, themes: string[]): string {
   const text = reviewText.trim();
-  if (!text) return "";
-  return `### Reference Review
-Below is your review for this product. Use it as a guide for tone, length, and what to focus on — especially which themes you covered and how you talked about them. Do not copy it word-for-word.
+  if (!text && !themes.length) return "";
+  const themeBlock = themes.length
+    ? `\n**Themes you emphasized:**\n${bullets(themes)}\n`
+    : "";
+  return `### Your User History
+Use your past review writing below as a guide for tone, length, structure, and theme emphasis.
 
-${text}
-
+**Review:**
+${text || "(none)"}
+${themeBlock}
 `;
 }
 
 /**
- * Healthcare Sapiens — evolved traits + user characteristics + prior reviews + best-prediction reference.
+ * Healthcare Sapiens — evolved traits + user characteristics + user history.
  */
 function buildHealthcareSapiensPromptSections(args: {
   tribe: Tribe;
@@ -104,21 +108,14 @@ function buildHealthcareSapiensPromptSections(args: {
     product,
     productDescription,
     category,
-    excludeReviewKey,
     lengthConstraint,
   } = args;
   const themes = themesForCategory(category);
   const userCharBlock = formatUserCharacteristics(user, category);
   const tribeTraitsBlock = formatTribeTraitSections(tribe.qualitative);
-  const referenceReview = getPromptReferenceReview(product);
-  const historyItems = buildHistoryContext({
-    user,
-    excludeReviewKey,
-    excludeReviewText: product?.groundTruthReview,
-    targetCategory: category,
-  });
-  const historyTextBlock = formatHistoryExamples(historyItems);
-  const referenceBlock = referenceReviewSection(referenceReview);
+  const userHistoryReview = getUserHistoryReview(product);
+  const userHistoryThemes = getUserHistoryThemes(product);
+  const userHistoryBlock = userHistorySection(userHistoryReview, userHistoryThemes);
   const tribeSection = tribeTraitsBlock
     ? `### Your Tribe (${tribe.name})
 Use these group traits when deciding what to notice and how to evaluate the product:
@@ -139,26 +136,23 @@ ${userCharBlock}
 
 Respond ONLY with valid JSON.
 
-${tribeSection}${charSection}### Your Writing Style & Preferences
-To understand how to write this review, analyze the following examples of reviews you have written in the past. Each example is review text only (no product titles or descriptions). Observe the tone, length, and what details you usually focus on.
-
-${historyTextBlock}
-### The New Task
+${tribeSection}${charSection}### The New Task
 You have just purchased and used a new product.
 
 Category: ${category}
 
 **The New Product:** ${productDescription}
 
-${referenceBlock}### Instructions
-1. Write review_text for the new product above from your persona's perspective — shaped by your tribe traits and personal characteristics. Match the reference review's tone and cover the same kinds of themes and concerns, but rewrite in your own words. Do not miss themes the reference emphasizes.
-2. After writing, infer which category themes are present in your review_text and provide confidence scores (0.0 to 1.0) for EACH theme listed below. Make sure themes you discussed in review_text receive appropriately high scores — do not under-score themes you clearly wrote about.
+${userHistoryBlock}### Instructions
+1. Write review_text consistent with your user history above — match its tone, similar length, and the same theme emphasis. Shape it with your tribe traits and personal characteristics. Do not miss themes listed in your user history.
+2. After writing, infer which category themes are present in your review_text and provide confidence scores (0.0 to 1.0) for EACH theme listed below. Give high scores to themes you covered — especially those from your user history.
 ${SENTIMENT_INSTRUCTION}
 
 **Category Themes (you MUST score ALL of these):**
 ${bullets(themes)}
 
 **CRITICAL:**
+- Stay consistent with your user history review and its themes
 - Read review_text carefully — scores must match what you wrote
 - Theme names must match EXACTLY as shown above (case-sensitive)
 - sentiment must be exactly: Positive, Negative, or Neutral
@@ -170,7 +164,7 @@ ${predictionOutputBlock(themes, "predicted_themes")}`;
 }
 
 /**
- * Video Games Sapiens — i0 evolved prompt (traits + user characteristics + prior reviews, no reference review).
+ * Video Games Sapiens — evolved traits + user characteristics only (no group summary, no prior reviews).
  */
 function buildVideoGamesI0EvolvedPromptSections(args: {
   tribe: Tribe;
@@ -181,56 +175,39 @@ function buildVideoGamesI0EvolvedPromptSections(args: {
   excludeReviewKey?: string;
   lengthConstraint: number;
 }): string {
-  const {
-    tribe,
-    user,
-    product,
-    productDescription,
-    category,
-    excludeReviewKey,
-    lengthConstraint,
-  } = args;
+  const { tribe, user, productDescription, category, lengthConstraint } = args;
   const themes = themesForCategory(category);
   const userCharBlock = formatUserCharacteristics(user, category);
   const tribeTraitsBlock = formatTribeTraitSections(tribe.qualitative);
-  const historyItems = buildHistoryContext({
-    user,
-    excludeReviewKey,
-    excludeReviewText: product?.groundTruthReview,
-    targetCategory: category,
-  });
-  const historyTextBlock = formatHistoryExamples(historyItems);
-  const groupSummary = tribe.tribeDefinition?.trim() || tribe.name;
+  const tribeSection = tribeTraitsBlock
+    ? `---
+SECTION 1: Your Tribe (${tribe.name})
+
+**Group traits** — behave like the tribe below while evaluating this product:
+${tribeTraitsBlock}
+
+`
+    : "";
+  const charSection =
+    userCharBlock.trim() && userCharBlock !== "(none)"
+      ? `---
+SECTION 2: Your User Characteristics (you personally)
+
+${userCharBlock}
+
+`
+      : "";
+  const productSectionNum = !tribeSection && !charSection ? 1 : !tribeSection || !charSection ? 2 : 3;
+  const themesSectionNum = productSectionNum + 1;
 
   return `You are someone from ${tribe.name} — a real person who shops on Amazon and writes honest reviews.
 
-You have NOT seen anyone else's review of this product. You only know the product description, your tribe profile (Section 1), your personal user characteristics (Section 2), and your own prior reviews (Section 3).
+You have NOT seen anyone else's review of this product. You only know the product description, your tribe traits, and your personal user characteristics.
 
 Respond ONLY with valid JSON.
 
----
-SECTION 1: Your Tribe (group profile)
-
-**Group summary:**
-${groupSummary}
-
-**Group traits** — behave like the tribe below while evaluating this product:
-${tribeTraitsBlock || "(none provided)"}
-
----
-SECTION 2: Your User Characteristics (you personally)
-
-${userCharBlock.trim() && userCharBlock !== "(none)" ? userCharBlock : "(none provided)"}
-
----
-SECTION 3: Your Prior Reviews (leave-one-out)
-
-These are other reviews written by this same user on different products. The target review you are writing is NOT included here.
-
-${historyTextBlock}
-
----
-SECTION 4: The Product
+${tribeSection}${charSection}---
+SECTION ${productSectionNum}: The Product
 
 Category: ${category}
 
@@ -238,19 +215,18 @@ Product Description:
 ${productDescription}
 
 ---
-SECTION 5: Themes People Discuss in This Category
+SECTION ${themesSectionNum}: Themes People Discuss in This Category
 
 ${bullets(themes)}
 
 ---
 YOUR TASK
 
-1. Write review_text that you would actually post for this product — shaped by your tribe (Section 1), your personal traits (Section 2), and your writing style in Section 3.
-2. After writing, score EVERY theme in Section 5 (0.0 to 1.0) based on what you wrote in review_text.
+1. Write review_text that you would actually post for this product — shaped by your tribe traits and personal characteristics.
+2. After writing, score EVERY theme in Section ${themesSectionNum} (0.0 to 1.0) based on what you wrote in review_text.
 ${SENTIMENT_INSTRUCTION}
 
 **CRITICAL:**
-- Match the tone, length, and structure of your prior reviews in Section 3
 - Theme names must match EXACTLY as shown above (case-sensitive)
 - sentiment must be exactly: Positive, Negative, or Neutral
 - Do not exceed **${lengthConstraint}** words in review_text
@@ -261,7 +237,7 @@ ${predictionOutputBlock(themes, "predicted_themes")}`;
 }
 
 /**
- * SAPIENS — tribe traits + user characteristics + prior reviews (+ healthcare reference review).
+ * SAPIENS — tribe traits + user characteristics (+ healthcare user history).
  */
 function buildSapiensPromptSections(args: {
   tribe: Tribe;
@@ -427,6 +403,15 @@ export function buildHistoryContext(args: {
   );
 }
 
+/**
+ * User history for the history baseline prompt.
+ */
+export function buildUserHistoryContext(user: User): HistoryContextItem[] {
+  return (user.userHistoryReviews ?? [])
+    .map((r) => ({ reviewText: r.reviewText.trim() }))
+    .filter((r) => r.reviewText.length > 0);
+}
+
 export function buildHistoryPrompt(args: {
   personaName: string;
   user: User;
@@ -436,13 +421,9 @@ export function buildHistoryPrompt(args: {
   excludeReviewKey?: string;
   groundTruthThemes: string[];
 }): string {
-  const { product, productDescription, personaName, category } = args;
+  const { user, productDescription, personaName, category } = args;
   const themes = themesForCategory(category);
-  const historyItems = buildHistoryContext({
-    ...args,
-    excludeReviewText: product?.groundTruthReview,
-    targetCategory: category,
-  });
+  const historyItems = buildUserHistoryContext(user);
 
   const historyTextBlock = historyItems
     .map((h, i) => `Example ${i + 1}:\n${h.reviewText}\n`)
@@ -450,10 +431,10 @@ export function buildHistoryPrompt(args: {
 
   return `You are someone who belongs to ${personaName}.
 
-### Your Writing Style & Preferences
+### Your User History
 To understand how to write this review, analyze the following examples of reviews you have written in the past. Each example is review text only (no product titles or descriptions). Observe the tone, length, and what details you usually focus on.
 
-${historyTextBlock || "(no prior reviews available)"}
+${historyTextBlock || "(no user history available)"}
 ### The New Task
 You have just purchased and used a new product.
 **The New Product:** ${productDescription}

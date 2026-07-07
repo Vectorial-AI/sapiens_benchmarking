@@ -10,8 +10,8 @@ import {
 } from "@/lib/baselines";
 import {
   buildBaselinePrompt,
-  buildHistoryContext,
   buildSapiensPrompt,
+  buildUserHistoryContext,
   parsePredictionResponse,
   REVIEW_SYSTEM,
 } from "@/lib/prompts";
@@ -19,11 +19,6 @@ import {
   formatLengthConstraint,
 } from "@/lib/review-history";
 import { hasGatewayKey, mockPrediction, runModel } from "@/lib/ai";
-import {
-  logBaselinePromptFull,
-  logFullPrompt,
-  logSapiensPromptContext,
-} from "@/lib/prompt-log";
 import { scorePredictionAgainstGroundTruth } from "@/lib/scoring";
 import type { EngineResult, ReviewSentiment, RunMode } from "@/lib/types";
 
@@ -151,13 +146,6 @@ export async function POST(req: Request) {
 
   const metricsSource = hasGatewayKey() ? "pipeline" : "mock";
 
-  const sapiensHistoryContext = buildHistoryContext({
-    user,
-    excludeReviewKey: reviewKey,
-    excludeReviewText: product?.groundTruthReview,
-    targetCategory: category,
-  });
-
   const promptBase = {
     tribe,
     user,
@@ -168,56 +156,14 @@ export async function POST(req: Request) {
     groundTruthThemes,
   };
 
-  function logAllPrompts(sapiensPrompt: string, runModeLabel: "sapiens" | "mock") {
-    logFullPrompt("system", REVIEW_SYSTEM, {
-      tribeId,
-      userId,
-      reviewKey: reviewKey ?? null,
-      note: "System message sent with every engine call",
-    });
-    logSapiensPromptContext({
-      tribeId,
-      userId,
-      reviewKey,
-      category,
-      tribe,
-      user,
-      historyItems: sapiensHistoryContext,
-      promptCharLength: sapiensPrompt.length,
-      mode: runModeLabel,
-    });
-    logFullPrompt("sapiens", sapiensPrompt, {
-      tribeId,
-      userId,
-      reviewKey: reviewKey ?? null,
-      model: SAPIENS_MODEL,
-    });
-    for (const method of BASELINE_METHODS) {
-      const baselinePrompt = buildBaselinePrompt(method, {
-        ...promptBase,
-        populationDefinition:
-          method === "population_persona" ? tribe.populationDefinition : undefined,
-      });
-      logBaselinePromptFull({
-        method,
-        tribeId,
-        userId,
-        reviewKey,
-        prompt: baselinePrompt,
-      });
-    }
-  }
-
   // ---- SAPIENS ----
   if (mode === "sapiens") {
     let sapiens: EngineResult;
-    const runModeLabel = hasGatewayKey() ? "sapiens" : "mock";
 
     const sapiensPrompt = buildSapiensPrompt({
       ...promptBase,
       lengthConstraint,
     });
-    logAllPrompts(sapiensPrompt, runModeLabel);
 
     if (!hasGatewayKey()) {
       const mock = mockPrediction("sapiens", productDescription);
@@ -256,14 +202,7 @@ export async function POST(req: Request) {
     : `${method}:${bModel}`;
 
   const historyContext =
-    method === "history"
-      ? buildHistoryContext({
-          user,
-          excludeReviewKey: reviewKey,
-          excludeReviewText: product?.groundTruthReview,
-          targetCategory: category,
-        })
-      : undefined;
+    method === "history" ? buildUserHistoryContext(user) : undefined;
 
   let baseline: EngineResult;
   const baselinePrompt = buildBaselinePrompt(method, {
@@ -271,20 +210,6 @@ export async function POST(req: Request) {
     populationDefinition: usingCustomPopulationDef
       ? customPopulationDefinition
       : undefined,
-  });
-  logFullPrompt("system", REVIEW_SYSTEM, {
-    tribeId,
-    userId,
-    reviewKey: reviewKey ?? null,
-    note: "System message sent with every engine call",
-  });
-  logBaselinePromptFull({
-    method,
-    tribeId,
-    userId,
-    reviewKey,
-    prompt: baselinePrompt,
-    model: gateway,
   });
 
   if (!hasGatewayKey()) {
