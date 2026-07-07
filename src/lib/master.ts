@@ -21,6 +21,7 @@ type RawTribe = {
   id: string;
   cluster: string;
   micro_id: string;
+  domain?: "healthcare" | "video_games";
   tribe_name: string;
   tribe_description: string;
   tribe_definition: string;
@@ -60,6 +61,14 @@ export type Product = {
   healthcareBenchmark?: boolean;
 };
 
+/** Prompt reference text for healthcare digital products (best prediction from accuracy file). */
+export function getPromptReferenceReview(product: Product | null | undefined): string {
+  if (product?.healthcareBenchmark && product.bestPredictionReview?.trim()) {
+    return product.bestPredictionReview.trim();
+  }
+  return product?.groundTruthReview?.trim() || "";
+}
+
 export type User = {
   id: string;
   characteristicSummary: string;
@@ -72,6 +81,7 @@ export type Tribe = {
   id: string;
   cluster: string;
   microId: string;
+  domain?: "healthcare" | "video_games";
   name: string;
   description: string;
   tribeDefinition: string;
@@ -127,14 +137,24 @@ function normalizeTribe(raw: RawTribe): Tribe {
     };
   });
 
-  users.sort((a, b) => b.similarityScore - a.similarityScore);
+  if (raw.domain === "healthcare") {
+    // Healthcare: most reviews first, then higher similarity (matches build-catalog ordering).
+    users.sort(
+      (a, b) =>
+        b.products.length - a.products.length ||
+        b.similarityScore - a.similarityScore,
+    );
+  } else {
+    users.sort((a, b) => b.similarityScore - a.similarityScore);
+  }
 
   return {
     id: raw.id,
     cluster: raw.cluster,
     microId: raw.micro_id,
+    domain: raw.domain,
     name: raw.tribe_name,
-    description: raw.tribe_description,
+    description: raw.tribe_definition?.trim() || raw.tribe_description,
     tribeDefinition: raw.tribe_definition,
     populationDefinition: raw.population_definition,
     traitSource: raw.trait_source,
@@ -191,12 +211,12 @@ export function getCatalogTribe(id: string): CatalogTribe | undefined {
     users: tribe.users.map((u) => ({
       id: u.id,
       characteristicSummary: u.characteristicSummary,
+      categoryCharacteristics: u.categoryCharacteristics,
       similarityScore: u.similarityScore,
       products: u.products.map((p) => ({
         reviewKey: p.reviewKey,
         productDescription: p.productDescription,
         category: p.category,
-        rating: p.rating,
         healthcareBenchmark: p.healthcareBenchmark,
       })),
     })),

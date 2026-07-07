@@ -14,6 +14,7 @@ Sources:
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -125,6 +126,12 @@ def find_tribe_definition(definitions: list, cluster: str, micro: str) -> str:
     return ""
 
 
+def tribe_persona_description(tribe_def: str, tribe_name: str) -> str:
+    """Short tribe persona blurb (generate_tribe_definitions.py) — not evolved group_summary."""
+    text = (tribe_def or "").strip()
+    return text or tribe_name
+
+
 def load_category_mapping() -> dict[str, str]:
     if not CATEGORY_MAPPING_PATH.exists():
         return {}
@@ -179,8 +186,11 @@ def load_healthcare_benchmark_index() -> tuple[
 
 
 def healthcare_product_from_entry(entry: dict, *, review_key: str) -> dict:
+    """Digital healthcare benchmark: GT for scoring/display, best prediction for prompt reference."""
     gt = entry.get("ground_truth") or {}
-    return {
+    pred = entry.get("prediction") or {}
+    acc = entry.get("accuracy") or {}
+    product: dict[str, Any] = {
         "review_key": review_key,
         "product_description": entry.get("product_description", ""),
         "review_text": gt.get("review", ""),
@@ -188,7 +198,18 @@ def healthcare_product_from_entry(entry: dict, *, review_key: str) -> dict:
         "category": entry.get("main_category", "Health & Personal Care"),
         "predicted_themes": gt.get("themes") or [],
         "sentiment": gt.get("sentiment"),
+        "best_prediction_review": str(pred.get("review") or "").strip(),
+        "healthcare_benchmark": True,
     }
+    score = acc.get("overall_similarity_score")
+    if score is None:
+        score = acc.get("overall_accuracy")
+    if score is not None:
+        product["overall_similarity_score"] = float(score)
+    sub = entry.get("major_subcategory_label")
+    if sub:
+        product["major_subcategory"] = sub
+    return product
 
 
 def sort_user_products(
@@ -304,24 +325,20 @@ def select_tribes(
                 if score is not None:
                     hc_benchmark_scores.setdefault(tribe_key, []).append(score)
 
-    healthcare_candidates: list[tuple[tuple[str, str], int, float, int]] = []
-    for cluster_dir in sorted((CLUSTERING / "micro_cluster_details").glob("cluster_*")):
-        cluster = cluster_dir.name
-        for details_path in sorted(cluster_dir.glob("micro_*_details.json")):
-            micro = details_path.stem.replace("_details", "")
-            tribe_key = (cluster, micro)
-            hpc_reviews = count_domain_reviews_in_details(cluster, micro, HEALTH_MAIN, sub_to_main)
-            benchmark_reviews = sum(len(v) for v in (hc_by_tribe_user.get(tribe_key) or {}).values())
-            if hpc_reviews < MIN_TRIBE_REVIEWS and benchmark_reviews < MIN_TRIBE_REVIEWS:
-                continue
-            bench_scores = hc_benchmark_scores.get(tribe_key) or []
-            mean_score = sum(bench_scores) / len(bench_scores) if bench_scores else 0.0
-            healthcare_candidates.append((tribe_key, hpc_reviews, mean_score, benchmark_reviews))
+    # Healthcare tribes = only those present in healthcare_digital_technical_accuracy.json
+    healthcare_candidates: list[tuple[tuple[str, str], int, float]] = []
+    for tribe_key, users in hc_by_tribe_user.items():
+        benchmark_reviews = sum(len(v) for v in users.values())
+        if benchmark_reviews == 0:
+            continue
+        bench_scores = hc_benchmark_scores.get(tribe_key) or []
+        mean_score = sum(bench_scores) / len(bench_scores) if bench_scores else 0.0
+        healthcare_candidates.append((tribe_key, benchmark_reviews, mean_score))
 
-    healthcare_candidates.sort(key=lambda item: (-item[2], -item[3], -item[1]))
+    healthcare_candidates.sort(key=lambda item: (-item[1], -item[2]))
     healthcare = [
         ("healthcare", tribe_key[0], tribe_key[1], review_count)
-        for tribe_key, review_count, _, _ in healthcare_candidates[:TRIBES_PER_DOMAIN]
+        for tribe_key, review_count, _ in healthcare_candidates
     ]
     healthcare_keys = {(cluster, micro) for _, cluster, micro, _ in healthcare}
 
@@ -354,6 +371,23 @@ def select_tribes(
     return selected, review_counts
 
 
+def normalize_user_characteristics_text(text: str) -> str:
+    """UI/prompt copy: refer to modelled people as users, not reviewers."""
+    if not text:
+        return text
+    out = text
+    for pattern, repl in (
+        (r"\bReviewers\b", "Users"),
+        (r"\breviewers\b", "users"),
+        (r"\bReviewer's\b", "User's"),
+        (r"\breviewer's\b", "user's"),
+        (r"\bReviewer\b", "User"),
+        (r"\breviewer\b", "user"),
+    ):
+        out = re.sub(pattern, repl, out)
+    return out
+
+
 def load_user_category_characteristics() -> dict[str, dict[str, str]]:
     """user_id -> { main_category -> influencing_characteristics_summary }"""
     if not USER_CHARS_PATH.exists():
@@ -369,7 +403,9 @@ def load_user_category_characteristics() -> dict[str, dict[str, str]]:
         summaries: dict[str, str] = {}
         for main_cat, block in cat_chars.items():
             if isinstance(block, dict):
-                summary = str(block.get("influencing_characteristics_summary") or "").strip()
+                summary = normalize_user_characteristics_text(
+                    str(block.get("influencing_characteristics_summary") or "").strip()
+                )
                 if summary:
                     summaries[str(main_cat)] = summary
         if summaries:
@@ -377,13 +413,29 @@ def load_user_category_characteristics() -> dict[str, dict[str, str]]:
     return out
 
 
+def domain_category_characteristics(
+    user_id: str,
+    user_cat_chars: dict[str, dict[str, str]],
+    domain: str,
+) -> dict[str, str]:
+    """Keep only the domain-relevant category block (healthcare → HPC, video games → Video Games)."""
+    main = DOMAIN_MAIN_CATEGORY.get(domain)
+    if not main:
+        return {}
+    text = (user_cat_chars.get(user_id) or {}).get(main, "").strip()
+    return {main: text} if text else {}
+
+
 def enrich_user_characteristics(
     user_id: str,
     characteristic_summary: str,
     user_cat_chars: dict[str, dict[str, str]],
 ) -> dict:
-    general = characteristic_summary
-    uid_chars = user_cat_chars.get(user_id) or {}
+    general = normalize_user_characteristics_text(characteristic_summary)
+    uid_chars = {
+        cat: normalize_user_characteristics_text(summary)
+        for cat, summary in (user_cat_chars.get(user_id) or {}).items()
+    }
     return {
         "user_id": user_id,
         "characteristic_summary": general,
@@ -627,6 +679,153 @@ def apply_product_ordering(
     return ordered
 
 
+def build_healthcare_digital_tribe(
+    cluster: str,
+    micro: str,
+    definitions: list,
+    population_def: str,
+    user_cat_chars: dict[str, dict[str, str]],
+    hc_by_tribe_user: dict[tuple[str, str], dict[str, list[dict]]],
+    hc_scores: dict[str, float],
+    sub_to_main: dict[str, str],
+    global_keys: dict[tuple[str, str], str],
+) -> dict | None:
+    """Build a healthcare tribe from digital/technical reviews only (no GT, prediction = reference)."""
+    tribe_key = (cluster, micro)
+    users_data = hc_by_tribe_user.get(tribe_key)
+    if not users_data:
+        return None
+
+    details_path = CLUSTERING / "micro_cluster_details" / cluster / f"{micro}_details.json"
+    details = load_json(details_path) if details_path.exists() else {}
+    evo = find_evolution(cluster, micro)
+    tribe_def = find_tribe_definition(definitions, cluster, micro)
+
+    if evo:
+        tribe_name = evo["tribe_name"] or details.get("persona_name", micro)
+        qualitative = evo["qualitative_summary"]
+        trait_source = "evolution_state.json"
+    else:
+        tribe_name = details.get("persona_name", micro)
+        q = details.get("qualitative_summary") or {}
+        qualitative = {
+            "inherent_behavioral_traits": [{"text": t} for t in (q.get("core_characteristics") or [])[:8]],
+            "latent_motivations": {"main": [{"text": t} for t in (q.get("key_motivations") or [])[:6]]},
+            "validation_triggers": q.get("common_praises") or [],
+            "friction_points": q.get("common_criticisms") or [],
+            "implicit_goals": [{"text": t} for t in (q.get("potential_goals") or [])[:5]],
+        }
+        trait_source = "micro_cluster_details (seed)"
+    tribe_desc = tribe_persona_description(tribe_def, tribe_name)
+
+    members = details.get("member_user_characteristics") or []
+    char_by_user = {
+        m["user_id"]: normalize_user_characteristics_text(m.get("characteristic_summary", ""))
+        for m in members
+    }
+    sim_scores = user_similarity_scores(cluster, micro)
+
+    users_out: list[dict] = []
+    for uid, entries in users_data.items():
+        products: list[dict] = []
+        for entry in entries:
+            review_key = str(entry.get("review_key") or "").strip()
+            if not review_key:
+                continue
+            product = healthcare_product_from_entry(entry, review_key=review_key)
+            if not canonicalize_product_review_key(product, uid, global_keys):
+                product["review_key"] = review_key
+            products.append(product)
+
+        products.sort(
+            key=lambda p: (
+                -float(p.get("overall_similarity_score") or hc_scores.get(p.get("review_key", ""), 0)),
+                p.get("review_key", ""),
+            )
+        )
+        if not products:
+            continue
+
+        mean_sim = sum(
+            float(p.get("overall_similarity_score") or hc_scores.get(p.get("review_key", ""), 0))
+            for p in products
+        ) / len(products)
+
+        users_out.append(
+            {
+                "user_id": uid,
+                "characteristic_summary": char_by_user.get(uid, ""),
+                "category_characteristics": domain_category_characteristics(
+                    uid, user_cat_chars, "healthcare"
+                ),
+                "similarity_score": round(sim_scores.get(uid, mean_sim), 4),
+                "benchmark_product_count": len(products),
+                "products": products,
+            }
+        )
+
+    if not users_out:
+        return None
+
+    users_out.sort(
+        key=lambda u: (u.get("benchmark_product_count", 0), u["similarity_score"]),
+        reverse=True,
+    )
+
+    assert_products_have_global_keys(
+        [{**p, "user_id": uid} for u in users_out for uid in [u["user_id"]] for p in u["products"]],
+        global_keys,
+        context=f"{cluster}/{micro}",
+    )
+
+    product_count = sum(len(u["products"]) for u in users_out)
+    best_prediction_count = sum(
+        1
+        for u in users_out
+        for p in u["products"]
+        if p.get("best_prediction_review")
+    )
+
+    hc_source = str(HEALTHCARE_ACCURACY_PATH.relative_to(WORKSPACE))
+    users_source = (
+        f"{hc_source} + Clustering/micro_cluster_details/{cluster}/{micro}_details.json"
+        if details_path.exists()
+        else hc_source
+    )
+
+    return {
+        "id": f"{cluster}-{micro}",
+        "cluster": cluster,
+        "micro_id": micro,
+        "domain": "healthcare",
+        "tribe_name": tribe_name,
+        "tribe_description": tribe_desc,
+        "tribe_definition": tribe_def,
+        "population_definition": population_def,
+        "trait_source": trait_source,
+        "data_sources": {
+            "users": users_source,
+            "products": hc_source,
+            "similarity": hc_source,
+            "traits": trait_source,
+            "best_predictions": hc_source,
+        },
+        "qualitative_summary": qualitative,
+        "member_user_characteristics": [
+            {
+                "user_id": u["user_id"],
+                "characteristic_summary": u["characteristic_summary"],
+                "category_characteristics": u.get("category_characteristics") or {},
+                "similarity_score": u["similarity_score"],
+            }
+            for u in users_out
+        ],
+        "members_grouped_by_user": {u["user_id"]: u["products"] for u in users_out},
+        "best_prediction_count": best_prediction_count,
+        "product_count": product_count,
+    }
+
+
 def build_tribe(
     cluster: str,
     micro: str,
@@ -640,6 +839,19 @@ def build_tribe(
     sub_to_main: dict[str, str],
     global_keys: dict[tuple[str, str], str],
 ) -> dict | None:
+    if domain == "healthcare":
+        return build_healthcare_digital_tribe(
+            cluster,
+            micro,
+            definitions,
+            population_def,
+            user_cat_chars,
+            hc_by_tribe_user,
+            hc_scores,
+            sub_to_main,
+            global_keys,
+        )
+
     details_path = CLUSTERING / "micro_cluster_details" / cluster / f"{micro}_details.json"
     if not details_path.exists():
         print(f"  SKIP {cluster}/{micro}: no details file")
@@ -651,13 +863,11 @@ def build_tribe(
 
     if evo:
         tribe_name = evo["tribe_name"] or details.get("persona_name", micro)
-        tribe_desc = evo["tribe_description"]
         qualitative = evo["qualitative_summary"]
         trait_source = "evolution_state.json"
     else:
         tribe_name = details.get("persona_name", micro)
         q = details.get("qualitative_summary") or {}
-        tribe_desc = q.get("persona_summary", tribe_name)
         qualitative = {
             "inherent_behavioral_traits": [{"text": t} for t in (q.get("core_characteristics") or [])[:8]],
             "latent_motivations": {"main": [{"text": t} for t in (q.get("key_motivations") or [])[:6]]},
@@ -666,10 +876,14 @@ def build_tribe(
             "implicit_goals": [{"text": t} for t in (q.get("potential_goals") or [])[:5]],
         }
         trait_source = "micro_cluster_details (seed)"
+    tribe_desc = tribe_persona_description(tribe_def, tribe_name)
 
     members = details.get("member_user_characteristics") or []
     grouped = details.get("members_grouped_by_user") or {}
-    char_by_user = {m["user_id"]: m.get("characteristic_summary", "") for m in members}
+    char_by_user = {
+        m["user_id"]: normalize_user_characteristics_text(m.get("characteristic_summary", ""))
+        for m in members
+    }
 
     users_source = f"Clustering/micro_cluster_details/{cluster}/{micro}_details.json"
     similarity_source = (
@@ -732,7 +946,9 @@ def build_tribe(
                 {
                     "user_id": uid,
                     "characteristic_summary": char_by_user.get(uid, ""),
-                    "category_characteristics": user_cat_chars.get(uid, {}),
+                    "category_characteristics": domain_category_characteristics(
+                        uid, user_cat_chars, domain
+                    ),
                     "similarity_score": round(mean_sim, 4),
                     "benchmark_product_count": benchmark_product_count,
                     "products": products,
@@ -784,8 +1000,12 @@ def build_tribe(
             users_out.append(
                 {
                     "user_id": uid,
-                    "characteristic_summary": m.get("characteristic_summary", ""),
-                    "category_characteristics": user_cat_chars.get(uid, {}),
+                    "characteristic_summary": normalize_user_characteristics_text(
+                        m.get("characteristic_summary", "")
+                    ),
+                    "category_characteristics": domain_category_characteristics(
+                        uid, user_cat_chars, domain
+                    ),
                     "similarity_score": round(sim_scores.get(uid, 0.5), 4),
                     "benchmark_product_count": benchmark_product_count,
                     "products": products,
@@ -880,9 +1100,8 @@ def main() -> None:
     print(f"Loaded category characteristics for {len(user_cat_chars)} users")
     print(f"Loaded {len(hc_entries)} healthcare benchmark reviews across {len(hc_by_tribe_user)} tribes")
     print(
-        f"Selected {sum(1 for d, _, _, _ in selected_tribes if d == 'healthcare')} healthcare + "
-        f"{sum(1 for d, _, _, _ in selected_tribes if d == 'video_games')} video games tribes "
-        f"(min {MIN_TRIBE_REVIEWS} domain reviews each)"
+        f"Selected {sum(1 for d, _, _, _ in selected_tribes if d == 'healthcare')} healthcare (digital) + "
+        f"{sum(1 for d, _, _, _ in selected_tribes if d == 'video_games')} video games tribes"
     )
 
     # Bundle category reference data for prompts
@@ -929,7 +1148,7 @@ def main() -> None:
             "microId": micro,
             "domain": domain,
             "reviewCount": tribe.get("product_count", review_count),
-            "description": tribe["tribe_description"],
+            "description": tribe["tribe_definition"] or tribe["tribe_description"],
             "userCount": len(tribe["member_user_characteristics"]),
             "traitSource": tribe["trait_source"],
             "dataSources": tribe["data_sources"],

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCategoryThemes } from "@/lib/category-themes";
-import { findContext } from "@/lib/master";
+import { findContext, getPromptReferenceReview } from "@/lib/master";
 import { buildHistoryContext } from "@/lib/prompts";
 import { formatUserCharacteristics } from "@/lib/user-characteristics";
 
@@ -27,7 +27,7 @@ export async function GET(req: Request) {
   const nonEmpty = (items: string[]) => items.map((s) => s.trim()).filter(Boolean);
   const groundTruthThemes = product?.predictedThemes ?? [];
   const categoryThemes = getCategoryThemes(category);
-  const referenceReview = product?.groundTruthReview?.trim() ?? "";
+  const referenceReview = getPromptReferenceReview(product);
 
   const historyItems = buildHistoryContext({
     user,

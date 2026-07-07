@@ -14,7 +14,6 @@ export type CatalogProduct = {
   reviewKey: string;
   productDescription: string;
   category: string;
-  rating: number | null;
   groundTruthSentiment?: ReviewSentiment | null;
   healthcareBenchmark?: boolean;
 };
@@ -22,6 +21,7 @@ export type CatalogProduct = {
 export type CatalogUser = {
   id: string;
   characteristicSummary: string;
+  categoryCharacteristics?: Record<string, string>;
   similarityScore: number;
   products: CatalogProduct[];
 };

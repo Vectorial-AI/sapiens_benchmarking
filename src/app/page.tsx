@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Dot, Label, Spinner, Stars, TONE_BG, type Tone } from "@/components/ui";
+import { Dot, Label, Spinner, TONE_BG, type Tone } from "@/components/ui";
 import {
   BASELINE_METHOD_META,
   BASELINE_METHODS,
@@ -30,7 +30,7 @@ import {
 } from "@/lib/wizard-session";
 
 const STEPS = [
-  { id: "tribe", label: "Tribe", title: "Pick a tribe", hint: "Select a behavioral tribe to model." },
+  { id: "tribe", label: "Tribe", title: "Pick a modelled tribe", hint: "Select a behavioral tribe to model." },
   { id: "user", label: "User", title: "Pick a modelled user", hint: "" },
   { id: "product", label: "Product", title: "Pick a product", hint: "Choose a product from this user." },
   { id: "sapiens", label: "Sapiens", title: "Sapiens prediction", hint: "What Sapiens generates vs the real review." },
@@ -348,12 +348,12 @@ export default function Home() {
               <Dot tone="sapiens" />
               <span className="text-[13px] font-semibold text-foreground">{tribe.name}</span>
             </div>
-            {tribe.description && (
+            {tribe.tribeDefinition && (
               <ExpandableText
-                text={tribe.description}
+                text={tribe.tribeDefinition}
                 className="text-[12px] text-muted mt-2 ml-4 leading-relaxed"
                 clampClass="line-clamp-2"
-                toggleLabel="tribe description"
+                toggleLabel="tribe definition"
               />
             )}
           </div>
@@ -371,9 +371,6 @@ export default function Home() {
           <>
             {step === 0 && (
               <div className="space-y-4">
-                <p className="text-[13px] text-muted">
-                  {tribeIndex.length} tribes — 15 healthcare, 15 video games
-                </p>
                 {(["healthcare", "video_games"] as const).map((domain) => {
                   const domainTribes = tribeIndex.filter((t) => t.domain === domain);
                   if (domainTribes.length === 0) return null;
@@ -381,7 +378,7 @@ export default function Home() {
                   return (
                     <div key={domain} className="space-y-2">
                       <h3 className="text-[12px] font-semibold uppercase tracking-wide text-muted-2">
-                        {label} ({domainTribes.length})
+                        {label}
                       </h3>
                       <div className="grid gap-2 sm:grid-cols-2 max-h-[22rem] overflow-y-auto pr-1">
                         {domainTribes.map((t) => (
@@ -442,16 +439,9 @@ export default function Home() {
                           : "border-border hover:border-border-strong"
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="text-[13px] text-foreground leading-snug line-clamp-2">
-                          {p.productDescription}
-                        </p>
-                        {p.rating != null && (
-                          <span className="shrink-0">
-                            <Stars rating={p.rating} />
-                          </span>
-                        )}
-                      </div>
+                      <p className="text-[13px] text-foreground leading-snug line-clamp-2">
+                        {p.productDescription}
+                      </p>
                       <p className="text-[11px] text-muted-2 mt-1.5">
                         {p.category}
                       </p>
@@ -508,7 +498,6 @@ export default function Home() {
                     loading={runningSapiens}
                     text={sapiens?.reviewText}
                     predictedThemes={sapiens?.predictedThemes}
-                    groundTruthThemes={groundTruthThemes}
                     sentiment={sapiens?.sentiment}
                     metrics={sapiens?.metrics}
                     error={sapiens?.error}
@@ -621,10 +610,6 @@ export default function Home() {
                   </div>
                   </div>
 
-                {groundTruthThemes.length > 0 && (
-                  <GroundTruthThemesPanel themes={groundTruthThemes} className="mb-4" />
-                )}
-
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   <ResultCard
                     tone="real"
@@ -639,7 +624,6 @@ export default function Home() {
                     title="Sapiens"
                     text={sapiens?.reviewText}
                     predictedThemes={sapiens?.predictedThemes}
-                    groundTruthThemes={groundTruthThemes}
                     sentiment={sapiens?.sentiment}
                     metrics={sapiens?.metrics}
                     error={sapiens?.error}
@@ -652,7 +636,6 @@ export default function Home() {
                       title={baselineDisplayLabel(b)}
                       text={b.reviewText}
                       predictedThemes={b.predictedThemes}
-                      groundTruthThemes={groundTruthThemes}
                       sentiment={b.sentiment}
                       metrics={b.metrics}
                       error={b.error}
@@ -799,7 +782,6 @@ function LearnedTribePanel({
       </button>
       {open && (
         <div className="mt-4 space-y-4 max-h-[24rem] overflow-y-auto">
-          <p className="text-[12.5px] text-muted leading-relaxed">{tribe.description}</p>
           {groups.map((g) => (
             <TraitGroup key={g.key} label={g.label} items={g.items} />
           ))}
@@ -887,10 +869,6 @@ function TribeSelectCard({
             </span>
           )}
         </div>
-        <p className="text-[11px] text-muted-2 mb-1.5">
-          {tribe.userCount} users
-          {tribe.reviewCount != null ? ` · ${tribe.reviewCount} reviews` : ""}
-        </p>
         <p
           className={`text-[12px] text-muted leading-relaxed ${
             expanded ? "" : "line-clamp-3"
@@ -905,7 +883,7 @@ function TribeSelectCard({
           onClick={() => setExpanded((v) => !v)}
           className="text-[11px] text-accent hover:underline mt-2"
         >
-          {expanded ? "Show less" : "Show full tribe description"}
+          {expanded ? "Show less" : "Show full tribe definition"}
         </button>
       )}
     </div>
@@ -925,7 +903,13 @@ function UserSelectCard({
 }) {
   const [expanded, setExpanded] = useState(false);
   const summary = user.characteristicSummary?.trim();
-  const canExpand = summary.length > 160;
+  const categoryEntry = Object.entries(user.categoryCharacteristics ?? {})[0];
+  const categoryLabel = categoryEntry?.[0];
+  const categoryText = categoryEntry?.[1]?.trim() ?? "";
+  const combined = [summary, categoryText ? `${categoryLabel}: ${categoryText}` : ""]
+    .filter(Boolean)
+    .join("\n\n");
+  const canExpand = combined.length > 160;
 
   return (
     <div
@@ -938,14 +922,29 @@ function UserSelectCard({
           <span className="text-[11px] font-mono text-muted-2">#{index + 1}</span>
           <span className="text-[12.5px] font-medium text-foreground">Modelled user</span>
         </div>
-        <p
-          className={`text-[12.5px] text-muted leading-relaxed ${
-            expanded ? "" : "line-clamp-3"
-          }`}
-        >
-          {summary}
-        </p>
-        <p className="text-[11px] text-muted-2 mt-1">{user.products.length} products</p>
+        {summary && (
+          <p
+            className={`text-[12.5px] text-muted leading-relaxed ${
+              expanded ? "" : "line-clamp-3"
+            }`}
+          >
+            {summary}
+          </p>
+        )}
+        {categoryText && (
+          <div className={summary ? "mt-2.5 pt-2.5 border-t border-border/60" : ""}>
+            <p className="text-[10px] uppercase tracking-wide text-muted-2 mb-1">
+              {categoryLabel}
+            </p>
+            <p
+              className={`text-[12.5px] text-muted leading-relaxed ${
+                expanded ? "" : "line-clamp-3"
+              }`}
+            >
+              {categoryText}
+            </p>
+          </div>
+        )}
       </button>
       {canExpand && (
         <button
@@ -1026,9 +1025,6 @@ function ScoreboardTable({
           <tr className="border-b border-border bg-surface-2 text-left text-muted-2">
             <th className="px-4 py-2.5 font-medium">Mode</th>
             <th className="px-4 py-2.5 font-medium">Overall</th>
-            <th className="px-4 py-2.5 font-medium">Recall@k</th>
-            <th className="px-4 py-2.5 font-medium">Text</th>
-            <th className="px-4 py-2.5 font-medium">Sentiment</th>
           </tr>
         </thead>
         <tbody>
@@ -1039,40 +1035,10 @@ function ScoreboardTable({
             >
               <td className="px-4 py-2.5 font-medium">{r.label}</td>
               <td className="px-4 py-2.5 font-medium">{fmtPct(r.metrics?.overallSimilarityScore)}</td>
-              <td className="px-4 py-2.5">{fmtPct(r.metrics?.recallAtK)}</td>
-              <td className="px-4 py-2.5">{fmtPct(r.metrics?.textSimilarity)}</td>
-              <td className="px-4 py-2.5">
-                {r.metrics?.sentimentMatch === 1 ? "✓" : r.metrics?.sentimentMatch === 0 ? "✗" : "—"}
-              </td>
             </tr>
           ))}
         </tbody>
       </table>
-    </div>
-  );
-}
-
-function GroundTruthThemesPanel({
-  themes,
-  className = "mb-4",
-}: {
-  themes: string[];
-  className?: string;
-}) {
-  if (!themes.length) return null;
-  return (
-    <div className={`rounded-xl border border-border bg-surface-2/40 p-4 ${className}`}>
-      <p className="text-[13px] font-medium text-foreground mb-2">Ground truth themes (evaluation)</p>
-      <p className="text-[11px] text-muted-2 mb-2">
-        Not sent to the prompt. Models score the full category theme list; these are used afterward for recall scoring.
-      </p>
-      <ul className="space-y-1">
-        {themes.map((theme) => (
-          <li key={theme} className="text-[12px] text-foreground/90 leading-snug">
-            · {theme}
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
@@ -1135,7 +1101,6 @@ function ResultCard({
   subtitle,
   text,
   predictedThemes,
-  groundTruthThemes,
   sentiment,
   metrics,
   loading,
@@ -1149,7 +1114,6 @@ function ResultCard({
   subtitle?: string;
   text?: string;
   predictedThemes?: Record<string, number>;
-  groundTruthThemes?: string[];
   sentiment?: ReviewSentiment | null;
   metrics?: PipelineMetrics;
   loading?: boolean;
@@ -1206,13 +1170,6 @@ function ResultCard({
               className={`h-full rounded-full ${TONE_BG[tone]}`}
               style={{ width: `${Math.min(100, Math.max(0, metrics.overallSimilarityScore * 100))}%` }}
             />
-          </div>
-          <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-[10px] text-muted-2">
-            {metrics.recallAtK !== null && <span>recall@k {fmtPct(metrics.recallAtK)}</span>}
-            {metrics.textSimilarity !== null && <span>text {fmtPct(metrics.textSimilarity)}</span>}
-            {metrics.sentimentMatch !== null && (
-              <span>sentiment {metrics.sentimentMatch === 1 ? "✓" : "✗"}</span>
-            )}
           </div>
         </div>
       )}
@@ -1271,18 +1228,6 @@ function ResultCard({
                   <span className="text-muted-2">Sentiment:</span>{" "}
                   <span className="text-foreground/80">{sentiment}</span>
                 </p>
-              )}
-              {isGenerated && groundTruthThemes && groundTruthThemes.length > 0 && (
-                <div>
-                  <p className="text-[11px] text-muted-2 mb-1">Ground truth themes (evaluation)</p>
-                  <ul className="space-y-0.5">
-                    {groundTruthThemes.map((theme) => (
-                      <li key={theme} className="text-[11px] text-foreground/80">
-                        · {theme}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
               )}
               {themeEntries.length > 0 && (
                 <ul className="space-y-1">
