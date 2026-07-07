@@ -40,6 +40,11 @@ VIDEO_GAMES_PERFORMANCE_PATH = (
     CLUSTERING / "Prediction_Accuracy_Refined" / "video_games_tribe_performance.json"
 )
 
+# Matches sapiens_benchmarking-main/src/lib/scoring.ts computePipelineMetrics
+APP_WEIGHT_TEXT = 0.25
+APP_WEIGHT_THEME = 0.7
+APP_WEIGHT_SENTIMENT = 0.05
+
 MIN_TRIBE_REVIEWS = 12
 MIN_VG_TRIBE_REVIEWS = 25
 TRIBES_PER_DOMAIN = 15
@@ -139,6 +144,57 @@ def load_category_mapping() -> dict[str, str]:
     return data.get("category_to_main_mapping") or {}
 
 
+def app_similarity_score(
+    *,
+    text_delta: float | None = None,
+    text_similarity: float | None = None,
+    recall: float | None = None,
+    sentiment_match: float | None = None,
+) -> float | None:
+    """UI composite: 0.25*text + 0.7*recall@k + 0.05*sentiment (same weights as scoring.ts)."""
+    parts: list[float] = []
+    if text_similarity is not None:
+        parts.append(float(text_similarity) * APP_WEIGHT_TEXT)
+    elif text_delta is not None:
+        parts.append(max(0.0, 1.0 - float(text_delta)) * APP_WEIGHT_TEXT)
+    if recall is not None:
+        parts.append(float(recall) * APP_WEIGHT_THEME)
+    if sentiment_match is not None:
+        parts.append(float(sentiment_match) * APP_WEIGHT_SENTIMENT)
+    return round(sum(parts), 4) if parts else None
+
+
+def load_video_games_app_scores() -> dict[str, float]:
+    """review_key -> UI overall similarity from video_games_tribe_performance.json."""
+    if not VIDEO_GAMES_PERFORMANCE_PATH.exists():
+        return {}
+    data = load_json(VIDEO_GAMES_PERFORMANCE_PATH)
+    scores: dict[str, float] = {}
+    for row in data.get("reviews") or []:
+        rk = str(row.get("review_key") or "").strip()
+        if not rk:
+            continue
+        score = app_similarity_score(
+            text_delta=row.get("text_delta"),
+            recall=row.get("recall"),
+            sentiment_match=row.get("sentiment_score"),
+        )
+        if score is not None:
+            scores[rk] = score
+    return scores
+
+
+def tribe_mean_similarity(tribe: dict) -> float:
+    scores: list[float] = []
+    grouped = tribe.get("members_grouped_by_user") or {}
+    for prods in grouped.values():
+        for p in prods:
+            s = p.get("overall_similarity_score")
+            if s is not None:
+                scores.append(float(s))
+    return round(sum(scores) / len(scores), 4) if scores else 0.0
+
+
 def load_healthcare_benchmark_index() -> tuple[
     dict[tuple[str, str], dict[str, list[dict]]],
     dict[str, float],
@@ -175,9 +231,15 @@ def load_healthcare_benchmark_index() -> tuple[
         uid = review["user_id"]
         by_tribe_user.setdefault(tribe_key, {}).setdefault(uid, []).append(review)
 
-        acc = (review.get("accuracy") or {}).get("overall_similarity_score")
+        acc = (review.get("accuracy") or {}).get("ui_overall_similarity")
         if acc is None:
-            acc = (review.get("accuracy") or {}).get("overall_accuracy")
+            acc_block = review.get("accuracy") or {}
+            acc = app_similarity_score(
+                text_similarity=acc_block.get("text_similarity"),
+                text_delta=acc_block.get("text_delta"),
+                recall=acc_block.get("recall@k"),
+                sentiment_match=acc_block.get("sentiment_score"),
+            )
         if acc is not None:
             scores[review_key] = float(acc)
         entries[review_key] = review
@@ -202,9 +264,14 @@ def healthcare_product_from_entry(entry: dict, *, review_key: str) -> dict:
         "user_history_themes": pred.get("themes") or [],
         "healthcare_benchmark": True,
     }
-    score = acc.get("overall_similarity_score")
+    score = acc.get("ui_overall_similarity")
     if score is None:
-        score = acc.get("overall_accuracy")
+        score = app_similarity_score(
+            text_similarity=acc.get("text_similarity"),
+            text_delta=acc.get("text_delta"),
+            recall=acc.get("recall@k"),
+            sentiment_match=acc.get("sentiment_score"),
+        )
     if score is not None:
         product["overall_similarity_score"] = float(score)
     sub = entry.get("major_subcategory_label")
@@ -336,7 +403,7 @@ def select_tribes(
         mean_score = sum(bench_scores) / len(bench_scores) if bench_scores else 0.0
         healthcare_candidates.append((tribe_key, benchmark_reviews, mean_score))
 
-    healthcare_candidates.sort(key=lambda item: (-item[1], -item[2]))
+    healthcare_candidates.sort(key=lambda item: (-item[2], -item[1]))
     healthcare = [
         ("healthcare", tribe_key[0], tribe_key[1], review_count)
         for tribe_key, review_count, _ in healthcare_candidates
@@ -444,8 +511,13 @@ def enrich_user_characteristics(
     }
 
 
-def user_similarity_scores(cluster: str, micro: str) -> dict[str, float]:
-    """Mean overall_accuracy per user from benchmark predictions."""
+def user_similarity_scores(
+    cluster: str,
+    micro: str,
+    *,
+    vg_scores: dict[str, float],
+) -> dict[str, float]:
+    """Mean UI similarity per user (video games catalog tribes)."""
     p = CLUSTERING / "Prediction_Accuracy_Refined" / cluster / f"{micro}_summary_enhanced_delta_corrected.json"
     if not p.exists():
         return {}
@@ -454,27 +526,50 @@ def user_similarity_scores(cluster: str, micro: str) -> dict[str, float]:
     scores: dict[str, list[float]] = {}
     for uid, reviews in preds.items():
         for rev in reviews:
-            acc = (rev.get("metrics") or {}).get("overall_accuracy")
-            if acc is not None:
-                scores.setdefault(uid, []).append(float(acc))
-    return {uid: sum(v) / len(v) for uid, v in scores.items() if v}
+            rk = str(rev.get("review_key") or "").strip()
+            score = vg_scores.get(rk) if rk else None
+            if score is None:
+                metrics = rev.get("metrics") or {}
+                score = app_similarity_score(
+                    text_delta=(rev.get("best_deltas") or {}).get("text_delta")
+                    or (rev.get("initial_deltas") or {}).get("text_delta"),
+                    recall=metrics.get("recall@k")
+                    or metrics.get(f"recall@max({metrics.get('num_actual_themes', 3)},k)"),
+                    sentiment_match=metrics.get("sentiment_score"),
+                )
+            if score is not None:
+                scores.setdefault(uid, []).append(float(score))
+    return {uid: round(sum(v) / len(v), 4) for uid, v in scores.items() if v}
 
 
-def product_accuracy_scores(cluster: str, micro: str) -> dict[str, float]:
-    """Per-review overall_accuracy from benchmark predictions."""
+def product_accuracy_scores(
+    cluster: str,
+    micro: str,
+    *,
+    vg_scores: dict[str, float],
+) -> dict[str, float]:
+    """Per-review UI similarity (video games)."""
+    out = {rk: s for rk, s in vg_scores.items() if s is not None}
     p = CLUSTERING / "Prediction_Accuracy_Refined" / cluster / f"{micro}_summary_enhanced_delta_corrected.json"
     if not p.exists():
-        return {}
+        return out
     data = load_json(p)
     preds = data.get("user_predictions") or {}
-    scores: dict[str, float] = {}
     for reviews in preds.values():
         for rev in reviews:
             rk = str(rev.get("review_key") or "").strip()
-            acc = (rev.get("metrics") or {}).get("overall_accuracy")
-            if rk and acc is not None:
-                scores[rk] = float(acc)
-    return scores
+            if not rk or rk in out:
+                continue
+            metrics = rev.get("metrics") or {}
+            score = app_similarity_score(
+                text_delta=(rev.get("best_deltas") or {}).get("text_delta")
+                or (rev.get("initial_deltas") or {}).get("text_delta"),
+                recall=metrics.get("recall@k"),
+                sentiment_match=metrics.get("sentiment_score"),
+            )
+            if score is not None:
+                out[rk] = score
+    return out
 
 
 def product_performance_score(product: dict, *, fallback_scores: dict[str, float]) -> float:
@@ -825,8 +920,6 @@ def build_healthcare_digital_tribe(
         m["user_id"]: normalize_user_characteristics_text(m.get("characteristic_summary", ""))
         for m in members
     }
-    sim_scores = user_similarity_scores(cluster, micro)
-
     users_out: list[dict] = []
     for uid, entries in users_data.items():
         products: list[dict] = []
@@ -839,12 +932,7 @@ def build_healthcare_digital_tribe(
                 product["review_key"] = review_key
             products.append(product)
 
-        products.sort(
-            key=lambda p: (
-                -product_performance_score(p, fallback_scores=hc_scores),
-                p.get("review_key", ""),
-            )
-        )
+        products = sort_products_by_performance(products, fallback_scores=hc_scores)
         if not products:
             continue
 
@@ -860,7 +948,7 @@ def build_healthcare_digital_tribe(
                 "category_characteristics": domain_category_characteristics(
                     uid, user_cat_chars, "healthcare"
                 ),
-                "similarity_score": round(sim_scores.get(uid, mean_sim), 4),
+                "similarity_score": round(mean_sim, 4),
                 "benchmark_product_count": len(products),
                 "products": products,
                 "user_history_reviews": user_history,
@@ -924,6 +1012,9 @@ def build_healthcare_digital_tribe(
         "members_grouped_by_user": {u["user_id"]: u["products"] for u in users_out},
         "best_prediction_count": best_prediction_count,
         "product_count": product_count,
+        "mean_similarity_score": tribe_mean_similarity(
+            {"members_grouped_by_user": {u["user_id"]: u["products"] for u in users_out}}
+        ),
     }
 
 
@@ -939,6 +1030,7 @@ def build_tribe(
     hc_entries: dict[str, dict],
     sub_to_main: dict[str, str],
     global_keys: dict[tuple[str, str], str],
+    vg_scores: dict[str, float],
 ) -> dict | None:
     if domain == "healthcare":
         return build_healthcare_digital_tribe(
@@ -999,9 +1091,8 @@ def build_tribe(
     )
     tribe_key = (cluster, micro)
     users_out: list[dict] = []
-    prod_scores = product_accuracy_scores(cluster, micro)
+    prod_scores = product_accuracy_scores(cluster, micro, vg_scores=vg_scores)
     all_scores = {**hc_scores, **prod_scores}
-    sim_scores = user_similarity_scores(cluster, micro)
 
     if sgo:
         sgo_rows, products_source = sgo
@@ -1047,6 +1138,10 @@ def build_tribe(
             products = attach_best_predictions(
                 products, best_by_key, best_by_user_desc, user_id=uid
             )
+            for product in products:
+                rk = str(product.get("review_key") or "")
+                if rk in all_scores:
+                    product["overall_similarity_score"] = all_scores[rk]
             products = sort_products_by_performance(products, fallback_scores=all_scores)
             mean_sim = mean_product_score(products, fallback_scores=all_scores)
             user_history = build_user_history_reviews(
@@ -1059,7 +1154,7 @@ def build_tribe(
                     "category_characteristics": domain_category_characteristics(
                         uid, user_cat_chars, domain
                     ),
-                    "similarity_score": round(sim_scores.get(uid, mean_sim), 4),
+                    "similarity_score": round(mean_sim, 4),
                     "benchmark_product_count": benchmark_product_count,
                     "products": products,
                     "user_history_reviews": user_history,
@@ -1125,7 +1220,7 @@ def build_tribe(
                     "category_characteristics": domain_category_characteristics(
                         uid, user_cat_chars, domain
                     ),
-                    "similarity_score": round(sim_scores.get(uid, mean_sim), 4),
+                    "similarity_score": round(mean_sim, 4),
                     "benchmark_product_count": benchmark_product_count,
                     "products": products,
                     "user_history_reviews": user_history,
@@ -1188,6 +1283,9 @@ def build_tribe(
         "members_grouped_by_user": {u["user_id"]: u["products"] for u in users_out},
         "best_prediction_count": best_prediction_count,
         "product_count": product_count,
+        "mean_similarity_score": tribe_mean_similarity(
+            {"members_grouped_by_user": {u["user_id"]: u["products"] for u in users_out}}
+        ),
     }
 
 
@@ -1211,9 +1309,11 @@ def main() -> None:
     global_keys = load_global_review_key_index()
     print(f"Loaded {len(global_keys)} global review_key mappings")
     hc_by_tribe_user, hc_scores, hc_entries = load_healthcare_benchmark_index()
+    vg_scores = load_video_games_app_scores()
     selected_tribes, tribe_review_counts = select_tribes(sub_to_main, hc_by_tribe_user, hc_scores)
     print(f"Loaded category characteristics for {len(user_cat_chars)} users")
     print(f"Loaded {len(hc_entries)} healthcare benchmark reviews across {len(hc_by_tribe_user)} tribes")
+    print(f"Loaded {len(vg_scores)} video games UI similarity scores")
     print(
         f"Selected {sum(1 for d, _, _, _ in selected_tribes if d == 'healthcare')} healthcare (digital) + "
         f"{sum(1 for d, _, _, _ in selected_tribes if d == 'video_games')} video games tribes"
@@ -1249,6 +1349,7 @@ def main() -> None:
             hc_entries,
             sub_to_main,
             global_keys,
+            vg_scores,
         )
         if not tribe:
             continue
@@ -1274,6 +1375,7 @@ def main() -> None:
                 "friction": len(tribe["qualitative_summary"].get("friction_points") or []),
                 "goals": len(tribe["qualitative_summary"].get("implicit_goals") or []),
             },
+            "meanSimilarityScore": tribe.get("mean_similarity_score", 0.0),
         })
         built += 1
         print(
@@ -1286,6 +1388,8 @@ def main() -> None:
         if stale.stem not in built_ids:
             stale.unlink()
             print(f"Removed stale tribe file: {stale.name}")
+
+    index.sort(key=lambda t: (-float(t.get("meanSimilarityScore") or 0), -int(t.get("reviewCount") or 0)))
 
     with open(OUT_DIR / "catalog-index.json", "w", encoding="utf-8") as f:
         json.dump({"tribes": index, "total": built}, f, ensure_ascii=False, indent=2)
