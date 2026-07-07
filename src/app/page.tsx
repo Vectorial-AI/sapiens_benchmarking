@@ -1016,7 +1016,7 @@ function HistoryContextPanel({
         <div>
           <p className="text-[13px] font-medium text-foreground">User history sent as context</p>
           <p className="text-[11px] text-muted-2 mt-0.5">
-            Reviews from this user&apos;s history (review text only)
+            Other-category reviews only (excludes health &amp; beauty)
           </p>
         </div>
         <span className="text-[12px] text-muted shrink-0">

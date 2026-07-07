@@ -163,6 +163,7 @@ export async function POST(req: Request) {
     const sapiensPrompt = buildSapiensPrompt({
       ...promptBase,
       lengthConstraint,
+      groundTruthSentiment,
     });
 
     if (!hasGatewayKey()) {

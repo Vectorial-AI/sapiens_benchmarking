@@ -39,6 +39,9 @@ HEALTHCARE_ACCURACY_PATH = (
 VIDEO_GAMES_PERFORMANCE_PATH = (
     CLUSTERING / "Prediction_Accuracy_Refined" / "video_games_tribe_performance.json"
 )
+HIST_BASELINE_DIR = CLUSTERING / "micro_cluster_history_predictions_health_care"
+TRIBE_BASELINE_DIR = CLUSTERING / "micro_cluster_tribe_predictions_health_care"
+BASELINE_MODELS = ["claude-sonnet-4-6", "claude-opus-4-8", "gpt-5", "gpt-5.2", "gpt-5.5"]
 
 # Matches sapiens_benchmarking-main/src/lib/scoring.ts computePipelineMetrics
 APP_WEIGHT_TEXT = 0.25
@@ -50,6 +53,8 @@ MIN_VG_TRIBE_REVIEWS = 25
 TRIBES_PER_DOMAIN = 15
 HEALTH_MAIN = "Health & Personal Care"
 VIDEO_GAMES_MAIN = "Video Games"
+# History baseline for healthcare: exclude target category AND adjacent beauty reviews.
+HEALTHCARE_HISTORY_EXCLUDED_MAINS = frozenset({HEALTH_MAIN, "All Beauty"})
 
 SELECTED_TRIBES: list[tuple[str, str, str]] = []
 
@@ -195,6 +200,131 @@ def tribe_mean_similarity(tribe: dict) -> float:
     return round(sum(scores) / len(scores), 4) if scores else 0.0
 
 
+def _baseline_join_key(user_id: str, product_description: str) -> tuple[str, str]:
+    return (str(user_id), str(product_description).strip())
+
+
+def _norm_baseline_sentiment(value: Any) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip().lower()
+    if text in {"positive", "negative", "neutral"}:
+        return text.capitalize()
+    return None
+
+
+def _baseline_sentiment_score(gt: Any, pred: Any) -> float | None:
+    g, p = _norm_baseline_sentiment(gt), _norm_baseline_sentiment(pred)
+    if not g:
+        return None
+    if not p:
+        return 0.0
+    return 1.0 if g == p else 0.0
+
+
+def _baseline_overall_similarity(
+    text_delta: float | None,
+    recall_k: float | None,
+    sent_score: float | None,
+) -> float | None:
+    if text_delta is None or recall_k is None:
+        return None
+    text_sim = max(0.0, 1.0 - float(text_delta))
+    parts = [APP_WEIGHT_TEXT * text_sim, APP_WEIGHT_THEME * float(recall_k)]
+    if sent_score is not None:
+        parts.append(float(sent_score) * APP_WEIGHT_SENTIMENT)
+    return round(sum(parts), 4)
+
+
+def load_healthcare_sapiens_baseline_gaps(
+    hc_entries: dict[str, dict],
+    hc_scores: dict[str, float],
+) -> dict[str, float]:
+    """review_key -> (Sapiens ui score − best baseline score across all modes/models)."""
+    gt_sent_by_join: dict[tuple[str, str], Any] = {}
+    review_key_by_join: dict[tuple[str, str], str] = {}
+    for review_key, entry in hc_entries.items():
+        jk = _baseline_join_key(entry.get("user_id", ""), entry.get("product_description", ""))
+        gt_sent_by_join[jk] = (entry.get("ground_truth") or {}).get("sentiment")
+        review_key_by_join[jk] = review_key
+
+    best_by_join: dict[tuple[str, str], float] = {}
+
+    def ingest(paths: list[Path]) -> None:
+        for path in paths:
+            for entry in load_json(path).get("predictions") or []:
+                jk = _baseline_join_key(
+                    entry.get("user_id", ""),
+                    entry.get("product_description", ""),
+                )
+                metrics = entry.get("metrics") or {}
+                pred = entry.get("prediction") or {}
+                score = _baseline_overall_similarity(
+                    metrics.get("text_delta"),
+                    metrics.get("recall@k"),
+                    _baseline_sentiment_score(gt_sent_by_join.get(jk), pred.get("sentiment")),
+                )
+                if score is None:
+                    continue
+                best_by_join[jk] = max(best_by_join.get(jk, 0.0), score)
+
+    for model in BASELINE_MODELS:
+        ingest(sorted((HIST_BASELINE_DIR / model).glob("cluster_*/micro_*_confidence_history.json")))
+        ingest(sorted((TRIBE_BASELINE_DIR / model).glob("cluster_*/micro_*_confidence_tribe.json")))
+        ingest(
+            sorted(
+                (TRIBE_BASELINE_DIR / model).glob(
+                    "cluster_*/micro_*_confidence_category_generic_tribe.json"
+                )
+            )
+        )
+
+    gaps: dict[str, float] = {}
+    for jk, best_score in best_by_join.items():
+        review_key = review_key_by_join.get(jk)
+        if not review_key:
+            continue
+        sapiens_score = hc_scores.get(review_key)
+        if sapiens_score is None:
+            continue
+        gaps[review_key] = round(float(sapiens_score) - float(best_score), 4)
+    return gaps
+
+
+def tribe_mean_sapiens_baseline_gap(tribe: dict) -> float:
+    gaps: list[float] = []
+    grouped = tribe.get("members_grouped_by_user") or {}
+    for prods in grouped.values():
+        for product in prods:
+            gap = product.get("sapiens_baseline_gap")
+            if gap is not None:
+                gaps.append(float(gap))
+    return round(sum(gaps) / len(gaps), 4) if gaps else 0.0
+
+
+def sort_products_by_sapiens_gap(products: list[dict]) -> list[dict]:
+    return sorted(
+        products,
+        key=lambda p: (
+            -float(p.get("sapiens_baseline_gap") or 0),
+            str(p.get("review_key") or ""),
+        ),
+    )
+
+
+def sort_users_by_sapiens_gap(users: list[dict]) -> list[dict]:
+    def user_gap(user: dict) -> float:
+        product_gaps = [
+            float(p.get("sapiens_baseline_gap") or 0) for p in user.get("products") or []
+        ]
+        return max(product_gaps) if product_gaps else 0.0
+
+    return sorted(
+        users,
+        key=lambda u: (-user_gap(u), str(u.get("user_id") or "")),
+    )
+
+
 def load_healthcare_benchmark_index() -> tuple[
     dict[tuple[str, str], dict[str, list[dict]]],
     dict[str, float],
@@ -247,7 +377,12 @@ def load_healthcare_benchmark_index() -> tuple[
     return by_tribe_user, scores, entries
 
 
-def healthcare_product_from_entry(entry: dict, *, review_key: str) -> dict:
+def healthcare_product_from_entry(
+    entry: dict,
+    *,
+    review_key: str,
+    sapiens_baseline_gap: float | None = None,
+) -> dict:
     """Digital healthcare benchmark: GT for scoring/display, user history for Sapiens context."""
     gt = entry.get("ground_truth") or {}
     pred = entry.get("prediction") or {}
@@ -274,6 +409,8 @@ def healthcare_product_from_entry(entry: dict, *, review_key: str) -> dict:
         )
     if score is not None:
         product["overall_similarity_score"] = float(score)
+    if sapiens_baseline_gap is not None:
+        product["sapiens_baseline_gap"] = float(sapiens_baseline_gap)
     sub = entry.get("major_subcategory_label")
     if sub:
         product["major_subcategory"] = sub
@@ -777,8 +914,10 @@ def build_user_history_reviews(
     *,
     target_main: str,
     sub_to_main: dict[str, str],
+    excluded_mains: set[str] | frozenset[str] | None = None,
 ) -> list[dict]:
     """User review history from micro_cluster_details (for history baseline context)."""
+    excluded = set(excluded_mains if excluded_mains is not None else {target_main})
     details_path = CLUSTERING / "micro_cluster_details" / cluster / f"{micro}_details.json"
     if not details_path.exists():
         return []
@@ -789,7 +928,7 @@ def build_user_history_reviews(
     for r in reviews:
         cat = r.get("category", "")
         main = r.get("main_category") or sub_to_main.get(cat, cat)
-        if main == target_main:
+        if main in excluded:
             continue
         text = str(r.get("review_text") or "").strip()
         if not text:
@@ -884,6 +1023,7 @@ def build_healthcare_digital_tribe(
     user_cat_chars: dict[str, dict[str, str]],
     hc_by_tribe_user: dict[tuple[str, str], dict[str, list[dict]]],
     hc_scores: dict[str, float],
+    hc_gaps: dict[str, float],
     sub_to_main: dict[str, str],
     global_keys: dict[tuple[str, str], str],
 ) -> dict | None:
@@ -927,19 +1067,28 @@ def build_healthcare_digital_tribe(
             review_key = str(entry.get("review_key") or "").strip()
             if not review_key:
                 continue
-            product = healthcare_product_from_entry(entry, review_key=review_key)
+            product = healthcare_product_from_entry(
+                entry,
+                review_key=review_key,
+                sapiens_baseline_gap=hc_gaps.get(review_key),
+            )
             if not canonicalize_product_review_key(product, uid, global_keys):
                 product["review_key"] = review_key
             products.append(product)
 
-        products = sort_products_by_performance(products, fallback_scores=hc_scores)
+        products = sort_products_by_sapiens_gap(products)
         if not products:
             continue
 
-        mean_sim = mean_product_score(products, fallback_scores=hc_scores)
+        user_gap = max(float(p.get("sapiens_baseline_gap") or 0) for p in products)
 
         user_history = build_user_history_reviews(
-            cluster, micro, uid, target_main=HEALTH_MAIN, sub_to_main=sub_to_main
+            cluster,
+            micro,
+            uid,
+            target_main=HEALTH_MAIN,
+            sub_to_main=sub_to_main,
+            excluded_mains=HEALTHCARE_HISTORY_EXCLUDED_MAINS,
         )
         users_out.append(
             {
@@ -948,7 +1097,7 @@ def build_healthcare_digital_tribe(
                 "category_characteristics": domain_category_characteristics(
                     uid, user_cat_chars, "healthcare"
                 ),
-                "similarity_score": round(mean_sim, 4),
+                "similarity_score": round(user_gap, 4),
                 "benchmark_product_count": len(products),
                 "products": products,
                 "user_history_reviews": user_history,
@@ -958,7 +1107,7 @@ def build_healthcare_digital_tribe(
     if not users_out:
         return None
 
-    users_out = sort_users_by_performance(users_out)
+    users_out = sort_users_by_sapiens_gap(users_out)
 
     assert_products_have_global_keys(
         [{**p, "user_id": uid} for u in users_out for uid in [u["user_id"]] for p in u["products"]],
@@ -1015,6 +1164,9 @@ def build_healthcare_digital_tribe(
         "mean_similarity_score": tribe_mean_similarity(
             {"members_grouped_by_user": {u["user_id"]: u["products"] for u in users_out}}
         ),
+        "mean_sapiens_baseline_gap": tribe_mean_sapiens_baseline_gap(
+            {"members_grouped_by_user": {u["user_id"]: u["products"] for u in users_out}}
+        ),
     }
 
 
@@ -1027,6 +1179,7 @@ def build_tribe(
     user_cat_chars: dict[str, dict[str, str]],
     hc_by_tribe_user: dict[tuple[str, str], dict[str, list[dict]]],
     hc_scores: dict[str, float],
+    hc_gaps: dict[str, float],
     hc_entries: dict[str, dict],
     sub_to_main: dict[str, str],
     global_keys: dict[tuple[str, str], str],
@@ -1041,6 +1194,7 @@ def build_tribe(
             user_cat_chars,
             hc_by_tribe_user,
             hc_scores,
+            hc_gaps,
             sub_to_main,
             global_keys,
         )
@@ -1309,10 +1463,12 @@ def main() -> None:
     global_keys = load_global_review_key_index()
     print(f"Loaded {len(global_keys)} global review_key mappings")
     hc_by_tribe_user, hc_scores, hc_entries = load_healthcare_benchmark_index()
+    hc_gaps = load_healthcare_sapiens_baseline_gaps(hc_entries, hc_scores)
     vg_scores = load_video_games_app_scores()
     selected_tribes, tribe_review_counts = select_tribes(sub_to_main, hc_by_tribe_user, hc_scores)
     print(f"Loaded category characteristics for {len(user_cat_chars)} users")
     print(f"Loaded {len(hc_entries)} healthcare benchmark reviews across {len(hc_by_tribe_user)} tribes")
+    print(f"Loaded {len(hc_gaps)} healthcare Sapiens vs baseline gap scores")
     print(f"Loaded {len(vg_scores)} video games UI similarity scores")
     print(
         f"Selected {sum(1 for d, _, _, _ in selected_tribes if d == 'healthcare')} healthcare (digital) + "
@@ -1346,6 +1502,7 @@ def main() -> None:
             user_cat_chars,
             hc_by_tribe_user,
             hc_scores,
+            hc_gaps,
             hc_entries,
             sub_to_main,
             global_keys,
@@ -1376,6 +1533,7 @@ def main() -> None:
                 "goals": len(tribe["qualitative_summary"].get("implicit_goals") or []),
             },
             "meanSimilarityScore": tribe.get("mean_similarity_score", 0.0),
+            "meanSapiensBaselineGap": tribe.get("mean_sapiens_baseline_gap", 0.0),
         })
         built += 1
         print(
@@ -1389,7 +1547,17 @@ def main() -> None:
             stale.unlink()
             print(f"Removed stale tribe file: {stale.name}")
 
-    index.sort(key=lambda t: (-float(t.get("meanSimilarityScore") or 0), -int(t.get("reviewCount") or 0)))
+    index.sort(
+        key=lambda t: (
+            0 if t.get("domain") == "healthcare" else 1,
+            -float(
+                t.get("meanSapiensBaselineGap") or 0
+                if t.get("domain") == "healthcare"
+                else t.get("meanSimilarityScore") or 0
+            ),
+            -int(t.get("reviewCount") or 0),
+        )
+    )
 
     with open(OUT_DIR / "catalog-index.json", "w", encoding="utf-8") as f:
         json.dump({"tribes": index, "total": built}, f, ensure_ascii=False, indent=2)

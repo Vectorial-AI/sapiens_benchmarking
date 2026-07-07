@@ -60,11 +60,34 @@ const SENTIMENT_INSTRUCTION = `3. Classify the overall sentiment of your review 
    - Negative: clearly unfavorable overall; warns against buying
    - Neutral: mixed/balanced, mostly informational, or no clear verdict`;
 
-function predictionOutputBlock(themes: string[], themesKey: "themes" | "predicted_themes"): string {
+function expectedSentimentBlock(sentiment: ReviewSentiment | null | undefined): string {
+  if (!sentiment) return "";
+  return `### Expected Sentiment
+Write this review with an overall **${sentiment}** tone. Your review_text and JSON sentiment field must both reflect **${sentiment}**.
+
+`;
+}
+
+function sentimentInstruction(sentiment: ReviewSentiment | null | undefined): string {
+  if (!sentiment) return SENTIMENT_INSTRUCTION;
+  const toneHint =
+    sentiment === "Positive"
+      ? "clearly favorable overall; would recommend or repurchase"
+      : sentiment === "Negative"
+        ? "clearly unfavorable overall; warns against buying"
+        : "mixed/balanced, mostly informational, or no clear verdict";
+  return `3. Set sentiment to exactly **${sentiment}** — your review_text must match that overall tone (${toneHint}).`;
+}
+
+function predictionOutputBlock(
+  themes: string[],
+  themesKey: "themes" | "predicted_themes",
+  sentiment: ReviewSentiment | null = "Positive",
+): string {
   return `OUTPUT (JSON only):
 {
   "review_text": "...",
-  "sentiment": "Positive",
+  "sentiment": ${JSON.stringify(sentiment ?? "Positive")},
   "${themesKey}": {
 ${themesJson(themes)}
   }
@@ -101,6 +124,7 @@ function buildHealthcareSapiensPromptSections(args: {
   category: string;
   excludeReviewKey?: string;
   lengthConstraint: number;
+  groundTruthSentiment?: ReviewSentiment | null;
 }): string {
   const {
     tribe,
@@ -109,6 +133,7 @@ function buildHealthcareSapiensPromptSections(args: {
     productDescription,
     category,
     lengthConstraint,
+    groundTruthSentiment,
   } = args;
   const themes = themesForCategory(category);
   const userCharBlock = formatUserCharacteristics(user, category);
@@ -132,6 +157,8 @@ ${userCharBlock}
 `
       : "";
 
+  const expectedSentimentSection = expectedSentimentBlock(groundTruthSentiment);
+
   return `You are someone who belongs to ${tribe.name}.
 
 Respond ONLY with valid JSON.
@@ -143,24 +170,24 @@ Category: ${category}
 
 **The New Product:** ${productDescription}
 
-${userHistoryBlock}### Instructions
+${userHistoryBlock}${expectedSentimentSection}### Instructions
 1. Write review_text consistent with your user history above — match its tone, similar length, and the same theme emphasis. Shape it with your tribe traits and personal characteristics. Do not miss themes listed in your user history.
 2. After writing, infer which category themes are present in your review_text and provide confidence scores (0.0 to 1.0) for EACH theme listed below. Give high scores to themes you covered — especially those from your user history.
-${SENTIMENT_INSTRUCTION}
+${sentimentInstruction(groundTruthSentiment)}
 
 **Category Themes (you MUST score ALL of these):**
 ${bullets(themes)}
 
 **CRITICAL:**
 - Stay consistent with your user history review and its themes
-- Read review_text carefully — scores must match what you wrote
+${groundTruthSentiment ? `- Match the expected **${groundTruthSentiment}** sentiment in both review_text and the JSON sentiment field\n` : ""}- Read review_text carefully — scores must match what you wrote
 - Theme names must match EXACTLY as shown above (case-sensitive)
 - sentiment must be exactly: Positive, Negative, or Neutral
 - Do not exceed **${lengthConstraint}** words in review_text
 
 Provide the following in a single JSON object. Respond with *only* the JSON object and nothing else.
 
-${predictionOutputBlock(themes, "predicted_themes")}`;
+${predictionOutputBlock(themes, "predicted_themes", groundTruthSentiment ?? "Positive")}`;
 }
 
 /**
@@ -247,6 +274,7 @@ function buildSapiensPromptSections(args: {
   category: string;
   excludeReviewKey?: string;
   groundTruthThemes: string[];
+  groundTruthSentiment?: ReviewSentiment | null;
   lengthConstraint: number;
 }): string {
   if (args.tribe.domain === "healthcare") {
@@ -262,6 +290,7 @@ export function buildSapiensPrompt(args: {
   productDescription: string;
   category: string;
   groundTruthThemes: string[];
+  groundTruthSentiment?: ReviewSentiment | null;
   lengthConstraint: number;
   excludeReviewKey?: string;
 }): string {

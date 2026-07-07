@@ -51,6 +51,8 @@ export type CatalogTribeIndex = {
     friction: number;
     goals: number;
   };
+  meanSimilarityScore?: number;
+  meanSapiensBaselineGap?: number;
 };
 
 export type CatalogTribe = CatalogTribeIndex & {

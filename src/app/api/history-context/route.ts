@@ -23,6 +23,6 @@ export async function GET(req: Request) {
     items,
     count: items.length,
     targetCategory,
-    filter: "User history (review text only)",
+    filter: "Other-category reviews (excludes health & beauty)",
   });
 }
