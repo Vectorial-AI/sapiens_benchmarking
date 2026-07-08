@@ -58,6 +58,10 @@ VIDEO_GAMES_MAIN = "Video Games"
 SOFTWARE_MAIN = "Software"
 # History baseline for healthcare: exclude target category and All Beauty from primary context.
 HEALTHCARE_HISTORY_EXCLUDED_MAINS = frozenset({HEALTH_MAIN, "All Beauty"})
+# History baseline for video games/software: exclude both benchmark mains from primary context.
+VIDEO_GAMES_SOFTWARE_HISTORY_EXCLUDED_MAINS = frozenset(
+    {VIDEO_GAMES_MAIN, SOFTWARE_MAIN}
+)
 MAX_USER_HISTORY_REVIEWS = 6
 HISTORY_WORST_FALLBACK_REVIEWS = 3
 # Rank history · gpt-5 fallback candidates (worst = lowest score).
@@ -1834,7 +1838,7 @@ def build_video_games_software_benchmark_tribe(
             uid,
             target_main=VIDEO_GAMES_MAIN,
             sub_to_main=sub_to_main,
-            included_mains=VIDEO_GAMES_SOFTWARE_MAINS,
+            excluded_mains=VIDEO_GAMES_SOFTWARE_HISTORY_EXCLUDED_MAINS,
         )
         users_out.append(
             {

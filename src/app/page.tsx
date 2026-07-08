@@ -460,17 +460,6 @@ export default function Home() {
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-[11px] font-mono text-muted-2">#{i + 1}</span>
-                        {p.sapiensBaselineGap != null && p.sapiensBaselineGap > 0 && (
-                          <span className="text-[10px] font-medium text-accent">
-                            +{Math.round(p.sapiensBaselineGap * 100)}pp
-                          </span>
-                        )}
-                        {p.overallSimilarityScore != null &&
-                          (p.sapiensBaselineGap == null || p.sapiensBaselineGap <= 0) && (
-                          <span className="text-[10px] font-medium text-accent">
-                            {Math.round(p.overallSimilarityScore * 100)}% sim
-                          </span>
-                        )}
                       </div>
                       <p className="text-[13px] text-foreground leading-snug line-clamp-2">
                         {p.productDescription}
@@ -923,11 +912,6 @@ function UserSelectCard({
         <div className="flex items-center gap-2 mb-1">
           <span className="text-[11px] font-mono text-muted-2">#{index + 1}</span>
           <span className="text-[12.5px] font-medium text-foreground">Modelled user</span>
-          {user.similarityScore > 0 && (
-            <span className="text-[10px] font-medium text-accent">
-              +{Math.round(user.similarityScore * 100)}pp max
-            </span>
-          )}
         </div>
         {summary && (
           <p
@@ -1042,9 +1026,6 @@ function SapiensExplanationPanel({
           <p className="text-[13px] font-medium text-foreground">Why Sapiens wins</p>
           <p className="text-[12px] text-muted mt-1">
             vs {methodLabel} · {data.bestBaseline.model}
-            {data.sapiensBaselineGap != null && (
-              <> · +{fmtPct(data.sapiensBaselineGap)} gap</>
-            )}
           </p>
         </div>
         <span className="text-[12px] text-muted shrink-0">{open ? "Hide" : "Show"}</span>

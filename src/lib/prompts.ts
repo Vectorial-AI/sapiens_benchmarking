@@ -103,22 +103,22 @@ function resolveLengthConstraint(product: Product | null | undefined): number {
   return formatLengthConstraint(product?.groundTruthReview ?? "") ?? 250;
 }
 
-function referenceReviewSection(reviewText: string, themes: string[]): string {
+function referenceReviewSection(
+  reviewText: string,
+  themes: string[],
+  targetLengthWords: number | null,
+): string {
   const text = reviewText.trim();
-  if (!text && !themes.length) return "";
+  if (!text && !themes.length && !targetLengthWords) return "";
   const themeBlock = themes.length
-    ? `\n**Themes emphasized in the reference (you MUST cover all of these):**\n${bullets(themes)}\n`
+    ? `\n### Reference Themes\n${bullets(themes)}\n`
     : "";
-  const refWordCount = text ? wordCount(text) : null;
-  const lengthHint = refWordCount
-    ? `\n**Reference length:** ~${refWordCount} words — stay within ±15 words of this.\n`
+  const lengthBlock = targetLengthWords
+    ? `\n### Target Length\nDo not exceed **${targetLengthWords}** words in review_text.\n`
     : "";
-  return `### Reference Review (paraphrase this)
-This is a high-quality review for **this same product**. Your job is to **paraphrase** it: same meaning, same story, same perspective, similar length — with fresh wording.
-
-**Reference review:**
+  return `### Reference Review
 ${text || "(none)"}
-${themeBlock}${lengthHint}`;
+${themeBlock}${lengthBlock}`;
 }
 
 /**
@@ -146,7 +146,12 @@ function buildHealthcareSapiensPromptSections(args: {
   const tribeTraitsBlock = formatTribeTraitSections(tribe.qualitative);
   const userHistoryReview = getUserHistoryReview(product);
   const userHistoryThemes = getUserHistoryThemes(product);
-  const referenceBlock = referenceReviewSection(userHistoryReview, userHistoryThemes);
+  const targetLengthWords = formatLengthConstraint(product?.groundTruthReview ?? "");
+  const referenceBlock = referenceReviewSection(
+    userHistoryReview,
+    userHistoryThemes,
+    targetLengthWords,
+  );
   const tribeSection = tribeTraitsBlock
     ? `### Your Tribe (${tribe.name})
 Use these group traits when deciding what to notice and how to evaluate the product:
@@ -177,18 +182,18 @@ Category: ${category}
 **The New Product:** ${productDescription}
 
 ${referenceBlock}${expectedSentimentSection}### Instructions
-1. **Paraphrase the reference review above** for this product. Keep the same narrative (who bought it, for whom, what was tested), the same points in the same order, and a similar length. Use different wording — do NOT copy sentences verbatim, and do NOT invent a different story (e.g. do not change who the product is for or switch perspective).
-2. **Cover every theme listed in the reference** with clear, natural mentions in review_text. Do not drop or replace reference themes.
-3. After writing, score EACH category theme below (0.0 to 1.0) based on review_text. Give **high scores (≥0.8)** to themes from the reference review; score low only on themes you did not cover.
+1. Write a review similar to the reference review above for this product.
+2. Focus on the reference themes listed above.
+3. After writing, score EACH category theme below (0.0 to 1.0) based on review_text.
 ${sentimentInstruction(groundTruthSentiment)}
 
 **Category Themes (you MUST score ALL of these):**
 ${bullets(themes)}
 
 **CRITICAL:**
-- Paraphrase the reference review — same story and themes, fresh wording
-- Include ALL reference themes listed above
-${groundTruthSentiment ? `- Match the expected **${groundTruthSentiment}** sentiment in both review_text and the JSON sentiment field\n` : ""}- Read review_text carefully — scores must match what you wrote
+- Write something similar to the reference review
+- Focus on the reference themes
+${targetLengthWords ? `- Do not exceed **${targetLengthWords}** words in review_text\n` : ""}${groundTruthSentiment ? `- Match the expected **${groundTruthSentiment}** sentiment in both review_text and the JSON sentiment field\n` : ""}- Read review_text carefully — scores must match what you wrote
 - Theme names must match EXACTLY as shown above (case-sensitive)
 - sentiment must be exactly: Positive, Negative, or Neutral
 
@@ -272,7 +277,7 @@ ${predictionOutputBlock(themes, "predicted_themes")}`;
 
 /**
  * SAPIENS prompt routing (by tribe):
- * - healthcare → paraphrase reference review + reference themes (temp 0.2)
+ * - healthcare → reference review + reference themes + GT length cap
  * - blind_deploy_i2 (video games/software deploy) → full i2 prompt + GT+15 word cap
  * - video_games fallback → traits + user chars + GT+15 word cap
  */
