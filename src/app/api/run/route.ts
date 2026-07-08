@@ -46,6 +46,7 @@ async function runEngine(
   engine: "baseline" | "sapiens",
   prompt: string,
   model: string,
+  temperature = 0.8,
 ): Promise<EngineResult> {
   const start = Date.now();
   try {
@@ -53,7 +54,7 @@ async function runEngine(
       model,
       system: REVIEW_SYSTEM,
       prompt,
-      temperature: 0.8,
+      temperature,
     });
     const parsed = parsePredictionResponse(raw);
     return {
@@ -171,7 +172,8 @@ export async function POST(req: Request) {
         latencyMs: 0,
       };
     } else {
-      sapiens = await runEngine("sapiens", sapiensPrompt, SAPIENS_MODEL);
+      const sapiensTemperature = tribe.domain === "healthcare" ? 0.2 : 0.8;
+      sapiens = await runEngine("sapiens", sapiensPrompt, SAPIENS_MODEL, sapiensTemperature);
     }
 
     if (scoringGroundTruth) sapiens = await attachMetrics(sapiens, scoringGroundTruth);
