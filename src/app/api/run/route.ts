@@ -51,6 +51,7 @@ async function attachMetrics(
     groundTruthSentiment: groundTruth.sentiment,
     metrics,
     label,
+    engine: result.engine,
   });
   return { ...result, metrics, similarityExplanation };
 }

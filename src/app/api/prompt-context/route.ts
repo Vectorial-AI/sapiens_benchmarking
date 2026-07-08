@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCategoryThemes } from "@/lib/category-themes";
 import { findContext, getUserHistoryReview, getUserHistoryThemes, getUserHistoryThemeScores } from "@/lib/master";
 import { formatUserCharacteristics } from "@/lib/user-characteristics";
-import { formatLengthConstraint, referenceReviewForLength } from "@/lib/review-history";
+import { formatLengthConstraint, groundTruthLengthConstraint, referenceReviewForLength } from "@/lib/review-history";
 import { themeTopKFromGroundTruth } from "@/lib/scoring";
 
 export const runtime = "nodejs";
@@ -35,6 +35,7 @@ export async function GET(req: Request) {
   const userNormPopulated = Boolean(product?.userNormContext?.trim());
   const isHealthcare = tribe.domain === "healthcare";
   const lengthConstraintWords =
+    groundTruthLengthConstraint(product) ??
     formatLengthConstraint(referenceReviewForLength(product)) ??
     (!isHealthcare ? 250 : null);
 

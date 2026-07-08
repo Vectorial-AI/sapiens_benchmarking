@@ -1222,7 +1222,6 @@ function ResultCard({
           >
             <span className={`transition-transform text-[10px] ${detailsOpen ? "rotate-90" : ""}`}>▶</span>
             Themes &amp; sentiment
-            {themeTopK > 0 ? ` (top ${themeTopK})` : ""}
           </button>
           {detailsOpen && (
             <div className="mt-2 space-y-2">

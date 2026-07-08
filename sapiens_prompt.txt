@@ -74,7 +74,7 @@ HOW TO APPROACH THIS (work through these steps before you write)
 - Then assign theme confidence scores for ALL themes in Section 4 based on that review.
 
 ---
-Make sure not to cross the review **{length_constraint}** words.
+Write the review in exactly **{length_constraint}** words — the same length as the real review.
 
 ---
 YOUR TASK (two steps — do them in this order)

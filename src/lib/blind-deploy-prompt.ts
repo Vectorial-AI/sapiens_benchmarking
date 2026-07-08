@@ -4,7 +4,7 @@ import { getCategoryThemes } from "./category-themes";
 import type { Qualitative, ReviewSentiment } from "./types";
 import type { Product, Tribe, User } from "./master";
 import { formatUserCharacteristics } from "./user-characteristics";
-import { formatLengthConstraint, referenceReviewForLength } from "./review-history";
+import { formatLengthConstraint, groundTruthLengthConstraint, referenceReviewForLength } from "./review-history";
 
 const PROMPT_PATH = path.join(
   process.cwd(),
@@ -104,7 +104,9 @@ export function buildBlindDeployI2Prompt(args: {
     product?.groundTruthReview?.trim() ||
     referenceReviewForLength(product);
   const lengthConstraint =
-    formatLengthConstraint(lengthReference) ?? 250;
+    groundTruthLengthConstraint(product) ??
+    formatLengthConstraint(lengthReference) ??
+    250;
 
   let prompt = template
     .replaceAll("{persona_name}", tribe.name)

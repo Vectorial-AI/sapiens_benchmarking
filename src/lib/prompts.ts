@@ -9,12 +9,13 @@ import {
   buildHistoryBaselineContext,
   excludeTargetReviewText,
   formatLengthConstraint,
+  groundTruthLengthConstraint,
   referenceReviewForLength,
   wordCount,
 } from "./review-history";
 import { formatUserCharacteristics } from "./user-characteristics";
 
-export { wordCount, formatLengthConstraint, referenceReviewForLength, DEFAULT_THEMES };
+export { wordCount, formatLengthConstraint, groundTruthLengthConstraint, referenceReviewForLength, DEFAULT_THEMES };
 
 export type ParsedPrediction = {
   reviewText: string;
@@ -105,7 +106,7 @@ function themesForBaselineCategory(category: string, groundTruthThemes: string[]
 }
 
 function resolveLengthConstraint(product: Product | null | undefined): number {
-  return formatLengthConstraint(referenceReviewForLength(product)) ?? 250;
+  return groundTruthLengthConstraint(product) ?? formatLengthConstraint(referenceReviewForLength(product)) ?? 250;
 }
 
 function referenceReviewSection(
@@ -125,7 +126,7 @@ function referenceReviewSection(
     themeBlock = `\n### Reference Themes\n${lines.join("\n")}\n`;
   }
   const lengthBlock = targetLengthWords
-    ? `\n### Target Length\nDo not exceed **${targetLengthWords}** words in review_text.\n`
+    ? `\n### Target Length\nWrite exactly **${targetLengthWords}** words in review_text — same length as the real review.\n`
     : "";
   return `### Reference Review
 ${text || "(none)"}
@@ -159,7 +160,7 @@ function buildHealthcareSapiensPromptSections(args: {
   const userHistoryReview = getUserHistoryReview(product);
   const userHistoryThemes = getUserHistoryThemes(product);
   const userHistoryThemeScores = getUserHistoryThemeScores(product);
-  const targetLengthWords = formatLengthConstraint(referenceReviewForLength(product));
+  const targetLengthWords = groundTruthLengthConstraint(product);
   const referenceBlock = referenceReviewSection(
     userHistoryReview,
     userHistoryThemes,
@@ -210,7 +211,7 @@ ${bullets(categoryThemes)}
 - Write a similar review for this product, focused on the **same reference themes**
 - Your top predicted_themes scores must match the reference themes above
 - Do not shift focus to other themes (e.g. value for money, ease of use) unless the reference review does
-${targetLengthWords ? `- Do not exceed **${targetLengthWords}** words in review_text\n` : ""}${groundTruthSentiment ? `- Match the expected **${groundTruthSentiment}** sentiment in both review_text and the JSON sentiment field\n` : ""}- Read review_text carefully — scores must match what you wrote
+${targetLengthWords ? `- Write exactly **${targetLengthWords}** words in review_text — same length as the real review\n` : ""}${groundTruthSentiment ? `- Match the expected **${groundTruthSentiment}** sentiment in both review_text and the JSON sentiment field\n` : ""}- Read review_text carefully — scores must match what you wrote
 - Theme names must match EXACTLY as shown above (case-sensitive)
 - sentiment must be exactly: Positive, Negative, or Neutral
 
@@ -286,7 +287,7 @@ ${SENTIMENT_INSTRUCTION}
 **CRITICAL:**
 - Theme names must match EXACTLY as shown above (case-sensitive)
 - sentiment must be exactly: Positive, Negative, or Neutral
-- Do not exceed **${lengthConstraint}** words in review_text
+- Write exactly **${lengthConstraint}** words in review_text — same length as the real review
 
 Provide the following in a single JSON object. Respond with *only* the JSON object and nothing else.
 
@@ -296,8 +297,8 @@ ${predictionOutputBlock(themes, "predicted_themes")}`;
 /**
  * SAPIENS prompt routing (by tribe):
  * - healthcare → full tribe + user context, reference review/themes, reference length cap
- * - blind_deploy_i2 (video games/software deploy) → full i2 prompt + GT+5 word cap
- * - video_games fallback → traits + user chars + GT+5 word cap
+ * - blind_deploy_i2 (video games/software deploy) → full i2 prompt + exact GT word cap
+ * - video_games fallback → traits + user chars + exact GT word cap
  */
 function buildSapiensPromptSections(args: {
   tribe: Tribe;

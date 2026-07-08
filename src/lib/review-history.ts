@@ -3,7 +3,7 @@
 import type { HistoryContextItem } from "./types";
 import { mapCategoryToMain } from "./category-themes";
 
-export const DEFAULT_LENGTH_MARGIN_WORDS = 5;
+export const DEFAULT_LENGTH_MARGIN_WORDS = 0;
 export const MAX_CHARS_PER_REVIEW = 900;
 
 export type ReviewHistoryProduct = {
@@ -17,7 +17,7 @@ export function wordCount(text: string): number {
   return (text.trim().match(/\S+/g) ?? []).length;
 }
 
-/** Max word count = reference review words + margin (pipeline default margin = 5). */
+/** Max word count = reference review words (+ optional margin; default margin = 0 = exact GT length). */
 export function formatLengthConstraint(
   referenceText: string,
   margin = DEFAULT_LENGTH_MARGIN_WORDS,
@@ -25,6 +25,15 @@ export function formatLengthConstraint(
   const trimmed = referenceText.trim();
   if (!trimmed) return null;
   return wordCount(trimmed) + margin;
+}
+
+/** Word cap from ground-truth review only — exact length, no margin. */
+export function groundTruthLengthConstraint(
+  product: { groundTruthReview?: string } | null | undefined,
+): number | null {
+  const gt = product?.groundTruthReview?.trim();
+  if (!gt) return null;
+  return wordCount(gt);
 }
 
 /** Reference review text for length cap — prefer user history / best pred over held-out GT. */
