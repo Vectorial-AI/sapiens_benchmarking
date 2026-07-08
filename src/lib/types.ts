@@ -122,43 +122,6 @@ export type BaselineRunResponse = {
   metricsSource?: "pipeline" | "mock";
 };
 
-export type SapiensExplanationMetricDriver = {
-  metric: string;
-  sapiens_value: string;
-  baseline_value: string;
-  impact: string;
-};
-
-export type SapiensExplanationExample = {
-  aspect: string;
-  ground_truth: string;
-  sapiens: string;
-  baseline: string;
-};
-
-export type SapiensExplanationContent = {
-  headline: string;
-  summary: string;
-  metric_drivers?: SapiensExplanationMetricDriver[];
-  why_sapiens_wins?: string[];
-  baseline_gaps?: string[];
-  concrete_examples?: SapiensExplanationExample[];
-};
-
-export type SapiensBaselineExplanation = {
-  reviewKey: string;
-  productDescription: string;
-  sapiensOverallSimilarity: number | null;
-  sapiensBaselineGap: number | null;
-  bestBaseline: {
-    method: BaselineMethod | string;
-    model: string;
-    overallSimilarity: number | null;
-    reviewText: string;
-  };
-  explanation: SapiensExplanationContent;
-};
-
 export const TRAIT_GROUP_LABELS: Record<keyof Qualitative, string> = {
   inherentBehavioralTraits: "Inherent behavioral traits",
   latentMotivations: "Latent motivations",

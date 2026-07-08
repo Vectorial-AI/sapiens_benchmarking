@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCategoryThemes } from "@/lib/category-themes";
 import { findContext, getUserHistoryReview, getUserHistoryThemes } from "@/lib/master";
 import { formatUserCharacteristics } from "@/lib/user-characteristics";
-import { formatLengthConstraint } from "@/lib/review-history";
+import { formatLengthConstraint, referenceReviewForLength } from "@/lib/review-history";
 
 export const runtime = "nodejs";
 
@@ -31,9 +31,9 @@ export async function GET(req: Request) {
   const leaveOneOutCount = product?.leaveOneOutHistoryReviews?.length ?? 0;
   const userNormPopulated = Boolean(product?.userNormContext?.trim());
   const isHealthcare = tribe.domain === "healthcare";
-  const lengthConstraintWords = !isHealthcare
-    ? formatLengthConstraint(product?.groundTruthReview ?? "") ?? 250
-    : null;
+  const lengthConstraintWords =
+    formatLengthConstraint(referenceReviewForLength(product)) ??
+    (!isHealthcare ? 250 : null);
 
   return NextResponse.json({
     category,

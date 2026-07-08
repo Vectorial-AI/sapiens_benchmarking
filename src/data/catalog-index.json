@@ -367,9 +367,9 @@
       "cluster": "cluster_0",
       "microId": "micro_9",
       "domain": "video_games",
-      "reviewCount": 56,
+      "reviewCount": 29,
       "description": "A tribe of pragmatic value gamers who judge products through a gaming and entertainment lens. They generally prioritize practical results, value for money.",
-      "userCount": 24,
+      "userCount": 19,
       "traitSource": "outputs/amazon_sgo_health_care/cluster_0/micro_9/evolution/state_history/000008_refine_after_iteration_2_batch_31.json",
       "dataSources": {
         "users": "Clustering/micro_cluster_details_video_games_software/cluster_0/micro_9_details.json + outputs/amazon_sgo_health_care/cluster_0/micro_9/blind_run_i2.json",
@@ -389,8 +389,8 @@
         "friction": 0,
         "goals": 3
       },
-      "meanSimilarityScore": 0.826,
-      "meanSapiensBaselineGap": 0.0
+      "meanSimilarityScore": 0.7789,
+      "meanSapiensBaselineGap": 0.1394
     }
   ],
   "total": 13

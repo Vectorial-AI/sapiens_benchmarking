@@ -17,14 +17,22 @@ export function wordCount(text: string): number {
   return (text.trim().match(/\S+/g) ?? []).length;
 }
 
-/** Max word count = GT words + margin (pipeline default margin = 15). */
+/** Max word count = reference review words + margin (pipeline default margin = 15). */
 export function formatLengthConstraint(
-  gtText: string,
+  referenceText: string,
   margin = DEFAULT_LENGTH_MARGIN_WORDS,
 ): number | null {
-  const trimmed = gtText.trim();
+  const trimmed = referenceText.trim();
   if (!trimmed) return null;
   return wordCount(trimmed) + margin;
+}
+
+/** Reference review text for length cap — prefer user history / best pred over held-out GT. */
+export function referenceReviewForLength(product: {
+  userHistoryReview?: string;
+  groundTruthReview?: string;
+} | null | undefined): string {
+  return product?.userHistoryReview?.trim() || product?.groundTruthReview?.trim() || "";
 }
 
 /**

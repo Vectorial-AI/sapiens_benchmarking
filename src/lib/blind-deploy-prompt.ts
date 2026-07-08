@@ -4,7 +4,7 @@ import { getCategoryThemes } from "./category-themes";
 import type { Qualitative, ReviewSentiment } from "./types";
 import type { Product, Tribe, User } from "./master";
 import { formatUserCharacteristics } from "./user-characteristics";
-import { formatLengthConstraint } from "./review-history";
+import { formatLengthConstraint, referenceReviewForLength } from "./review-history";
 
 const PROMPT_PATH = path.join(
   process.cwd(),
@@ -76,7 +76,7 @@ function formatLeaveOneOutHistory(product: Product | null): string {
 const themesJson = (themes: string[]) =>
   themes.map((t) => `    ${JSON.stringify(t)}: 0.0`).join(",\n");
 
-/** Video games / software blind deploy i2 — GT+15 word cap (no reference review in prompt). */
+/** Video games / software blind deploy i2 — reference review + margin word cap. */
 export function buildBlindDeployI2Prompt(args: {
   tribe: Tribe;
   user: User;
@@ -100,7 +100,7 @@ export function buildBlindDeployI2Prompt(args: {
   const userGapSection = formatUserGapSection(product?.userNormContext ?? "");
   const leaveOneOut = formatLeaveOneOutHistory(product);
   const lengthConstraint =
-    formatLengthConstraint(product?.groundTruthReview ?? "") ?? 250;
+    formatLengthConstraint(referenceReviewForLength(product)) ?? 250;
 
   let prompt = template
     .replaceAll("{persona_name}", tribe.name)

@@ -9,11 +9,12 @@ import {
   buildHistoryBaselineContext,
   excludeTargetReviewText,
   formatLengthConstraint,
+  referenceReviewForLength,
   wordCount,
 } from "./review-history";
 import { formatUserCharacteristics } from "./user-characteristics";
 
-export { wordCount, formatLengthConstraint, DEFAULT_THEMES };
+export { wordCount, formatLengthConstraint, referenceReviewForLength, DEFAULT_THEMES };
 
 export type ParsedPrediction = {
   reviewText: string;
@@ -100,7 +101,7 @@ function themesForCategory(category: string): string[] {
 }
 
 function resolveLengthConstraint(product: Product | null | undefined): number {
-  return formatLengthConstraint(product?.groundTruthReview ?? "") ?? 250;
+  return formatLengthConstraint(referenceReviewForLength(product)) ?? 250;
 }
 
 function referenceReviewSection(
@@ -146,7 +147,7 @@ function buildHealthcareSapiensPromptSections(args: {
   const tribeTraitsBlock = formatTribeTraitSections(tribe.qualitative);
   const userHistoryReview = getUserHistoryReview(product);
   const userHistoryThemes = getUserHistoryThemes(product);
-  const targetLengthWords = formatLengthConstraint(product?.groundTruthReview ?? "");
+  const targetLengthWords = formatLengthConstraint(referenceReviewForLength(product));
   const referenceBlock = referenceReviewSection(
     userHistoryReview,
     userHistoryThemes,

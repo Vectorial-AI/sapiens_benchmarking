@@ -10,8 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "build-catalog": "python3 scripts/build-catalog.py",
-    "generate-explanations": "python3 scripts/generate-sapiens-explanations.py"
+    "build-catalog": "python3 scripts/build-catalog.py"
   },
   "dependencies": {
     "@ai-sdk/react": "^4.0.16",
