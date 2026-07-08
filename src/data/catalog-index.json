@@ -17,6 +17,9 @@
         "traits": "evolution_state.json",
         "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
       },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
       "traitCounts": {
         "behavioral": 38,
         "motivations": 4,
@@ -44,6 +47,9 @@
         "traits": "evolution_state.json",
         "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
       },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
       "traitCounts": {
         "behavioral": 10,
         "motivations": 4,
@@ -71,6 +77,9 @@
         "traits": "evolution_state.json",
         "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
       },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
       "traitCounts": {
         "behavioral": 10,
         "motivations": 6,
@@ -98,6 +107,9 @@
         "traits": "evolution_state.json",
         "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
       },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
       "traitCounts": {
         "behavioral": 19,
         "motivations": 7,
@@ -125,6 +137,9 @@
         "traits": "evolution_state.json",
         "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
       },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
       "traitCounts": {
         "behavioral": 7,
         "motivations": 6,
@@ -152,6 +167,9 @@
         "traits": "evolution_state.json",
         "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
       },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
       "traitCounts": {
         "behavioral": 10,
         "motivations": 7,
@@ -179,6 +197,9 @@
         "traits": "evolution_state.json",
         "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
       },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
       "traitCounts": {
         "behavioral": 9,
         "motivations": 3,
@@ -206,6 +227,9 @@
         "traits": "evolution_state.json",
         "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
       },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
       "traitCounts": {
         "behavioral": 9,
         "motivations": 6,
@@ -233,6 +257,9 @@
         "traits": "evolution_state.json",
         "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
       },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
       "traitCounts": {
         "behavioral": 9,
         "motivations": 6,
@@ -260,6 +287,9 @@
         "traits": "evolution_state.json",
         "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
       },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
       "traitCounts": {
         "behavioral": 10,
         "motivations": 6,
@@ -287,6 +317,9 @@
         "traits": "evolution_state.json",
         "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
       },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
       "traitCounts": {
         "behavioral": 10,
         "motivations": 3,
@@ -303,17 +336,21 @@
       "cluster": "cluster_0",
       "microId": "micro_0",
       "domain": "video_games",
-      "reviewCount": 22,
+      "reviewCount": 18,
       "description": "A tribe of pragmatic value advocates who speak up for what matters to them and guide others with opinionated feedback. They generally prioritize practical results, value for money.",
-      "userCount": 15,
-      "traitSource": "evolution_state.json",
+      "userCount": 13,
+      "traitSource": "outputs/amazon_sgo_health_care/cluster_0/micro_0/evolution/state_history/000006_refine_after_iteration_2_batch_22.json",
       "dataSources": {
-        "users": "Clustering/micro_cluster_details_video_games_software/cluster_0/micro_0_details.json + outputs/amazon_sgo_health_care/cluster_0/micro_0/best_delta_predictions.json",
-        "products": "outputs/amazon_sgo_health_care/cluster_0/micro_0/best_delta_predictions.json",
-        "similarity": "outputs/amazon_sgo_health_care/cluster_0/micro_0/sapiens_vs_baselines_analysis.json",
-        "traits": "evolution_state.json",
-        "best_predictions": "outputs/amazon_sgo_health_care/cluster_0/micro_0/best_delta_predictions.json"
+        "users": "Clustering/micro_cluster_details_video_games_software/cluster_0/micro_0_details.json + outputs/amazon_sgo_health_care/cluster_0/micro_0/blind_run_i2.json",
+        "products": "outputs/amazon_sgo_health_care/cluster_0/micro_0/blind_run_i2.json",
+        "similarity": "outputs/amazon_sgo_health_care/cluster_0/micro_0/i0_deltas_blind_run_i2.json",
+        "traits": "outputs/amazon_sgo_health_care/cluster_0/micro_0/evolution/state_history/000006_refine_after_iteration_2_batch_22.json",
+        "best_predictions": "outputs/amazon_sgo_health_care/cluster_0/micro_0/blind_run_i2.json",
+        "user_norms": "outputs/amazon_sgo_health_care/cluster_0/micro_0/user_norms/user_norms_after_i2.json"
       },
+      "deployCheckpoint": "blind_i2",
+      "deployIteration": 2,
+      "sapiensPromptMode": "blind_deploy_i2",
       "traitCounts": {
         "behavioral": 9,
         "motivations": 3,
@@ -321,9 +358,40 @@
         "friction": 0,
         "goals": 3
       },
-      "meanSimilarityScore": 0.8663,
-      "meanSapiensBaselineGap": 0.4132
+      "meanSimilarityScore": 0.8585,
+      "meanSapiensBaselineGap": 0.433
+    },
+    {
+      "id": "cluster_0-micro_9",
+      "name": "Pragmatic Value Gamers",
+      "cluster": "cluster_0",
+      "microId": "micro_9",
+      "domain": "video_games",
+      "reviewCount": 56,
+      "description": "A tribe of pragmatic value gamers who judge products through a gaming and entertainment lens. They generally prioritize practical results, value for money.",
+      "userCount": 24,
+      "traitSource": "outputs/amazon_sgo_health_care/cluster_0/micro_9/evolution/state_history/000008_refine_after_iteration_2_batch_31.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details_video_games_software/cluster_0/micro_9_details.json + outputs/amazon_sgo_health_care/cluster_0/micro_9/blind_run_i2.json",
+        "products": "outputs/amazon_sgo_health_care/cluster_0/micro_9/blind_run_i2.json",
+        "similarity": "outputs/amazon_sgo_health_care/cluster_0/micro_9/i0_deltas_blind_run_i2.json",
+        "traits": "outputs/amazon_sgo_health_care/cluster_0/micro_9/evolution/state_history/000008_refine_after_iteration_2_batch_31.json",
+        "best_predictions": "outputs/amazon_sgo_health_care/cluster_0/micro_9/blind_run_i2.json",
+        "user_norms": "outputs/amazon_sgo_health_care/cluster_0/micro_9/user_norms/user_norms_after_i2.json"
+      },
+      "deployCheckpoint": "blind_i2",
+      "deployIteration": 2,
+      "sapiensPromptMode": "blind_deploy_i2",
+      "traitCounts": {
+        "behavioral": 11,
+        "motivations": 1,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      },
+      "meanSimilarityScore": 0.826,
+      "meanSapiensBaselineGap": 0.0
     }
   ],
-  "total": 12
+  "total": 13
 }

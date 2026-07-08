@@ -21,6 +21,10 @@ type RawReview = {
   best_prediction_themes?: string[];
   healthcare_benchmark?: boolean;
   video_games_benchmark?: boolean;
+  sapiens_baseline_gap?: number;
+  overall_similarity_score?: number;
+  user_norm_context?: string;
+  leave_one_out_history_reviews?: Array<string | { review_text: string }>;
 };
 type RawTribe = {
   id: string;
@@ -32,6 +36,10 @@ type RawTribe = {
   tribe_definition: string;
   population_definition: string;
   trait_source: string;
+  deploy_checkpoint?: string;
+  deploy_iteration?: number;
+  sapiens_prompt_mode?: string;
+  catalog_sort_by?: string;
   data_sources?: {
     users: string;
     products: string;
@@ -76,6 +84,10 @@ export type Product = {
   historyBaselineContextReviews?: string[];
   healthcareBenchmark?: boolean;
   videoGamesBenchmark?: boolean;
+  sapiensBaselineGap?: number;
+  overallSimilarityScore?: number;
+  userNormContext?: string;
+  leaveOneOutHistoryReviews?: string[];
 };
 
 /** User history review text for healthcare Sapiens context. */
@@ -124,6 +136,9 @@ export type Tribe = {
     similarity: string;
     traits: string;
   };
+  sapiensPromptMode?: string;
+  deployCheckpoint?: string;
+  deployIteration?: number;
   qualitative: Qualitative;
   users: User[];
 };
@@ -139,6 +154,13 @@ function normalizeQualitative(raw: RawTribe["qualitative_summary"]): Qualitative
     frictionPoints: q.friction_points ?? [],
     implicitGoals: (q.implicit_goals ?? []).map((t) => t.text),
   };
+}
+
+function productSortScore(p: Product, sortMode: string): number {
+  if (sortMode === "overall_similarity") {
+    return p.overallSimilarityScore ?? 0;
+  }
+  return p.sapiensBaselineGap ?? 0;
 }
 
 function normalizeProduct(r: RawReview): Product {
@@ -163,6 +185,19 @@ function normalizeProduct(r: RawReview): Product {
       .filter(Boolean),
     healthcareBenchmark: Boolean(r.healthcare_benchmark),
     videoGamesBenchmark: Boolean(r.video_games_benchmark),
+    sapiensBaselineGap:
+      typeof r.sapiens_baseline_gap === "number" ? r.sapiens_baseline_gap : undefined,
+    overallSimilarityScore:
+      typeof r.overall_similarity_score === "number"
+        ? r.overall_similarity_score
+        : undefined,
+    userNormContext: r.user_norm_context?.trim() || undefined,
+    leaveOneOutHistoryReviews: (r.leave_one_out_history_reviews ?? [])
+      .map((item) => {
+        if (typeof item === "string") return item.trim();
+        return String(item.review_text ?? "").trim();
+      })
+      .filter(Boolean),
   };
 }
 
@@ -180,9 +215,16 @@ function normalizeUserHistoryReviews(
 }
 
 function normalizeTribe(raw: RawTribe): Tribe {
+  const sortMode = raw.catalog_sort_by ?? "baseline_gap";
+
   const users: User[] = raw.member_user_characteristics.map((u) => {
     const reviews = raw.members_grouped_by_user[u.user_id] ?? [];
     const products: Product[] = reviews.map(normalizeProduct);
+    products.sort(
+      (a, b) =>
+        productSortScore(b, sortMode) - productSortScore(a, sortMode) ||
+        a.reviewKey.localeCompare(b.reviewKey),
+    );
     const userHistoryReviews = normalizeUserHistoryReviews(
       u.user_history_reviews ?? u.history_noise_reviews,
     );
@@ -209,6 +251,9 @@ function normalizeTribe(raw: RawTribe): Tribe {
     populationDefinition: raw.population_definition,
     traitSource: raw.trait_source,
     dataSources: raw.data_sources,
+    sapiensPromptMode: raw.sapiens_prompt_mode,
+    deployCheckpoint: raw.deploy_checkpoint,
+    deployIteration: raw.deploy_iteration,
     qualitative: normalizeQualitative(raw.qualitative_summary),
     users,
   };
@@ -258,6 +303,9 @@ export function getCatalogTribe(id: string): CatalogTribe | undefined {
     tribeDefinition: tribe.tribeDefinition,
     populationDefinition: tribe.populationDefinition,
     dataSources: tribe.dataSources ?? idx.dataSources,
+    sapiensPromptMode: tribe.sapiensPromptMode ?? idx.sapiensPromptMode,
+    deployCheckpoint: tribe.deployCheckpoint ?? idx.deployCheckpoint,
+    deployIteration: tribe.deployIteration ?? idx.deployIteration,
     users: tribe.users.map((u) => ({
       id: u.id,
       characteristicSummary: u.characteristicSummary,
@@ -269,6 +317,8 @@ export function getCatalogTribe(id: string): CatalogTribe | undefined {
         category: p.category,
         healthcareBenchmark: p.healthcareBenchmark,
         videoGamesBenchmark: p.videoGamesBenchmark,
+        sapiensBaselineGap: p.sapiensBaselineGap,
+        overallSimilarityScore: p.overallSimilarityScore,
       })),
     })),
   };

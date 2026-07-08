@@ -40,8 +40,7 @@ const STEPS = [
 
 function defaultReviewKeyForUser(user: CatalogTribe["users"][number] | null | undefined): string | null {
   if (!user?.products.length) return null;
-  const benchmark = user.products.find((p) => p.healthcareBenchmark || p.videoGamesBenchmark);
-  return benchmark?.reviewKey ?? user.products[0]?.reviewKey ?? null;
+  return user.products[0]?.reviewKey ?? null;
 }
 
 export default function Home() {
@@ -449,7 +448,7 @@ export default function Home() {
             {step === 2 && user && tribe && (
               <div className="space-y-4">
                 <div className="space-y-2 max-h-[20rem] overflow-y-auto pr-1">
-                  {user.products.map((p) => (
+                  {user.products.map((p, i) => (
                     <button
                       key={p.reviewKey}
                       onClick={() => selectProduct(p.reviewKey)}
@@ -459,6 +458,20 @@ export default function Home() {
                           : "border-border hover:border-border-strong"
                       }`}
                     >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] font-mono text-muted-2">#{i + 1}</span>
+                        {p.sapiensBaselineGap != null && p.sapiensBaselineGap > 0 && (
+                          <span className="text-[10px] font-medium text-accent">
+                            +{Math.round(p.sapiensBaselineGap * 100)}pp
+                          </span>
+                        )}
+                        {p.overallSimilarityScore != null &&
+                          (p.sapiensBaselineGap == null || p.sapiensBaselineGap <= 0) && (
+                          <span className="text-[10px] font-medium text-accent">
+                            {Math.round(p.overallSimilarityScore * 100)}% sim
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[13px] text-foreground leading-snug line-clamp-2">
                         {p.productDescription}
                       </p>
@@ -910,6 +923,11 @@ function UserSelectCard({
         <div className="flex items-center gap-2 mb-1">
           <span className="text-[11px] font-mono text-muted-2">#{index + 1}</span>
           <span className="text-[12.5px] font-medium text-foreground">Modelled user</span>
+          {user.similarityScore > 0 && (
+            <span className="text-[10px] font-medium text-accent">
+              +{Math.round(user.similarityScore * 100)}pp max
+            </span>
+          )}
         </div>
         {summary && (
           <p

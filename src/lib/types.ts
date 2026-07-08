@@ -17,6 +17,8 @@ export type CatalogProduct = {
   groundTruthSentiment?: ReviewSentiment | null;
   healthcareBenchmark?: boolean;
   videoGamesBenchmark?: boolean;
+  sapiensBaselineGap?: number;
+  overallSimilarityScore?: number;
 };
 
 export type CatalogUser = {
@@ -54,6 +56,9 @@ export type CatalogTribeIndex = {
   };
   meanSimilarityScore?: number;
   meanSapiensBaselineGap?: number;
+  deployCheckpoint?: string;
+  deployIteration?: number;
+  sapiensPromptMode?: string;
 };
 
 export type CatalogTribe = CatalogTribeIndex & {
@@ -61,6 +66,9 @@ export type CatalogTribe = CatalogTribeIndex & {
   tribeDefinition: string;
   populationDefinition: string;
   users: CatalogUser[];
+  sapiensPromptMode?: string;
+  deployCheckpoint?: string;
+  deployIteration?: number;
 };
 
 export type HistoryContextItem = {

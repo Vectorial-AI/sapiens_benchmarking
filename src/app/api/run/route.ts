@@ -15,9 +15,6 @@ import {
   parsePredictionResponse,
   REVIEW_SYSTEM,
 } from "@/lib/prompts";
-import {
-  formatLengthConstraint,
-} from "@/lib/review-history";
 import { hasGatewayKey, mockPrediction, runModel } from "@/lib/ai";
 import { scorePredictionAgainstGroundTruth } from "@/lib/scoring";
 import type { EngineResult, ReviewSentiment, RunMode } from "@/lib/types";
@@ -136,8 +133,6 @@ export async function POST(req: Request) {
   const groundTruth = product?.groundTruthReview ?? null;
   const groundTruthThemes = product?.predictedThemes ?? [];
   const groundTruthSentiment = product?.groundTruthSentiment ?? null;
-  const lengthConstraint =
-    formatLengthConstraint(groundTruth ?? "") ?? 250;
 
   const scoringGroundTruth: ScoringGroundTruth =
     groundTruth && groundTruth.trim()
@@ -162,7 +157,6 @@ export async function POST(req: Request) {
 
     const sapiensPrompt = buildSapiensPrompt({
       ...promptBase,
-      lengthConstraint,
       groundTruthSentiment,
     });
 

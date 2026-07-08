@@ -65,14 +65,48 @@ HISTORY_RANK_WEIGHT_TEXT = 0.3
 HISTORY_RANK_WEIGHT_THEME = 0.7
 # UI catalog: only healthcare reviews where Sapiens beats best baseline by >10pp.
 MIN_UI_SAPIENS_BASELINE_GAP = 0.10
-VIDEO_GAMES_BENCHMARK_CLUSTER = "cluster_0"
-VIDEO_GAMES_BENCHMARK_MICRO = "micro_0"
 VIDEO_GAMES_SOFTWARE_DETAILS_DIR = CLUSTERING / "micro_cluster_details_video_games_software"
 VIDEO_GAMES_SOFTWARE_MAINS = frozenset({VIDEO_GAMES_MAIN, SOFTWARE_MAIN})
-SAPIENS_VS_BASELINES_VG_PATH = (
-    OUTPUTS / "amazon_sgo_health_care/cluster_0/micro_0/sapiens_vs_baselines_analysis.json"
-)
-BEST_DELTA_VG_PATH = OUTPUTS / "amazon_sgo_health_care/cluster_0/micro_0/best_delta_predictions.json"
+MAX_SAME_CATEGORY_HISTORY_REVIEWS = 3
+MAX_HISTORY_CHARS_PER_REVIEW = 900
+
+# Per-tribe deployable benchmark configs (each tribe can differ).
+TRIBE_BENCHMARK_CONFIGS: dict[tuple[str, str], dict[str, Any]] = {
+    ("cluster_0", "micro_0"): {
+        "blind_run_i2": OUTPUTS / "amazon_sgo_health_care/cluster_0/micro_0/blind_run_i2.json",
+        "deltas_i2": OUTPUTS / "amazon_sgo_health_care/cluster_0/micro_0/i0_deltas_blind_run_i2.json",
+        "user_norms_i2": OUTPUTS / "amazon_sgo_health_care/cluster_0/micro_0/user_norms/user_norms_after_i2.json",
+        "baseline_analysis": OUTPUTS
+        / "amazon_sgo_health_care/cluster_0/micro_0/sapiens_vs_baselines_analysis.json",
+        "evolution_i2": OUTPUTS
+        / "amazon_sgo_health_care/cluster_0/micro_0/evolution/state_history/000006_refine_after_iteration_2_batch_22.json",
+        "filter_mode": "baseline_gap",
+        "min_baseline_gap": MIN_UI_SAPIENS_BASELINE_GAP,
+        "min_overall_similarity": 0.0,
+        "sort_by": "baseline_gap",
+        "catalog_sort_by": "baseline_gap",
+        "sapiens_prompt_mode": "blind_deploy_i2",
+        "deploy_checkpoint": "blind_i2",
+        "deploy_iteration": 2,
+    },
+    ("cluster_0", "micro_9"): {
+        "blind_run_i2": OUTPUTS / "amazon_sgo_health_care/cluster_0/micro_9/blind_run_i2.json",
+        "deltas_i2": OUTPUTS / "amazon_sgo_health_care/cluster_0/micro_9/i0_deltas_blind_run_i2.json",
+        "user_norms_i2": OUTPUTS
+        / "amazon_sgo_health_care/cluster_0/micro_9/user_norms/user_norms_after_i2.json",
+        "baseline_analysis": None,
+        "evolution_i2": OUTPUTS
+        / "amazon_sgo_health_care/cluster_0/micro_9/evolution/state_history/000008_refine_after_iteration_2_batch_31.json",
+        "filter_mode": "overall_similarity",
+        "min_baseline_gap": 0.0,
+        "min_overall_similarity": 0.65,
+        "sort_by": "overall_similarity",
+        "catalog_sort_by": "overall_similarity",
+        "sapiens_prompt_mode": "blind_deploy_i2",
+        "deploy_checkpoint": "blind_i2",
+        "deploy_iteration": 2,
+    },
+}
 
 SELECTED_TRIBES: list[tuple[str, str, str]] = []
 
@@ -96,6 +130,10 @@ SGO_REVIEW_SOURCES: dict[tuple[str, str], Path] = {
 EVOLUTION_OVERRIDES: dict[tuple[str, str], Path] = {
     ("cluster_4", "micro_1"): OUTPUTS / "amazon_sgo/cluster_4/micro_1/evolution/evolution_state.json",
     ("cluster_4", "micro_7"): OUTPUTS / "amazon_sgo/cluster_4/micro_7_best/evolution/evolution_state.json",
+    ("cluster_0", "micro_0"): OUTPUTS
+    / "amazon_sgo_health_care/cluster_0/micro_0/evolution/state_history/000006_refine_after_iteration_2_batch_22.json",
+    ("cluster_0", "micro_9"): OUTPUTS
+    / "amazon_sgo_health_care/cluster_0/micro_9/evolution/state_history/000008_refine_after_iteration_2_batch_31.json",
 }
 
 
@@ -358,35 +396,241 @@ def filter_healthcare_benchmark_by_gap(
     return filtered_by_tribe_user, filtered_scores, filtered_entries, filtered_gaps
 
 
-def load_video_games_sapiens_baseline_analysis() -> tuple[dict[str, float], dict[str, dict]]:
-    """review_key -> gap; review_key -> analysis row from cluster_0/micro_0 comparison."""
-    if not SAPIENS_VS_BASELINES_VG_PATH.is_file():
-        return {}, {}
-    data = load_json(SAPIENS_VS_BASELINES_VG_PATH)
+def load_blind_run_reviews(path: Path) -> list[dict]:
+    """Flatten blind_run user_predictions into review rows."""
+    data = load_json(path)
+    rows: list[dict] = []
+    for uid, preds in (data.get("user_predictions") or {}).items():
+        if not isinstance(preds, list):
+            continue
+        for row in preds:
+            if not isinstance(row, dict):
+                continue
+            merged = dict(row)
+            if not merged.get("user_id"):
+                merged["user_id"] = uid
+            rows.append(merged)
+    return rows
+
+
+def product_descriptions_by_review_key(details: dict) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for _uid, revs in (details.get("members_grouped_by_user") or {}).items():
+        for rev in revs or []:
+            rk = str(rev.get("review_key") or "").strip()
+            desc = str(rev.get("product_description") or "").strip()
+            if rk and desc:
+                out[rk] = desc
+    return out
+
+
+def enrich_product_description_from_details(row: dict, details_desc: dict[str, str]) -> dict:
+    """Use micro_cluster_details product text when blind run has a placeholder description."""
+    review_key = str(row.get("review_key") or "").strip()
+    current = str(row.get("product_description") or "").strip()
+    category = str(row.get("category") or "").strip()
+    fallback = details_desc.get(review_key, "")
+    if not fallback:
+        return row
+    if not current or current.lower() == category.lower() or len(current) < 30:
+        enriched = dict(row)
+        enriched["product_description"] = fallback
+        return enriched
+    return row
+
+
+def format_i0_user_gap_section(gap_context: str) -> str:
+    text = (gap_context or "").strip()
+    if not text:
+        return ""
+    return (
+        "---\n"
+        "SECTION 2B: How This User Evaluates (STRONG behavioral profile — mandatory)\n\n"
+        "These are hardened rules learned from this reviewer's real past reviews. They override "
+        "generic tribe habits when they conflict. Apply every rule that fits this product:\n"
+        "- what to lead with and what counts as pass/fail\n"
+        "- what to emphasize vs never invent\n"
+        "- theme areas to score high vs skip\n"
+        "- category-specific habits when present\n\n"
+        f"{text}\n"
+    )
+
+
+def gap_context_for_review(
+    summaries: dict[str, Any],
+    *,
+    review_key: str,
+    user_id: str,
+    target_category: str = "",
+) -> str:
+    if not summaries:
+        return ""
+    text = ""
+    per_review = summaries.get("per_review") or {}
+    row = per_review.get(review_key) if isinstance(per_review, dict) else None
+    if isinstance(row, dict):
+        text = str(
+            row.get("norm_context")
+            or row.get("gap_context")
+            or row.get("evidence_context")
+            or row.get("user_summary")
+            or ""
+        ).strip()
+    if not text:
+        per_user = summaries.get("per_user") or {}
+        row = per_user.get(user_id) if isinstance(per_user, dict) else None
+        if isinstance(row, dict):
+            text = str(
+                row.get("norm_context")
+                or row.get("gap_context")
+                or row.get("evidence_context")
+                or row.get("user_summary")
+                or ""
+            ).strip()
+    return text
+
+
+def load_blind_i2_deltas_by_key(path: Path) -> dict[str, dict]:
+    if not path.is_file():
+        return {}
+    out: dict[str, dict] = {}
+    for row in load_json(path).get("deltas") or []:
+        review_key = str(row.get("review_key") or "").strip()
+        if review_key:
+            out[review_key] = row
+    return out
+
+
+def format_leave_one_out_history_text(reviews: list[dict]) -> str:
+    rows: list[str] = []
+    for review in reviews:
+        text = str(review.get("review_text") or "").strip()
+        if not text:
+            continue
+        if len(text) > MAX_HISTORY_CHARS_PER_REVIEW:
+            text = text[:MAX_HISTORY_CHARS_PER_REVIEW].rstrip() + "…"
+        rows.append(f"Example {len(rows) + 1}:\n{text}")
+    return "\n\n".join(rows) if rows else "(none available)"
+
+
+def build_same_category_leave_one_out_history(
+    details: dict,
+    *,
+    user_id: str,
+    target_review_key: str,
+    target_category: str,
+    sub_to_main: dict[str, str],
+    max_reviews: int = MAX_SAME_CATEGORY_HISTORY_REVIEWS,
+) -> list[dict]:
+    target_main = sub_to_main.get(target_category, target_category)
+    grouped = details.get("members_grouped_by_user") or {}
+    user_reviews = grouped.get(user_id) or []
+    out: list[dict] = []
+    for rev in user_reviews:
+        rk = str(rev.get("review_key") or "").strip()
+        if rk == target_review_key:
+            continue
+        cat = str(rev.get("category") or "")
+        main = rev.get("main_category") or sub_to_main.get(cat, cat)
+        if main != target_main:
+            continue
+        text = str(rev.get("review_text") or "").strip()
+        if not text:
+            continue
+        out.append({"review_text": text, "category": cat, "main_category": main, "review_key": rk})
+        if len(out) >= max_reviews:
+            break
+    return out
+
+
+def load_tribe_baseline_analysis(
+    analysis_path: Path | None,
+    i2_by_key: dict[str, dict],
+) -> tuple[dict[str, float], dict[str, dict]]:
+    """review_key -> gap; review_key -> analysis row."""
+    baseline_by_key: dict[str, dict] = {}
+    if analysis_path and analysis_path.is_file():
+        for row in load_json(analysis_path).get("reviews") or []:
+            review_key = str(row.get("review_key") or "").strip()
+            if review_key:
+                baseline_by_key[review_key] = row.get("best_baseline") or {}
+
     gaps: dict[str, float] = {}
     rows: dict[str, dict] = {}
-    for row in data.get("reviews") or []:
-        review_key = str(row.get("review_key") or "").strip()
-        if not review_key:
-            continue
-        gap = row.get("gap_pp")
-        if gap is None:
-            continue
-        gaps[review_key] = round(float(gap), 4)
-        rows[review_key] = row
+    for review_key, i2 in i2_by_key.items():
+        sapiens_sim = i2.get("overall_similarity")
+        best_baseline = baseline_by_key.get(review_key) or {}
+        baseline_sim = best_baseline.get("overall_similarity")
+        gap = None
+        if sapiens_sim is not None and baseline_sim is not None:
+            gap = round(float(sapiens_sim) - float(baseline_sim), 4)
+        text_delta = i2.get("text_delta")
+        theme_recall_delta = i2.get("theme_delta_recall")
+        rows[review_key] = {
+            "review_key": review_key,
+            "category": i2.get("category"),
+            "sapiens": {
+                "overall_similarity": float(sapiens_sim) if sapiens_sim is not None else None,
+                "text_similarity": round(max(0.0, 1.0 - float(text_delta)), 4)
+                if text_delta is not None
+                else None,
+                "recall@k": round(1.0 - float(theme_recall_delta), 4)
+                if theme_recall_delta is not None
+                else None,
+                "sentiment_match": i2.get("sentiment_match"),
+                "category": i2.get("category"),
+                "product_description": i2.get("product_description"),
+            },
+            "best_baseline": best_baseline,
+            "gap_pp": gap,
+            "sapiens_wins": gap is not None and gap > 0,
+        }
+        if gap is not None:
+            gaps[review_key] = gap
     return gaps, rows
 
 
-def filter_video_games_benchmark_by_gap(
-    vg_gaps: dict[str, float],
-    vg_rows: dict[str, dict],
+def filter_benchmark_reviews(
+    i2_by_key: dict[str, dict],
     *,
-    min_gap: float = MIN_UI_SAPIENS_BASELINE_GAP,
-) -> tuple[dict[str, float], dict[str, dict]]:
-    allowed = {review_key for review_key, gap in vg_gaps.items() if gap > min_gap}
-    return (
-        {k: v for k, v in vg_gaps.items() if k in allowed},
-        {k: v for k, v in vg_rows.items() if k in allowed},
+    filter_mode: str,
+    min_baseline_gap: float,
+    min_overall_similarity: float,
+    gaps: dict[str, float],
+) -> set[str]:
+    allowed: set[str] = set()
+    for review_key, row in i2_by_key.items():
+        sim = row.get("overall_similarity")
+        if sim is None:
+            continue
+        if filter_mode == "baseline_gap":
+            gap = gaps.get(review_key)
+            if gap is not None and gap > min_baseline_gap:
+                allowed.add(review_key)
+        elif filter_mode == "overall_similarity":
+            if float(sim) >= min_overall_similarity:
+                allowed.add(review_key)
+    return allowed
+
+
+def sort_products_by_overall_similarity(products: list[dict]) -> list[dict]:
+    return sorted(
+        products,
+        key=lambda p: (
+            -float(p.get("overall_similarity_score") or 0),
+            str(p.get("review_key") or ""),
+        ),
+    )
+
+
+def sort_users_by_overall_similarity(users: list[dict]) -> list[dict]:
+    def user_score(user: dict) -> float:
+        scores = [float(p.get("overall_similarity_score") or 0) for p in user.get("products") or []]
+        return max(scores) if scores else 0.0
+
+    return sorted(
+        users,
+        key=lambda u: (-user_score(u), str(u.get("user_id") or "")),
     )
 
 
@@ -613,6 +857,8 @@ def video_games_benchmark_product_from_row(
     review_key: str,
     sapiens_baseline_gap: float | None = None,
     analysis_row: dict | None = None,
+    user_norm_context: str = "",
+    leave_one_out_history_reviews: list[dict] | None = None,
 ) -> dict:
     """Video games + software benchmark: GT for display, Sapiens prediction as user history."""
     actual = row.get("actual") or {}
@@ -650,6 +896,10 @@ def video_games_benchmark_product_from_row(
         product["best_baseline_model"] = bb.get("model")
         if bb.get("overall_similarity") is not None:
             product["best_baseline_overall_similarity"] = float(bb["overall_similarity"])
+    if user_norm_context.strip():
+        product["user_norm_context"] = user_norm_context.strip()
+    if leave_one_out_history_reviews:
+        product["leave_one_out_history_reviews"] = leave_one_out_history_reviews
     return product
 
 
@@ -800,9 +1050,9 @@ def select_tribes(
             video_games_candidates.append((tribe_key, vg_reviews, vg_users))
 
     video_games_candidates.sort(key=lambda item: (-item[1], -item[2]))
-    # UI catalog: single video games + software benchmark tribe (cluster_0/micro_0, >10pp filter applied at build).
     video_games = [
-        ("video_games", VIDEO_GAMES_BENCHMARK_CLUSTER, VIDEO_GAMES_BENCHMARK_MICRO, 0),
+        ("video_games", cluster, micro, 0)
+        for cluster, micro in sorted(TRIBE_BENCHMARK_CONFIGS.keys())
     ]
 
     selected = healthcare + video_games
@@ -1449,14 +1699,37 @@ def build_video_games_software_benchmark_tribe(
     definitions: list,
     population_def: str,
     user_cat_chars: dict[str, dict[str, str]],
-    vg_gaps: dict[str, float],
-    vg_rows: dict[str, dict],
+    benchmark_config: dict[str, Any],
     sub_to_main: dict[str, str],
     global_keys: dict[tuple[str, str], str],
 ) -> dict | None:
-    """Build cluster_0/micro_0 from best_delta predictions filtered to >10pp Sapiens wins."""
-    if not BEST_DELTA_VG_PATH.is_file() or not vg_gaps:
+    """Build a video games + software tribe from blind_run_i2 deploy checkpoint."""
+    blind_run_path = Path(benchmark_config["blind_run_i2"])
+    deltas_path = Path(benchmark_config["deltas_i2"])
+    if not blind_run_path.is_file() or not deltas_path.is_file():
         return None
+
+    i2_by_key = load_blind_i2_deltas_by_key(deltas_path)
+    gaps, analysis_rows = load_tribe_baseline_analysis(
+        Path(benchmark_config["baseline_analysis"])
+        if benchmark_config.get("baseline_analysis")
+        else None,
+        i2_by_key,
+    )
+    allowed = filter_benchmark_reviews(
+        i2_by_key,
+        filter_mode=str(benchmark_config.get("filter_mode") or "baseline_gap"),
+        min_baseline_gap=float(benchmark_config.get("min_baseline_gap") or 0),
+        min_overall_similarity=float(benchmark_config.get("min_overall_similarity") or 0),
+        gaps=gaps,
+    )
+    if not allowed:
+        return None
+
+    user_norms: dict[str, Any] = {}
+    norms_path = benchmark_config.get("user_norms_i2")
+    if norms_path and Path(norms_path).is_file():
+        user_norms = load_json(Path(norms_path))
 
     details_path = VIDEO_GAMES_SOFTWARE_DETAILS_DIR / cluster / f"{micro}_details.json"
     if not details_path.is_file():
@@ -1465,13 +1738,18 @@ def build_video_games_software_benchmark_tribe(
         return None
 
     details = load_json(details_path)
-    evo = find_evolution(cluster, micro)
+    evolution_path = benchmark_config.get("evolution_i2")
+    if evolution_path and Path(evolution_path).is_file():
+        evo = normalize_evolution(load_json(Path(evolution_path)))
+        trait_source = str(Path(evolution_path).relative_to(WORKSPACE))
+    else:
+        evo = find_evolution(cluster, micro)
+        trait_source = "evolution_state.json (blind_i2)"
     tribe_def = find_tribe_definition(definitions, cluster, micro)
 
     if evo:
         tribe_name = evo["tribe_name"] or details.get("persona_name", micro)
         qualitative = evo["qualitative_summary"]
-        trait_source = "evolution_state.json"
     else:
         tribe_name = details.get("persona_name", micro)
         q = details.get("qualitative_summary") or {}
@@ -1485,16 +1763,16 @@ def build_video_games_software_benchmark_tribe(
         trait_source = "micro_cluster_details (seed)"
     tribe_desc = tribe_persona_description(tribe_def, tribe_name)
 
-    best_delta = load_json(BEST_DELTA_VG_PATH)
+    details_desc = product_descriptions_by_review_key(details)
     by_user: dict[str, list[dict]] = {}
-    for row in best_delta.get("reviews") or []:
+    for row in load_blind_run_reviews(blind_run_path):
         review_key = str(row.get("review_key") or "").strip()
-        if not review_key or review_key not in vg_gaps:
+        if not review_key or review_key not in allowed:
             continue
         uid = str(row.get("user_id") or "").strip()
         if not uid:
             continue
-        by_user.setdefault(uid, []).append(row)
+        by_user.setdefault(uid, []).append(enrich_product_description_from_details(row, details_desc))
 
     members = details.get("member_user_characteristics") or []
     char_by_user = {
@@ -1502,26 +1780,54 @@ def build_video_games_software_benchmark_tribe(
         for m in members
     }
 
+    sort_by = str(benchmark_config.get("sort_by") or "baseline_gap")
+    catalog_sort_by = str(benchmark_config.get("catalog_sort_by") or sort_by)
     users_out: list[dict] = []
     for uid, rows in by_user.items():
         products: list[dict] = []
         for row in rows:
             review_key = str(row.get("review_key") or "").strip()
+            category = str(row.get("category") or VIDEO_GAMES_MAIN)
+            loo = build_same_category_leave_one_out_history(
+                details,
+                user_id=uid,
+                target_review_key=review_key,
+                target_category=category,
+                sub_to_main=sub_to_main,
+            )
+            norm_context = gap_context_for_review(
+                user_norms,
+                review_key=review_key,
+                user_id=uid,
+                target_category=category,
+            )
             product = video_games_benchmark_product_from_row(
                 row,
                 review_key=review_key,
-                sapiens_baseline_gap=vg_gaps.get(review_key),
-                analysis_row=vg_rows.get(review_key),
+                sapiens_baseline_gap=gaps.get(review_key),
+                analysis_row=analysis_rows.get(review_key),
+                user_norm_context=norm_context,
+                leave_one_out_history_reviews=loo,
             )
-            if not canonicalize_product_review_key(product, uid, global_keys):
-                product["review_key"] = review_key
+            product["review_key"] = review_key
+            if review_key in i2_by_key and product.get("overall_similarity_score") is None:
+                product["overall_similarity_score"] = round(
+                    float(i2_by_key[review_key]["overall_similarity"]), 4
+                )
             products.append(product)
 
-        products = sort_products_by_sapiens_gap(products)
+        if sort_by == "overall_similarity":
+            products = sort_products_by_overall_similarity(products)
+        else:
+            products = sort_products_by_sapiens_gap(products)
         if not products:
             continue
 
-        user_gap = max(float(p.get("sapiens_baseline_gap") or 0) for p in products)
+        if sort_by == "overall_similarity":
+            user_score = max(float(p.get("overall_similarity_score") or 0) for p in products)
+        else:
+            user_score = max(float(p.get("sapiens_baseline_gap") or 0) for p in products)
+
         user_history = build_user_history_reviews(
             cluster,
             micro,
@@ -1537,7 +1843,7 @@ def build_video_games_software_benchmark_tribe(
                 "category_characteristics": domain_category_characteristics(
                     uid, user_cat_chars, "video_games"
                 ),
-                "similarity_score": round(user_gap, 4),
+                "similarity_score": round(user_score, 4),
                 "benchmark_product_count": len(products),
                 "products": products,
                 "user_history_reviews": user_history,
@@ -1547,21 +1853,21 @@ def build_video_games_software_benchmark_tribe(
     if not users_out:
         return None
 
-    users_out = sort_users_by_sapiens_gap(users_out)
-
-    assert_products_have_global_keys(
-        [{**p, "user_id": uid} for u in users_out for uid in [u["user_id"]] for p in u["products"]],
-        global_keys,
-        context=f"{cluster}/{micro}",
-    )
+    if sort_by == "overall_similarity":
+        users_out = sort_users_by_overall_similarity(users_out)
+    else:
+        users_out = sort_users_by_sapiens_gap(users_out)
 
     product_count = sum(len(u["products"]) for u in users_out)
     best_prediction_count = sum(
         1 for u in users_out for p in u["products"] if p.get("best_prediction_review")
     )
-    vg_source = str(BEST_DELTA_VG_PATH.relative_to(WORKSPACE))
-    analysis_source = str(SAPIENS_VS_BASELINES_VG_PATH.relative_to(WORKSPACE))
+    vg_source = str(blind_run_path.relative_to(WORKSPACE))
+    analysis_source = str(deltas_path.relative_to(WORKSPACE))
     details_rel = str(details_path.relative_to(WORKSPACE))
+    deploy_checkpoint = str(benchmark_config.get("deploy_checkpoint") or "blind_i2")
+    deploy_iteration = int(benchmark_config.get("deploy_iteration") or 2)
+    sapiens_prompt_mode = str(benchmark_config.get("sapiens_prompt_mode") or "blind_deploy_i2")
 
     return {
         "id": f"{cluster}-{micro}",
@@ -1573,12 +1879,17 @@ def build_video_games_software_benchmark_tribe(
         "tribe_definition": tribe_def,
         "population_definition": population_def,
         "trait_source": trait_source,
+        "deploy_checkpoint": deploy_checkpoint,
+        "deploy_iteration": deploy_iteration,
+        "sapiens_prompt_mode": sapiens_prompt_mode,
+        "catalog_sort_by": catalog_sort_by,
         "data_sources": {
             "users": f"{details_rel} + {vg_source}",
             "products": vg_source,
             "similarity": analysis_source,
             "traits": trait_source,
             "best_predictions": vg_source,
+            "user_norms": str(Path(norms_path).relative_to(WORKSPACE)) if norms_path else "",
         },
         "qualitative_summary": qualitative,
         "member_user_characteristics": [
@@ -1638,18 +1949,14 @@ def build_tribe(
             global_keys,
         )
 
-    if (
-        domain == "video_games"
-        and (cluster, micro) == (VIDEO_GAMES_BENCHMARK_CLUSTER, VIDEO_GAMES_BENCHMARK_MICRO)
-    ):
+    if domain == "video_games" and (cluster, micro) in TRIBE_BENCHMARK_CONFIGS:
         return build_video_games_software_benchmark_tribe(
             cluster,
             micro,
             definitions,
             population_def,
             user_cat_chars,
-            vg_gaps or {},
-            vg_rows or {},
+            TRIBE_BENCHMARK_CONFIGS[(cluster, micro)],
             sub_to_main,
             global_keys,
         )
@@ -1934,23 +2241,52 @@ def main() -> None:
     )
     history_gpt5_by_user_micro, history_gpt5_by_user = load_healthcare_history_gpt5_prediction_index()
     vg_scores = load_video_games_app_scores()
-    vg_gaps_all, vg_rows_all = load_video_games_sapiens_baseline_analysis()
-    total_vg_reviews = len(vg_gaps_all)
-    vg_gaps, vg_rows = filter_video_games_benchmark_by_gap(vg_gaps_all, vg_rows_all)
     selected_tribes, tribe_review_counts = select_tribes(sub_to_main, hc_by_tribe_user, hc_scores)
-    # Patch review count for the single video games benchmark tribe.
-    tribe_review_counts[("video_games", VIDEO_GAMES_BENCHMARK_CLUSTER, VIDEO_GAMES_BENCHMARK_MICRO)] = len(
-        vg_gaps
-    )
+    for tribe_key, cfg in TRIBE_BENCHMARK_CONFIGS.items():
+        i2_by_key = load_blind_i2_deltas_by_key(Path(cfg["deltas_i2"]))
+        gaps, _ = load_tribe_baseline_analysis(
+            Path(cfg["baseline_analysis"]) if cfg.get("baseline_analysis") else None,
+            i2_by_key,
+        )
+        allowed = filter_benchmark_reviews(
+            i2_by_key,
+            filter_mode=str(cfg.get("filter_mode") or "baseline_gap"),
+            min_baseline_gap=float(cfg.get("min_baseline_gap") or 0),
+            min_overall_similarity=float(cfg.get("min_overall_similarity") or 0),
+            gaps=gaps,
+        )
+        domain, cluster, micro, _ = next(
+            (row for row in selected_tribes if row[1] == tribe_key[0] and row[2] == tribe_key[1]),
+            ("video_games", tribe_key[0], tribe_key[1], 0),
+        )
+        tribe_review_counts[(domain, cluster, micro)] = len(allowed)
     print(f"Loaded category characteristics for {len(user_cat_chars)} users")
     print(
         f"Healthcare UI filter (>10pp Sapiens vs best baseline): "
         f"{len(hc_entries)}/{total_hc_reviews} reviews across {len(hc_by_tribe_user)} tribes"
     )
-    print(
-        f"Video games UI filter (>10pp Sapiens vs best baseline): "
-        f"{len(vg_gaps)}/{total_vg_reviews} reviews for {VIDEO_GAMES_BENCHMARK_CLUSTER}/{VIDEO_GAMES_BENCHMARK_MICRO}"
-    )
+    for tribe_key, cfg in TRIBE_BENCHMARK_CONFIGS.items():
+        i2_by_key = load_blind_i2_deltas_by_key(Path(cfg["deltas_i2"]))
+        gaps, _ = load_tribe_baseline_analysis(
+            Path(cfg["baseline_analysis"]) if cfg.get("baseline_analysis") else None,
+            i2_by_key,
+        )
+        allowed = filter_benchmark_reviews(
+            i2_by_key,
+            filter_mode=str(cfg.get("filter_mode") or "baseline_gap"),
+            min_baseline_gap=float(cfg.get("min_baseline_gap") or 0),
+            min_overall_similarity=float(cfg.get("min_overall_similarity") or 0),
+            gaps=gaps,
+        )
+        label = (
+            f">{cfg.get('min_baseline_gap', 0) * 100:.0f}pp baseline gap"
+            if cfg.get("filter_mode") == "baseline_gap"
+            else f">={cfg.get('min_overall_similarity', 0):.2f} overall sim"
+        )
+        print(
+            f"Video games tribe {tribe_key[0]}/{tribe_key[1]} ({label}): "
+            f"{len(allowed)}/{len(i2_by_key)} reviews"
+        )
     print(f"Loaded {len(hc_gaps)} healthcare Sapiens vs baseline gap scores")
     print(
         f"Loaded {sum(len(v) for v in history_gpt5_by_user_micro.values())} history · gpt-5 fallback predictions"
@@ -1995,8 +2331,6 @@ def main() -> None:
             sub_to_main,
             global_keys,
             vg_scores,
-            vg_gaps,
-            vg_rows,
         )
         if not tribe:
             continue
@@ -2015,6 +2349,9 @@ def main() -> None:
             "userCount": len(tribe["member_user_characteristics"]),
             "traitSource": tribe["trait_source"],
             "dataSources": tribe["data_sources"],
+            "deployCheckpoint": tribe.get("deploy_checkpoint"),
+            "deployIteration": tribe.get("deploy_iteration"),
+            "sapiensPromptMode": tribe.get("sapiens_prompt_mode"),
             "traitCounts": {
                 "behavioral": len(tribe["qualitative_summary"].get("inherent_behavioral_traits") or []),
                 "motivations": len((tribe["qualitative_summary"].get("latent_motivations") or {}).get("main") or []),

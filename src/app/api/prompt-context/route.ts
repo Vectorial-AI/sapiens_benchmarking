@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCategoryThemes } from "@/lib/category-themes";
 import { findContext, getUserHistoryReview, getUserHistoryThemes } from "@/lib/master";
 import { formatUserCharacteristics } from "@/lib/user-characteristics";
+import { formatLengthConstraint } from "@/lib/review-history";
 
 export const runtime = "nodejs";
 
@@ -27,11 +28,20 @@ export async function GET(req: Request) {
   const categoryThemes = getCategoryThemes(category);
   const userHistoryReview = getUserHistoryReview(product);
   const userHistoryThemes = getUserHistoryThemes(product);
+  const leaveOneOutCount = product?.leaveOneOutHistoryReviews?.length ?? 0;
+  const userNormPopulated = Boolean(product?.userNormContext?.trim());
+  const isHealthcare = tribe.domain === "healthcare";
+  const lengthConstraintWords = !isHealthcare
+    ? formatLengthConstraint(product?.groundTruthReview ?? "") ?? 250
+    : null;
 
   return NextResponse.json({
     category,
     tribeName: tribe.name,
     domain: tribe.domain,
+    deployCheckpoint: tribe.deployCheckpoint ?? null,
+    sapiensPromptMode: tribe.sapiensPromptMode ?? null,
+    lengthConstraintWords,
     checklist: {
       tribeBehavioralTraits: nonEmpty(q.inherentBehavioralTraits).length > 0,
       tribeMotivations: nonEmpty(q.latentMotivations).length > 0,
@@ -41,6 +51,8 @@ export async function GET(req: Request) {
       userCharacteristics: userCharacteristicsPopulated,
       userHistory: userHistoryReview.length > 0,
       userHistoryThemes: userHistoryThemes.length > 0,
+      userNorms: userNormPopulated,
+      leaveOneOutHistory: leaveOneOutCount > 0,
       categoryThemes: categoryThemes.length > 0,
     },
     categoryThemes,

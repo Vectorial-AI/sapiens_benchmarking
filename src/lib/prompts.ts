@@ -4,6 +4,7 @@ import { DEFAULT_THEMES } from "./prompts-constants";
 import type { HistoryContextItem, Qualitative, ReviewSentiment } from "./types";
 import type { Product, Tribe, User } from "./master";
 import { getUserHistoryReview, getUserHistoryThemes } from "./master";
+import { buildBlindDeployI2Prompt } from "./blind-deploy-prompt";
 import {
   buildHistoryBaselineContext,
   excludeTargetReviewText,
@@ -98,6 +99,10 @@ function themesForCategory(category: string): string[] {
   return getCategoryThemes(category);
 }
 
+function resolveLengthConstraint(product: Product | null | undefined): number {
+  return formatLengthConstraint(product?.groundTruthReview ?? "") ?? 250;
+}
+
 function userHistorySection(reviewText: string, themes: string[]): string {
   const text = reviewText.trim();
   if (!text && !themes.length) return "";
@@ -123,7 +128,6 @@ function buildHealthcareSapiensPromptSections(args: {
   productDescription: string;
   category: string;
   excludeReviewKey?: string;
-  lengthConstraint: number;
   groundTruthSentiment?: ReviewSentiment | null;
 }): string {
   const {
@@ -132,7 +136,6 @@ function buildHealthcareSapiensPromptSections(args: {
     product,
     productDescription,
     category,
-    lengthConstraint,
     groundTruthSentiment,
   } = args;
   const themes = themesForCategory(category);
@@ -183,7 +186,6 @@ ${bullets(themes)}
 ${groundTruthSentiment ? `- Match the expected **${groundTruthSentiment}** sentiment in both review_text and the JSON sentiment field\n` : ""}- Read review_text carefully — scores must match what you wrote
 - Theme names must match EXACTLY as shown above (case-sensitive)
 - sentiment must be exactly: Positive, Negative, or Neutral
-- Do not exceed **${lengthConstraint}** words in review_text
 
 Provide the following in a single JSON object. Respond with *only* the JSON object and nothing else.
 
@@ -200,10 +202,10 @@ function buildVideoGamesI0EvolvedPromptSections(args: {
   productDescription: string;
   category: string;
   excludeReviewKey?: string;
-  lengthConstraint: number;
 }): string {
-  const { tribe, user, productDescription, category, lengthConstraint } = args;
+  const { tribe, user, product, productDescription, category } = args;
   const themes = themesForCategory(category);
+  const lengthConstraint = resolveLengthConstraint(product);
   const userCharBlock = formatUserCharacteristics(user, category);
   const tribeTraitsBlock = formatTribeTraitSections(tribe.qualitative);
   const tribeSection = tribeTraitsBlock
@@ -264,7 +266,10 @@ ${predictionOutputBlock(themes, "predicted_themes")}`;
 }
 
 /**
- * SAPIENS — tribe traits + user characteristics (+ healthcare user history).
+ * SAPIENS prompt routing (by tribe):
+ * - healthcare → evolved traits + reference user history (no word cap — history sets length)
+ * - blind_deploy_i2 (video games/software deploy) → full i2 prompt + GT+15 word cap
+ * - video_games fallback → traits + user chars + GT+15 word cap
  */
 function buildSapiensPromptSections(args: {
   tribe: Tribe;
@@ -275,12 +280,24 @@ function buildSapiensPromptSections(args: {
   excludeReviewKey?: string;
   groundTruthThemes: string[];
   groundTruthSentiment?: ReviewSentiment | null;
-  lengthConstraint: number;
 }): string {
+  if (args.tribe.sapiensPromptMode === "blind_deploy_i2" || args.tribe.deployCheckpoint === "blind_i2") {
+    return buildBlindDeployI2Prompt({
+      tribe: args.tribe,
+      user: args.user,
+      product: args.product,
+      productDescription: args.productDescription,
+      category: args.category,
+      groundTruthSentiment: args.groundTruthSentiment,
+    });
+  }
   if (args.tribe.domain === "healthcare") {
     return buildHealthcareSapiensPromptSections(args);
   }
-  return buildVideoGamesI0EvolvedPromptSections(args);
+  if (args.tribe.domain === "video_games") {
+    return buildVideoGamesI0EvolvedPromptSections(args);
+  }
+  return buildHealthcareSapiensPromptSections(args);
 }
 
 export function buildSapiensPrompt(args: {
@@ -291,7 +308,6 @@ export function buildSapiensPrompt(args: {
   category: string;
   groundTruthThemes: string[];
   groundTruthSentiment?: ReviewSentiment | null;
-  lengthConstraint: number;
   excludeReviewKey?: string;
 }): string {
   return buildSapiensPromptSections(args);
