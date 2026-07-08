@@ -83,6 +83,7 @@ export function buildBlindDeployI2Prompt(args: {
   product: Product | null;
   productDescription: string;
   category: string;
+  groundTruthThemes?: string[];
   groundTruthSentiment?: ReviewSentiment | null;
 }): string {
   const {
@@ -99,8 +100,11 @@ export function buildBlindDeployI2Prompt(args: {
   const userChar = formatUserCharacteristics(user, category);
   const userGapSection = formatUserGapSection(product?.userNormContext ?? "");
   const leaveOneOut = formatLeaveOneOutHistory(product);
+  const lengthReference =
+    product?.groundTruthReview?.trim() ||
+    referenceReviewForLength(product);
   const lengthConstraint =
-    formatLengthConstraint(referenceReviewForLength(product)) ?? 250;
+    formatLengthConstraint(lengthReference) ?? 250;
 
   let prompt = template
     .replaceAll("{persona_name}", tribe.name)

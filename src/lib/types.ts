@@ -14,6 +14,7 @@ export type CatalogProduct = {
   reviewKey: string;
   productDescription: string;
   category: string;
+  groundTruthThemes?: string[];
   groundTruthSentiment?: ReviewSentiment | null;
   healthcareBenchmark?: boolean;
   videoGamesBenchmark?: boolean;
@@ -92,6 +93,8 @@ export type EngineResult = {
   predictedThemes?: Record<string, number>;
   sentiment?: ReviewSentiment | null;
   metrics?: PipelineMetrics;
+  /** Plain-language LLM summary of what overlaps or differs vs ground truth. */
+  similarityExplanation?: string | null;
   model: string;
   latencyMs: number;
   error?: string;
@@ -111,6 +114,7 @@ export type SapiensRunResponse = {
   groundTruth: string | null;
   groundTruthThemes?: string[];
   groundTruthSentiment?: ReviewSentiment | null;
+  themeTopK?: number;
   sapiens: EngineResult;
   source: string;
   metricsSource?: "pipeline" | "mock";
@@ -118,6 +122,7 @@ export type SapiensRunResponse = {
 
 export type BaselineRunResponse = {
   baseline: BaselineResult;
+  themeTopK?: number;
   source: string;
   metricsSource?: "pipeline" | "mock";
 };

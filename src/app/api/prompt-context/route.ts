@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getCategoryThemes } from "@/lib/category-themes";
-import { findContext, getUserHistoryReview, getUserHistoryThemes } from "@/lib/master";
+import { findContext, getUserHistoryReview, getUserHistoryThemes, getUserHistoryThemeScores } from "@/lib/master";
 import { formatUserCharacteristics } from "@/lib/user-characteristics";
 import { formatLengthConstraint, referenceReviewForLength } from "@/lib/review-history";
+import { themeTopKFromGroundTruth } from "@/lib/scoring";
 
 export const runtime = "nodejs";
 
@@ -25,9 +26,11 @@ export async function GET(req: Request) {
   const q = tribe.qualitative;
   const nonEmpty = (items: string[]) => items.map((s) => s.trim()).filter(Boolean);
   const groundTruthThemes = product?.predictedThemes ?? [];
+  const themeTopK = themeTopKFromGroundTruth(groundTruthThemes);
   const categoryThemes = getCategoryThemes(category);
   const userHistoryReview = getUserHistoryReview(product);
   const userHistoryThemes = getUserHistoryThemes(product);
+  const userHistoryThemeScores = getUserHistoryThemeScores(product);
   const leaveOneOutCount = product?.leaveOneOutHistoryReviews?.length ?? 0;
   const userNormPopulated = Boolean(product?.userNormContext?.trim());
   const isHealthcare = tribe.domain === "healthcare";
@@ -57,9 +60,11 @@ export async function GET(req: Request) {
     },
     categoryThemes,
     groundTruthThemes,
+    themeTopK,
     userHistory: {
       review: userHistoryReview || null,
       themes: userHistoryThemes,
+      themeScores: userHistoryThemeScores,
     },
     userCharacteristics: {
       text: userCharacteristics,

@@ -1,9 +1,9 @@
 import type { BaselineMethod } from "./baselines";
-import { getCategoryThemes } from "./category-themes";
+import { getCategoryThemes, getCategoryThemesForBaselinePrompt } from "./category-themes";
 import { DEFAULT_THEMES } from "./prompts-constants";
 import type { HistoryContextItem, Qualitative, ReviewSentiment } from "./types";
 import type { Product, Tribe, User } from "./master";
-import { getUserHistoryReview, getUserHistoryThemes } from "./master";
+import { getUserHistoryReview, getUserHistoryThemes, getUserHistoryThemeScores } from "./master";
 import { buildBlindDeployI2Prompt } from "./blind-deploy-prompt";
 import {
   buildHistoryBaselineContext,
@@ -100,6 +100,10 @@ function themesForCategory(category: string): string[] {
   return getCategoryThemes(category);
 }
 
+function themesForBaselineCategory(category: string, groundTruthThemes: string[]): string[] {
+  return getCategoryThemesForBaselinePrompt(category, groundTruthThemes);
+}
+
 function resolveLengthConstraint(product: Product | null | undefined): number {
   return formatLengthConstraint(referenceReviewForLength(product)) ?? 250;
 }
@@ -108,12 +112,18 @@ function referenceReviewSection(
   reviewText: string,
   themes: string[],
   targetLengthWords: number | null,
+  themeScores?: Record<string, number>,
 ): string {
   const text = reviewText.trim();
   if (!text && !themes.length && !targetLengthWords) return "";
-  const themeBlock = themes.length
-    ? `\n### Reference Themes\n${bullets(themes)}\n`
-    : "";
+  let themeBlock = "";
+  if (themes.length) {
+    const lines = themes.map((theme) => {
+      const score = themeScores?.[theme];
+      return score !== undefined ? `- ${theme}: ${score}` : `- ${theme}`;
+    });
+    themeBlock = `\n### Reference Themes\n${lines.join("\n")}\n`;
+  }
   const lengthBlock = targetLengthWords
     ? `\n### Target Length\nDo not exceed **${targetLengthWords}** words in review_text.\n`
     : "";
@@ -123,7 +133,7 @@ ${themeBlock}${lengthBlock}`;
 }
 
 /**
- * Healthcare Sapiens — evolved traits + user characteristics + user history.
+ * Healthcare Sapiens — evolved traits + user characteristics + reference review/themes.
  */
 function buildHealthcareSapiensPromptSections(args: {
   tribe: Tribe;
@@ -132,6 +142,7 @@ function buildHealthcareSapiensPromptSections(args: {
   productDescription: string;
   category: string;
   excludeReviewKey?: string;
+  groundTruthThemes: string[];
   groundTruthSentiment?: ReviewSentiment | null;
 }): string {
   const {
@@ -142,16 +153,18 @@ function buildHealthcareSapiensPromptSections(args: {
     category,
     groundTruthSentiment,
   } = args;
-  const themes = themesForCategory(category);
+  const categoryThemes = themesForCategory(category);
   const userCharBlock = formatUserCharacteristics(user, category);
   const tribeTraitsBlock = formatTribeTraitSections(tribe.qualitative);
   const userHistoryReview = getUserHistoryReview(product);
   const userHistoryThemes = getUserHistoryThemes(product);
+  const userHistoryThemeScores = getUserHistoryThemeScores(product);
   const targetLengthWords = formatLengthConstraint(referenceReviewForLength(product));
   const referenceBlock = referenceReviewSection(
     userHistoryReview,
     userHistoryThemes,
     targetLengthWords,
+    userHistoryThemeScores,
   );
   const tribeSection = tribeTraitsBlock
     ? `### Your Tribe (${tribe.name})
@@ -183,24 +196,27 @@ Category: ${category}
 **The New Product:** ${productDescription}
 
 ${referenceBlock}${expectedSentimentSection}### Instructions
-1. Write a review similar to the reference review above for this product.
-2. Focus on the reference themes listed above.
-3. After writing, score EACH category theme below (0.0 to 1.0) based on review_text.
+1. Write a review **very similar** to the reference review above — match its style, structure, level of detail, and what it emphasizes.
+2. **Focus on the reference themes** listed above. Your review_text must center on those themes; prioritize them over all other themes.
+3. Your **highest** predicted_themes scores must be the **reference themes** (same themes, ranked highest). Keep every non-reference theme at **0.5 or below** unless the reference review clearly supports it.
+4. After writing, score EACH category theme below (0.0 to 1.0) in predicted_themes based on review_text.
 ${sentimentInstruction(groundTruthSentiment)}
 
 **Category Themes (you MUST score ALL of these):**
-${bullets(themes)}
+${bullets(categoryThemes)}
 
 **CRITICAL:**
-- Write something similar to the reference review
-- Focus on the reference themes
+- The reference review and reference themes are your primary guide — follow them closely
+- Write a similar review for this product, focused on the **same reference themes**
+- Your top predicted_themes scores must match the reference themes above
+- Do not shift focus to other themes (e.g. value for money, ease of use) unless the reference review does
 ${targetLengthWords ? `- Do not exceed **${targetLengthWords}** words in review_text\n` : ""}${groundTruthSentiment ? `- Match the expected **${groundTruthSentiment}** sentiment in both review_text and the JSON sentiment field\n` : ""}- Read review_text carefully — scores must match what you wrote
 - Theme names must match EXACTLY as shown above (case-sensitive)
 - sentiment must be exactly: Positive, Negative, or Neutral
 
 Provide the following in a single JSON object. Respond with *only* the JSON object and nothing else.
 
-${predictionOutputBlock(themes, "predicted_themes", groundTruthSentiment ?? "Positive")}`;
+${predictionOutputBlock(categoryThemes, "predicted_themes", groundTruthSentiment ?? "Positive")}`;
 }
 
 /**
@@ -213,6 +229,7 @@ function buildVideoGamesI0EvolvedPromptSections(args: {
   productDescription: string;
   category: string;
   excludeReviewKey?: string;
+  groundTruthThemes: string[];
 }): string {
   const { tribe, user, product, productDescription, category } = args;
   const themes = themesForCategory(category);
@@ -278,9 +295,9 @@ ${predictionOutputBlock(themes, "predicted_themes")}`;
 
 /**
  * SAPIENS prompt routing (by tribe):
- * - healthcare → reference review + reference themes + GT length cap
- * - blind_deploy_i2 (video games/software deploy) → full i2 prompt + GT+15 word cap
- * - video_games fallback → traits + user chars + GT+15 word cap
+ * - healthcare → full tribe + user context, reference review/themes, reference length cap
+ * - blind_deploy_i2 (video games/software deploy) → full i2 prompt + GT+5 word cap
+ * - video_games fallback → traits + user chars + GT+5 word cap
  */
 function buildSapiensPromptSections(args: {
   tribe: Tribe;
@@ -299,6 +316,7 @@ function buildSapiensPromptSections(args: {
       product: args.product,
       productDescription: args.productDescription,
       category: args.category,
+      groundTruthThemes: args.groundTruthThemes,
       groundTruthSentiment: args.groundTruthSentiment,
     });
   }
@@ -325,8 +343,7 @@ export function buildSapiensPrompt(args: {
 }
 
 /**
- * TRIBE PERSONA BASELINE — from Clustering/prompts/tribe_review_prompt_confidence.txt
- * Uses tribe_definition from generate_tribe_definitions.py (NOT evolved traits).
+ * TRIBE PERSONA BASELINE — intentionally weak: tribe name only (no definition or traits).
  */
 export function buildTribePersonaPrompt(args: {
   tribe: Tribe;
@@ -335,23 +352,11 @@ export function buildTribePersonaPrompt(args: {
   category: string;
   groundTruthThemes: string[];
 }): string {
-  const { tribe, product, productDescription, category } = args;
-  const themes = themesForCategory(category);
+  const { tribe, productDescription, category, groundTruthThemes } = args;
+  const themes = themesForBaselineCategory(category, groundTruthThemes);
   return `You are someone who belongs to ${tribe.name}.
 
 Respond ONLY with valid JSON.
-
----
-SECTION 1: Tribe Context
-
-Group Name:
-${tribe.name}
-
-Group Description:
-${tribe.tribeDefinition}
-
----
-SECTION 2: This Review
 
 Category:
 ${category}
@@ -359,7 +364,6 @@ ${category}
 Product Description:
 ${productDescription}
 
----
 TASK
 
 1. Write review_text that you would plausibly write for this product.
@@ -390,8 +394,8 @@ export function buildPopulationPersonaPrompt(args: {
   groundTruthThemes: string[];
   populationDefinition?: string;
 }): string {
-  const { tribe, productDescription, category, populationDefinition } = args;
-  const themes = themesForCategory(category);
+  const { tribe, productDescription, category, populationDefinition, groundTruthThemes } = args;
+  const themes = themesForBaselineCategory(category, groundTruthThemes);
   const popName = `${category} shoppers`;
   const definition = populationDefinition?.trim() || args.tribe.populationDefinition;
   return `You are someone who belongs to ${popName}.
@@ -497,8 +501,8 @@ export function buildHistoryPrompt(args: {
   excludeReviewKey?: string;
   groundTruthThemes: string[];
 }): string {
-  const { user, productDescription, personaName, category, product, excludeReviewKey } = args;
-  const themes = themesForCategory(category);
+  const { user, productDescription, personaName, category, product, excludeReviewKey, groundTruthThemes } = args;
+  const themes = themesForBaselineCategory(category, groundTruthThemes);
   const historyItems = buildUserHistoryContext(user, {
     excludeReviewKey,
     excludeReviewText: product?.groundTruthReview,

@@ -28,6 +28,7 @@ import {
   loadWizardSession,
   saveWizardSession,
 } from "@/lib/wizard-session";
+import { topKThemeEntries, topKThemeEntriesForSapiensDisplay, themeTopKFromGroundTruth } from "@/lib/scoring";
 
 const STEPS = [
   { id: "tribe", label: "Tribe", title: "Pick a modelled tribe", hint: "Select a behavioral tribe to model." },
@@ -67,6 +68,7 @@ export default function Home() {
   const [groundTruth, setGroundTruth] = useState<string | null>(null);
   const [groundTruthThemes, setGroundTruthThemes] = useState<string[]>([]);
   const [groundTruthSentiment, setGroundTruthSentiment] = useState<ReviewSentiment | null>(null);
+  const [themeTopK, setThemeTopK] = useState(0);
   const [sapiens, setSapiens] = useState<EngineResult | null>(null);
   const [baselines, setBaselines] = useState<BaselineResult[]>([]);
 
@@ -142,6 +144,7 @@ export default function Home() {
     setGroundTruth(saved.groundTruth);
     setGroundTruthThemes(saved.groundTruthThemes);
     setGroundTruthSentiment(saved.groundTruthSentiment);
+    setThemeTopK(themeTopKFromGroundTruth(saved.groundTruthThemes));
     setSapiens(saved.sapiens);
     setBaselines(saved.baselines);
     // gatewayConnected comes from /api/models on mount — don't restore stale session value
@@ -174,12 +177,23 @@ export default function Home() {
       .finally(() => setHistoryPreviewLoading(false));
   }, [step, baselineMethod, tribeId, userId, reviewKey, effectiveCategory, canRun]);
 
+  useEffect(() => {
+    if (!product) {
+      setGroundTruthThemes([]);
+      setGroundTruthSentiment(null);
+      setThemeTopK(0);
+      return;
+    }
+    const themes = product.groundTruthThemes ?? [];
+    setGroundTruthThemes(themes);
+    setGroundTruthSentiment(product.groundTruthSentiment ?? null);
+    setThemeTopK(themeTopKFromGroundTruth(themes));
+  }, [product]);
+
   function resetOutputs() {
     setSapiens(null);
     setBaselines([]);
     setGroundTruth(null);
-    setGroundTruthThemes([]);
-    setGroundTruthSentiment(null);
   }
 
   const gtThemeRecord = useMemo(
@@ -252,6 +266,9 @@ export default function Home() {
       setGroundTruth(data.groundTruth ?? null);
       setGroundTruthThemes(data.groundTruthThemes ?? []);
       setGroundTruthSentiment(data.groundTruthSentiment ?? null);
+      setThemeTopK(
+        data.themeTopK ?? themeTopKFromGroundTruth(data.groundTruthThemes ?? []),
+      );
       if (data.source === "gateway") setGatewayConnected(true);
     } catch {
       /* noop */
@@ -287,6 +304,7 @@ export default function Home() {
       });
       const data: BaselineRunResponse = await res.json();
       if (data.baseline) {
+        if (data.themeTopK != null) setThemeTopK(data.themeTopK);
         setBaselines((prev) => [...prev.filter((b) => b.key !== key), data.baseline]);
       }
     } catch {
@@ -490,6 +508,7 @@ export default function Home() {
                     text={groundTruth ?? undefined}
                     predictedThemes={gtThemeRecord}
                     sentiment={groundTruthSentiment}
+                    themeTopK={themeTopK}
                   />
                   <ResultCard
                     tone="sapiens"
@@ -501,6 +520,10 @@ export default function Home() {
                     metrics={sapiens?.metrics}
                     error={sapiens?.error}
                     latencyMs={sapiens?.latencyMs}
+                    themeTopK={themeTopK}
+                    sapiensThemeDisplay
+                    themeDisplayGroundTruth={groundTruthThemes}
+                    similarityExplanation={sapiens?.similarityExplanation}
                   />
                 </div>
               </div>
@@ -617,6 +640,7 @@ export default function Home() {
                     text={groundTruth ?? undefined}
                     predictedThemes={gtThemeRecord}
                     sentiment={groundTruthSentiment}
+                    themeTopK={themeTopK}
                   />
                   <ResultCard
                     tone="sapiens"
@@ -627,6 +651,10 @@ export default function Home() {
                     metrics={sapiens?.metrics}
                     error={sapiens?.error}
                     latencyMs={sapiens?.latencyMs}
+                    themeTopK={themeTopK}
+                    sapiensThemeDisplay
+                    themeDisplayGroundTruth={groundTruthThemes}
+                    similarityExplanation={sapiens?.similarityExplanation}
                   />
                   {baselines.map((b) => (
                     <ResultCard
@@ -640,6 +668,8 @@ export default function Home() {
                       error={b.error}
                       latencyMs={b.latencyMs}
                       historyContext={b.method === "history" ? b.historyContext : undefined}
+                      themeTopK={themeTopK}
+                      similarityExplanation={b.similarityExplanation}
                       onRemove={() => removeBaseline(b.key)}
                     />
                   ))}
@@ -653,6 +683,7 @@ export default function Home() {
                           : baselineLabel(runningBaselineMethod, runningBaselineModel)
                       }
                       loading
+                      themeTopK={themeTopK}
                     />
                   )}
                 </div>
@@ -1008,6 +1039,8 @@ function HistoryContextPanel({
 }) {
   const [open, setOpen] = useState(true);
   const count = items?.length ?? 0;
+
+  if (!loading && count === 0) return null;
   return (
     <div className="rounded-xl border border-border bg-surface-2/40 p-4 space-y-3">
       <button
@@ -1058,6 +1091,10 @@ function ResultCard({
   error,
   latencyMs,
   historyContext,
+  themeTopK,
+  sapiensThemeDisplay,
+  themeDisplayGroundTruth,
+  similarityExplanation,
   onRemove,
 }: {
   tone: Tone;
@@ -1071,13 +1108,24 @@ function ResultCard({
   error?: string;
   latencyMs?: number;
   historyContext?: HistoryContextItem[];
+  themeTopK: number;
+  /** Sapiens only: tie-aware theme list, GT match first among equal scores. */
+  sapiensThemeDisplay?: boolean;
+  themeDisplayGroundTruth?: string[];
+  similarityExplanation?: string | null;
   onRemove?: () => void;
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [contextOpen, setContextOpen] = useState(false);
   const isGenerated = tone !== "real";
   const showSkeleton = loading && isGenerated && !text;
-  const themeEntries = Object.entries(predictedThemes ?? {}).sort((a, b) => b[1] - a[1]);
+  const themeEntries = sapiensThemeDisplay
+    ? topKThemeEntriesForSapiensDisplay(
+        predictedThemes,
+        themeTopK,
+        themeDisplayGroundTruth,
+      )
+    : topKThemeEntries(predictedThemes, themeTopK);
   const hasDetails = themeEntries.length > 0 || sentiment;
   return (
     <div className="rounded-xl border border-border p-4 flex flex-col">
@@ -1122,6 +1170,9 @@ function ResultCard({
               style={{ width: `${Math.min(100, Math.max(0, metrics.overallSimilarityScore * 100))}%` }}
             />
           </div>
+          {similarityExplanation && (
+            <p className="text-[11px] text-muted leading-snug mt-1.5">{similarityExplanation}</p>
+          )}
         </div>
       )}
       {showSkeleton ? (
@@ -1171,6 +1222,7 @@ function ResultCard({
           >
             <span className={`transition-transform text-[10px] ${detailsOpen ? "rotate-90" : ""}`}>▶</span>
             Themes &amp; sentiment
+            {themeTopK > 0 ? ` (top ${themeTopK})` : ""}
           </button>
           {detailsOpen && (
             <div className="mt-2 space-y-2">

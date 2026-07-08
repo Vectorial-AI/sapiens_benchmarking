@@ -836,6 +836,11 @@ def healthcare_product_from_entry(
         "user_history_themes": pred.get("themes") or [],
         "healthcare_benchmark": True,
     }
+    pred_theme_scores = pred.get("predicted_themes") or {}
+    if isinstance(pred_theme_scores, dict) and pred_theme_scores:
+        product["user_history_theme_scores"] = {
+            str(k): float(v) for k, v in pred_theme_scores.items()
+        }
     score = acc.get("ui_overall_similarity")
     if score is None:
         score = app_similarity_score(

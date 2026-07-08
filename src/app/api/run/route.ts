@@ -16,7 +16,8 @@ import {
   REVIEW_SYSTEM,
 } from "@/lib/prompts";
 import { hasGatewayKey, mockPrediction, runModel } from "@/lib/ai";
-import { scorePredictionAgainstGroundTruth } from "@/lib/scoring";
+import { generateSimilarityExplanation } from "@/lib/similarity-explanation";
+import { scorePredictionAgainstGroundTruth, themeTopKFromGroundTruth } from "@/lib/scoring";
 import type { EngineResult, ReviewSentiment, RunMode } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -31,6 +32,7 @@ type ScoringGroundTruth = {
 async function attachMetrics(
   result: EngineResult,
   groundTruth: NonNullable<ScoringGroundTruth>,
+  label?: string,
 ): Promise<EngineResult> {
   if (!result.reviewText.trim() || result.error) return result;
   const metrics = await scorePredictionAgainstGroundTruth({
@@ -38,8 +40,19 @@ async function attachMetrics(
     predictedThemes: result.predictedThemes,
     sentiment: result.sentiment,
     groundTruth,
+    tieAwareTopK: result.engine === "sapiens",
   });
-  return { ...result, metrics };
+  const similarityExplanation = await generateSimilarityExplanation({
+    generatedReview: result.reviewText,
+    groundTruthReview: groundTruth.reviewText,
+    groundTruthThemes: groundTruth.themes,
+    predictedThemes: result.predictedThemes,
+    predictedSentiment: result.sentiment,
+    groundTruthSentiment: groundTruth.sentiment,
+    metrics,
+    label,
+  });
+  return { ...result, metrics, similarityExplanation };
 }
 
 async function runEngine(
@@ -134,6 +147,7 @@ export async function POST(req: Request) {
   const groundTruth = product?.groundTruthReview ?? null;
   const groundTruthThemes = product?.predictedThemes ?? [];
   const groundTruthSentiment = product?.groundTruthSentiment ?? null;
+  const themeTopK = themeTopKFromGroundTruth(groundTruthThemes);
 
   const scoringGroundTruth: ScoringGroundTruth =
     groundTruth && groundTruth.trim()
@@ -176,12 +190,13 @@ export async function POST(req: Request) {
       sapiens = await runEngine("sapiens", sapiensPrompt, SAPIENS_MODEL, sapiensTemperature);
     }
 
-    if (scoringGroundTruth) sapiens = await attachMetrics(sapiens, scoringGroundTruth);
+    if (scoringGroundTruth) sapiens = await attachMetrics(sapiens, scoringGroundTruth, "Sapiens");
 
     return NextResponse.json({
       groundTruth,
       groundTruthThemes,
       groundTruthSentiment,
+      themeTopK,
       sapiens,
       source: hasGatewayKey() ? "gateway" : "mock",
       metricsSource,
@@ -229,7 +244,13 @@ export async function POST(req: Request) {
     baseline = await runEngine("baseline", baselinePrompt, gateway);
   }
 
-  if (scoringGroundTruth) baseline = await attachMetrics(baseline, scoringGroundTruth);
+  if (scoringGroundTruth) {
+    baseline = await attachMetrics(
+      baseline,
+      scoringGroundTruth,
+      `${method} baseline`,
+    );
+  }
 
   return NextResponse.json({
     baseline: {
@@ -239,6 +260,7 @@ export async function POST(req: Request) {
       baselineModel: bModel,
       historyContext,
     },
+    themeTopK,
     source: hasGatewayKey() ? "gateway" : "mock",
     metricsSource,
   });

@@ -3,7 +3,7 @@
 import type { HistoryContextItem } from "./types";
 import { mapCategoryToMain } from "./category-themes";
 
-export const DEFAULT_LENGTH_MARGIN_WORDS = 15;
+export const DEFAULT_LENGTH_MARGIN_WORDS = 5;
 export const MAX_CHARS_PER_REVIEW = 900;
 
 export type ReviewHistoryProduct = {
@@ -17,7 +17,7 @@ export function wordCount(text: string): number {
   return (text.trim().match(/\S+/g) ?? []).length;
 }
 
-/** Max word count = reference review words + margin (pipeline default margin = 15). */
+/** Max word count = reference review words + margin (pipeline default margin = 5). */
 export function formatLengthConstraint(
   referenceText: string,
   margin = DEFAULT_LENGTH_MARGIN_WORDS,

@@ -16,6 +16,7 @@ type RawReview = {
   sentiment?: string | null;
   user_history_review?: string;
   user_history_themes?: string[];
+  user_history_theme_scores?: Record<string, number>;
   history_baseline_context_reviews?: Array<string | { review_text: string; rank_score?: number }>;
   best_prediction_review?: string;
   best_prediction_themes?: string[];
@@ -81,6 +82,7 @@ export type Product = {
   groundTruthSentiment: ReviewSentiment | null;
   userHistoryReview?: string;
   userHistoryThemes?: string[];
+  userHistoryThemeScores?: Record<string, number>;
   historyBaselineContextReviews?: string[];
   healthcareBenchmark?: boolean;
   videoGamesBenchmark?: boolean;
@@ -98,10 +100,18 @@ export function getUserHistoryReview(product: Product | null | undefined): strin
   return product?.groundTruthReview?.trim() || "";
 }
 
-/** Themes from user history (healthcare digital products). */
+/** Theme names from the reference / best prediction (healthcare benchmark). */
 export function getUserHistoryThemes(product: Product | null | undefined): string[] {
   if (!product?.healthcareBenchmark) return [];
   return (product.userHistoryThemes ?? []).map((t) => t.trim()).filter(Boolean);
+}
+
+/** Full theme score map from the reference / best prediction (healthcare benchmark). */
+export function getUserHistoryThemeScores(
+  product: Product | null | undefined,
+): Record<string, number> {
+  if (!product?.healthcareBenchmark) return {};
+  return product.userHistoryThemeScores ?? {};
 }
 
 export type UserHistoryReview = {
@@ -177,6 +187,7 @@ function normalizeProduct(r: RawReview): Product {
     userHistoryThemes: (r.user_history_themes ?? r.best_prediction_themes)?.length
       ? (r.user_history_themes ?? r.best_prediction_themes)
       : undefined,
+    userHistoryThemeScores: r.user_history_theme_scores,
     historyBaselineContextReviews: (r.history_baseline_context_reviews ?? [])
       .map((item) => {
         if (typeof item === "string") return item.trim();
@@ -315,6 +326,8 @@ export function getCatalogTribe(id: string): CatalogTribe | undefined {
         reviewKey: p.reviewKey,
         productDescription: p.productDescription,
         category: p.category,
+        groundTruthThemes: p.predictedThemes,
+        groundTruthSentiment: p.groundTruthSentiment,
         healthcareBenchmark: p.healthcareBenchmark,
         videoGamesBenchmark: p.videoGamesBenchmark,
         sapiensBaselineGap: p.sapiensBaselineGap,

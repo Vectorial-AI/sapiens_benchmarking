@@ -2,7 +2,7 @@
   "cluster": "cluster_4",
   "micro": "micro_7",
   "canonicalReviews": 252,
-  "matchThreshold": 0.75,
+  "matchThreshold": 0.65,
   "source": "outputs/amazon_sgo/cluster_4/micro_7_best/sapiens_vs_baselines_final_dataset.json",
   "modes": [
     {
