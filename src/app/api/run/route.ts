@@ -203,7 +203,13 @@ export async function POST(req: Request) {
     : `${method}:${bModel}`;
 
   const historyContext =
-    method === "history" ? buildUserHistoryContext(user) : undefined;
+    method === "history"
+      ? buildUserHistoryContext(user, {
+          excludeReviewKey: reviewKey,
+          excludeReviewText: product?.groundTruthReview,
+          product,
+        })
+      : undefined;
 
   let baseline: EngineResult;
   const baselinePrompt = buildBaselinePrompt(method, {

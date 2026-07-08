@@ -16,9 +16,11 @@ type RawReview = {
   sentiment?: string | null;
   user_history_review?: string;
   user_history_themes?: string[];
+  history_baseline_context_reviews?: Array<string | { review_text: string; rank_score?: number }>;
   best_prediction_review?: string;
   best_prediction_themes?: string[];
   healthcare_benchmark?: boolean;
+  video_games_benchmark?: boolean;
 };
 type RawTribe = {
   id: string;
@@ -58,6 +60,7 @@ type RawUserHistoryReview = {
   review_text: string;
   category?: string;
   main_category?: string;
+  review_key?: string;
 };
 
 export type Product = {
@@ -70,7 +73,9 @@ export type Product = {
   groundTruthSentiment: ReviewSentiment | null;
   userHistoryReview?: string;
   userHistoryThemes?: string[];
+  historyBaselineContextReviews?: string[];
   healthcareBenchmark?: boolean;
+  videoGamesBenchmark?: boolean;
 };
 
 /** User history review text for healthcare Sapiens context. */
@@ -91,6 +96,7 @@ export type UserHistoryReview = {
   reviewText: string;
   category: string;
   mainCategory: string;
+  reviewKey?: string;
 };
 
 export type User = {
@@ -149,23 +155,37 @@ function normalizeProduct(r: RawReview): Product {
     userHistoryThemes: (r.user_history_themes ?? r.best_prediction_themes)?.length
       ? (r.user_history_themes ?? r.best_prediction_themes)
       : undefined,
+    historyBaselineContextReviews: (r.history_baseline_context_reviews ?? [])
+      .map((item) => {
+        if (typeof item === "string") return item.trim();
+        return String(item.review_text ?? "").trim();
+      })
+      .filter(Boolean),
     healthcareBenchmark: Boolean(r.healthcare_benchmark),
+    videoGamesBenchmark: Boolean(r.video_games_benchmark),
   };
+}
+
+function normalizeUserHistoryReviews(
+  rows: RawUserHistoryReview[] | undefined,
+): UserHistoryReview[] {
+  return (rows ?? [])
+    .filter((r) => r.review_text?.trim())
+    .map((r) => ({
+      reviewText: r.review_text.trim(),
+      category: r.category ?? "",
+      mainCategory: r.main_category ?? r.category ?? "",
+      reviewKey: r.review_key?.trim() || undefined,
+    }));
 }
 
 function normalizeTribe(raw: RawTribe): Tribe {
   const users: User[] = raw.member_user_characteristics.map((u) => {
     const reviews = raw.members_grouped_by_user[u.user_id] ?? [];
     const products: Product[] = reviews.map(normalizeProduct);
-    const userHistoryReviews: UserHistoryReview[] = (
-      u.user_history_reviews ?? u.history_noise_reviews ?? []
-    )
-      .filter((r) => r.review_text?.trim())
-      .map((r) => ({
-        reviewText: r.review_text.trim(),
-        category: r.category ?? "",
-        mainCategory: r.main_category ?? r.category ?? "",
-      }));
+    const userHistoryReviews = normalizeUserHistoryReviews(
+      u.user_history_reviews ?? u.history_noise_reviews,
+    );
     return {
       id: u.user_id,
       characteristicSummary: u.characteristic_summary,
@@ -248,6 +268,7 @@ export function getCatalogTribe(id: string): CatalogTribe | undefined {
         productDescription: p.productDescription,
         category: p.category,
         healthcareBenchmark: p.healthcareBenchmark,
+        videoGamesBenchmark: p.videoGamesBenchmark,
       })),
     })),
   };

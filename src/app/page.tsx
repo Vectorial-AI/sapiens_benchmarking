@@ -21,6 +21,7 @@ import type {
   HistoryContextItem,
   PipelineMetrics,
   ReviewSentiment,
+  SapiensBaselineExplanation,
   SapiensRunResponse,
 } from "@/lib/types";
 import {
@@ -39,7 +40,7 @@ const STEPS = [
 
 function defaultReviewKeyForUser(user: CatalogTribe["users"][number] | null | undefined): string | null {
   if (!user?.products.length) return null;
-  const benchmark = user.products.find((p) => p.healthcareBenchmark);
+  const benchmark = user.products.find((p) => p.healthcareBenchmark || p.videoGamesBenchmark);
   return benchmark?.reviewKey ?? user.products[0]?.reviewKey ?? null;
 }
 
@@ -77,6 +78,10 @@ export default function Home() {
   const [runningBaselineModel, setRunningBaselineModel] = useState<BaselineModel | null>(null);
   const [historyPreview, setHistoryPreview] = useState<HistoryContextItem[] | null>(null);
   const [historyPreviewLoading, setHistoryPreviewLoading] = useState(false);
+  const [sapiensExplanation, setSapiensExplanation] = useState<SapiensBaselineExplanation | null>(
+    null,
+  );
+  const [sapiensExplanationLoading, setSapiensExplanationLoading] = useState(false);
 
   const user = useMemo(
     () => tribe?.users.find((u) => u.id === userId) ?? null,
@@ -122,6 +127,24 @@ export default function Home() {
       .then((d) => setTribeIndex(d.tribes ?? []))
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!reviewKey || !(product?.healthcareBenchmark || product?.videoGamesBenchmark)) {
+      setSapiensExplanation(null);
+      return;
+    }
+    setSapiensExplanationLoading(true);
+    fetch(`/api/sapiens-explanation?reviewKey=${encodeURIComponent(reviewKey)}`)
+      .then(async (r) => {
+        if (!r.ok) {
+          setSapiensExplanation(null);
+          return;
+        }
+        setSapiensExplanation((await r.json()) as SapiensBaselineExplanation);
+      })
+      .catch(() => setSapiensExplanation(null))
+      .finally(() => setSapiensExplanationLoading(false));
+  }, [reviewKey, product?.healthcareBenchmark, product?.videoGamesBenchmark]);
 
   useEffect(() => {
     if (restoredRef.current) return;
@@ -501,6 +524,13 @@ export default function Home() {
                     latencyMs={sapiens?.latencyMs}
                   />
                 </div>
+
+                {(product?.healthcareBenchmark || product?.videoGamesBenchmark) && (
+                  <SapiensExplanationPanel
+                    data={sapiensExplanation}
+                    loading={sapiensExplanationLoading}
+                  />
+                )}
               </div>
             )}
 
@@ -657,6 +687,13 @@ export default function Home() {
 
                 {baselines.length > 0 && sapiens?.metrics && (
                   <ScoreboardTable sapiens={sapiens} baselines={baselines} />
+                )}
+
+                {(product?.healthcareBenchmark || product?.videoGamesBenchmark) && (
+                  <SapiensExplanationPanel
+                    data={sapiensExplanation}
+                    loading={sapiensExplanationLoading}
+                  />
                 )}
 
                 <div className="mt-6 pt-4 border-t border-border">
@@ -949,6 +986,127 @@ function fmtPct(value: number | null | undefined): string {
   return `${Math.round(value * 100)}%`;
 }
 
+function SapiensExplanationPanel({
+  data,
+  loading,
+}: {
+  data: SapiensBaselineExplanation | null;
+  loading: boolean;
+}) {
+  const [open, setOpen] = useState(true);
+  if (loading) {
+    return (
+      <div className="mt-6 rounded-xl border border-border bg-surface-2/40 p-4 text-[13px] text-muted flex items-center gap-2">
+        <Spinner /> Loading Sapiens vs baseline analysis…
+      </div>
+    );
+  }
+  if (!data) return null;
+
+  const method = data.bestBaseline.method;
+  const methodLabel =
+    method === "history"
+      ? "History baseline"
+      : method === "tribe_persona"
+        ? "Tribe persona baseline"
+        : method === "population_persona"
+          ? "Population persona baseline"
+          : String(method);
+
+  return (
+    <div className="mt-6 rounded-xl border border-accent/30 bg-accent/[0.03] p-4 space-y-4">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-start justify-between w-full text-left gap-3"
+      >
+        <div>
+          <p className="text-[13px] font-medium text-foreground">Why Sapiens wins</p>
+          <p className="text-[12px] text-muted mt-1">
+            vs {methodLabel} · {data.bestBaseline.model}
+            {data.sapiensBaselineGap != null && (
+              <> · +{fmtPct(data.sapiensBaselineGap)} gap</>
+            )}
+          </p>
+        </div>
+        <span className="text-[12px] text-muted shrink-0">{open ? "Hide" : "Show"}</span>
+      </button>
+
+      {open && (
+        <div className="space-y-4 text-[13px] leading-relaxed">
+          <div>
+            <p className="font-medium text-foreground">{data.explanation.headline}</p>
+            <p className="text-muted mt-1">{data.explanation.summary}</p>
+          </div>
+
+          {data.explanation.metric_drivers?.length ? (
+            <div>
+              <p className="text-[12px] font-medium text-muted-2 uppercase tracking-wide mb-2">
+                Metric drivers
+              </p>
+              <div className="space-y-2">
+                {data.explanation.metric_drivers.map((driver) => (
+                  <div key={driver.metric} className="rounded-lg border border-border bg-surface-1 px-3 py-2">
+                    <p className="font-medium capitalize">{driver.metric.replace(/_/g, " ")}</p>
+                    <p className="text-[12px] text-muted mt-0.5">
+                      Sapiens {driver.sapiens_value} vs baseline {driver.baseline_value}
+                    </p>
+                    <p className="text-[12px] text-muted-2 mt-1">{driver.impact}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {data.explanation.why_sapiens_wins?.length ? (
+            <div>
+              <p className="text-[12px] font-medium text-muted-2 uppercase tracking-wide mb-2">
+                Sapiens strengths
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-muted">
+                {data.explanation.why_sapiens_wins.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {data.explanation.baseline_gaps?.length ? (
+            <div>
+              <p className="text-[12px] font-medium text-muted-2 uppercase tracking-wide mb-2">
+                Baseline gaps
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-muted">
+                {data.explanation.baseline_gaps.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {data.explanation.concrete_examples?.length ? (
+            <div>
+              <p className="text-[12px] font-medium text-muted-2 uppercase tracking-wide mb-2">
+                Concrete examples
+              </p>
+              <div className="space-y-2">
+                {data.explanation.concrete_examples.map((ex) => (
+                  <div key={`${ex.aspect}-${ex.ground_truth}`} className="rounded-lg border border-border bg-surface-1 px-3 py-2 text-[12px]">
+                    <p className="font-medium capitalize">{ex.aspect}</p>
+                    <p className="text-muted mt-1"><span className="text-muted-2">Real:</span> {ex.ground_truth}</p>
+                    <p className="text-muted mt-1"><span className="text-muted-2">Sapiens:</span> {ex.sapiens}</p>
+                    <p className="text-muted mt-1"><span className="text-muted-2">Baseline:</span> {ex.baseline}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ScoreboardTable({
   sapiens,
   baselines,
@@ -1015,9 +1173,6 @@ function HistoryContextPanel({
       >
         <div>
           <p className="text-[13px] font-medium text-foreground">User history sent as context</p>
-          <p className="text-[11px] text-muted-2 mt-0.5">
-            Other-category reviews only (excludes health &amp; beauty)
-          </p>
         </div>
         <span className="text-[12px] text-muted shrink-0">
           {loading ? "Loading…" : `${count} review${count === 1 ? "" : "s"}`}

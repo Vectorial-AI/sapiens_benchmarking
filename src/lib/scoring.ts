@@ -5,7 +5,7 @@ import { computeTextDelta } from "./embeddings";
 export const WEIGHT_TEXT = 0.25;
 export const WEIGHT_THEME = 0.7;
 export const WEIGHT_SENTIMENT = 0.05;
-export const MATCH_THRESHOLD = 0.65;
+export const MATCH_THRESHOLD = 0.75;
 
 export type PipelineMetrics = {
   recallAtK: number | null;

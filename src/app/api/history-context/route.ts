@@ -17,12 +17,15 @@ export async function GET(req: Request) {
   }
 
   const targetCategory = categoryParam || product?.category || "";
-  const items = buildUserHistoryContext(user);
+  const items = buildUserHistoryContext(user, {
+    excludeReviewKey: reviewKey,
+    excludeReviewText: product?.groundTruthReview,
+    product,
+  });
 
   return NextResponse.json({
     items,
     count: items.length,
     targetCategory,
-    filter: "Other-category reviews (excludes health & beauty)",
   });
 }

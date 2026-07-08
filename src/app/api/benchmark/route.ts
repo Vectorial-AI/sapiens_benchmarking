@@ -40,7 +40,7 @@ export async function GET(req: Request) {
     micro: raw.micro,
     available: modes.length > 0,
     canonicalReviews: raw.canonicalReviews,
-    matchThreshold: raw.matchThreshold ?? 0.65,
+    matchThreshold: raw.matchThreshold ?? 0.75,
     dataSource: raw.source,
     sapiensMode,
     baselineModes,

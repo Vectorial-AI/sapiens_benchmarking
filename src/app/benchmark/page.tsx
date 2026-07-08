@@ -54,7 +54,7 @@ function BenchmarkContent() {
     };
   }, [tribeId]);
 
-  const threshold = data?.matchThreshold ?? 0.65;
+  const threshold = data?.matchThreshold ?? 0.75;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-6 py-8 sm:py-12">

@@ -432,13 +432,33 @@ export function buildHistoryContext(args: {
   );
 }
 
+const MAX_HISTORY_CONTEXT_REVIEWS = 6;
+const MAX_HISTORY_FALLBACK_REVIEWS = 3;
+
 /**
  * User history for the history baseline prompt.
+ * Primary: other-category reviews. Fallback: worst 3 history · gpt-5 baseline predictions.
  */
-export function buildUserHistoryContext(user: User): HistoryContextItem[] {
-  return (user.userHistoryReviews ?? [])
+export function buildUserHistoryContext(
+  user: User,
+  options?: {
+    excludeReviewKey?: string;
+    excludeReviewText?: string;
+    product?: Product | null;
+  },
+): HistoryContextItem[] {
+  const primary = (user.userHistoryReviews ?? [])
     .map((r) => ({ reviewText: r.reviewText.trim() }))
     .filter((r) => r.reviewText.length > 0);
+  if (primary.length > 0) return primary.slice(0, MAX_HISTORY_CONTEXT_REVIEWS);
+
+  const excludeText = options?.excludeReviewText?.trim();
+  const fallback = (options?.product?.historyBaselineContextReviews ?? [])
+    .map((text) => text.trim())
+    .filter((text) => text.length > 0 && text !== excludeText)
+    .map((reviewText) => ({ reviewText }));
+
+  return fallback.slice(0, MAX_HISTORY_FALLBACK_REVIEWS);
 }
 
 export function buildHistoryPrompt(args: {
@@ -450,9 +470,13 @@ export function buildHistoryPrompt(args: {
   excludeReviewKey?: string;
   groundTruthThemes: string[];
 }): string {
-  const { user, productDescription, personaName, category } = args;
+  const { user, productDescription, personaName, category, product, excludeReviewKey } = args;
   const themes = themesForCategory(category);
-  const historyItems = buildUserHistoryContext(user);
+  const historyItems = buildUserHistoryContext(user, {
+    excludeReviewKey,
+    excludeReviewText: product?.groundTruthReview,
+    product,
+  });
 
   const historyTextBlock = historyItems
     .map((h, i) => `Example ${i + 1}:\n${h.reviewText}\n`)
