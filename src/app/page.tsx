@@ -18,7 +18,6 @@ import type {
   CatalogTribe,
   CatalogTribeIndex,
   EngineResult,
-  HistoryContextItem,
   PipelineMetrics,
   ReviewSentiment,
   SapiensRunResponse,
@@ -29,6 +28,11 @@ import {
   saveWizardSession,
 } from "@/lib/wizard-session";
 import { topKThemeEntries, topKThemeEntriesForSapiensDisplay, themeTopKFromGroundTruth } from "@/lib/scoring";
+
+const DOMAIN_SECTIONS = [
+  { id: "video_games" as const, label: "Video Games & Software" },
+  { id: "healthcare" as const, label: "Healthcare & Wellness" },
+];
 
 const STEPS = [
   { id: "tribe", label: "Tribe", title: "Pick a modelled tribe", hint: "Select a behavioral tribe to model." },
@@ -43,6 +47,13 @@ function defaultReviewKeyForUser(user: CatalogTribe["users"][number] | null | un
   return user.products[0]?.reviewKey ?? null;
 }
 
+function catalogProductDescription(product: {
+  mainProductDescription?: string;
+  productDescription: string;
+}): string {
+  return product.mainProductDescription?.trim() || product.productDescription.trim();
+}
+
 export default function Home() {
   const router = useRouter();
   const restoredRef = useRef(false);
@@ -55,7 +66,7 @@ export default function Home() {
   const [tribeId, setTribeId] = useState("");
   const [tribe, setTribe] = useState<CatalogTribe | null>(null);
   const [tribeLoading, setTribeLoading] = useState(false);
-  const [traitsOpen, setTraitsOpen] = useState(true);
+  const [traitsOpen, setTraitsOpen] = useState(false);
 
   const [userId, setUserId] = useState("");
   const [reviewKey, setReviewKey] = useState<string | null>(null);
@@ -76,8 +87,6 @@ export default function Home() {
   const [runningBaselineKey, setRunningBaselineKey] = useState<string | null>(null);
   const [runningBaselineMethod, setRunningBaselineMethod] = useState<BaselineMethod | null>(null);
   const [runningBaselineModel, setRunningBaselineModel] = useState<BaselineModel | null>(null);
-  const [historyPreview, setHistoryPreview] = useState<HistoryContextItem[] | null>(null);
-  const [historyPreviewLoading, setHistoryPreviewLoading] = useState(false);
 
   const user = useMemo(
     () => tribe?.users.find((u) => u.id === userId) ?? null,
@@ -97,8 +106,8 @@ export default function Home() {
       skipProductDescSyncRef.current = false;
       return;
     }
-    if (product) setCustomProductDesc(product.productDescription);
-  }, [product?.reviewKey, product?.productDescription]);
+    if (product) setCustomProductDesc(catalogProductDescription(product));
+  }, [product?.reviewKey, product?.mainProductDescription, product?.productDescription]);
 
   useEffect(() => {
     if (skipPopulationDefSyncRef.current) {
@@ -156,26 +165,6 @@ export default function Home() {
       .catch(() => {})
       .finally(() => setTribeLoading(false));
   }, []);
-
-  useEffect(() => {
-    if (step !== 4 || baselineMethod !== "history" || !canRun) {
-      setHistoryPreview(null);
-      return;
-    }
-    const params = new URLSearchParams({
-      tribeId,
-      userId,
-      mode: "history",
-      category: effectiveCategory,
-    });
-    if (reviewKey) params.set("reviewKey", reviewKey);
-    setHistoryPreviewLoading(true);
-    fetch(`/api/history-context?${params}`)
-      .then((r) => r.json())
-      .then((d) => setHistoryPreview((d.items as HistoryContextItem[]) ?? []))
-      .catch(() => setHistoryPreview([]))
-      .finally(() => setHistoryPreviewLoading(false));
-  }, [step, baselineMethod, tribeId, userId, reviewKey, effectiveCategory, canRun]);
 
   useEffect(() => {
     if (!product) {
@@ -359,23 +348,36 @@ export default function Home() {
       <Stepper step={step} onStep={goTo} />
 
       <div className="mt-8 mb-6">
-        {tribe && (
-          <div className="mb-2">
-            <div className="flex items-center gap-2">
-              <Dot tone="sapiens" />
-              <span className="text-[13px] font-semibold text-foreground">{tribe.name}</span>
-            </div>
-            {tribe.tribeDefinition && (
-              <p className="text-[12px] text-muted mt-2 ml-4 leading-relaxed">
-                {tribe.tribeDefinition}
-              </p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            {tribe && (
+              <div className="mb-2">
+                <div className="flex items-center gap-2">
+                  <Dot tone="sapiens" />
+                  <span className="text-[13px] font-semibold text-foreground">{tribe.name}</span>
+                </div>
+                {tribe.tribeDefinition && (
+                  <p className="text-[12px] text-muted mt-2 ml-4 leading-relaxed">
+                    {tribe.tribeDefinition}
+                  </p>
+                )}
+              </div>
             )}
+            <h1 className="text-[22px] font-semibold tracking-tight">{STEPS[step].title}</h1>
+            {STEPS[step].hint ? (
+              <p className="text-[14px] text-muted mt-1">{STEPS[step].hint}</p>
+            ) : null}
           </div>
-        )}
-        <h1 className="text-[22px] font-semibold tracking-tight">{STEPS[step].title}</h1>
-        {STEPS[step].hint ? (
-          <p className="text-[14px] text-muted mt-1">{STEPS[step].hint}</p>
-        ) : null}
+          {tribeId && (
+            <button
+              type="button"
+              onClick={openBenchmarking}
+              className="shrink-0 text-[13px] font-medium text-accent hover:underline"
+            >
+              View benchmarking →
+            </button>
+          )}
+        </div>
       </div>
 
       <section className="card p-6 sm:p-7 animate-in" key={step}>
@@ -385,10 +387,9 @@ export default function Home() {
           <>
             {step === 0 && (
               <div className="space-y-4">
-                {(["healthcare", "video_games"] as const).map((domain) => {
+                {DOMAIN_SECTIONS.map(({ id: domain, label }) => {
                   const domainTribes = tribeIndex.filter((t) => t.domain === domain);
                   if (domainTribes.length === 0) return null;
-                  const label = domain === "healthcare" ? "Healthcare" : "Video Games";
                   return (
                     <div key={domain} className="space-y-2">
                       <h3 className="text-[12px] font-semibold uppercase tracking-wide text-muted-2">
@@ -456,9 +457,15 @@ export default function Home() {
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-[11px] font-mono text-muted-2">#{i + 1}</span>
                       </div>
-                      <p className="text-[13px] text-foreground leading-snug line-clamp-2">
-                        {p.productDescription}
+                      <p className="text-[13px] text-foreground leading-snug line-clamp-3">
+                        {catalogProductDescription(p)}
                       </p>
+                      {p.mainProductDescription &&
+                        p.mainProductDescription.trim() !== p.productDescription.trim() && (
+                          <p className="text-[11px] text-muted-2 mt-1 line-clamp-1">
+                            {p.productDescription}
+                          </p>
+                        )}
                       <p className="text-[11px] text-muted-2 mt-1.5">
                         {p.category}
                       </p>
@@ -566,14 +573,6 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {baselineMethod === "history" && (
-                    <HistoryContextPanel
-                      items={historyPreview}
-                      loading={historyPreviewLoading}
-                      targetCategory={effectiveCategory}
-                    />
-                  )}
-
                   {baselineMethod === "population_persona" && (
                     <div className="rounded-xl border border-border bg-surface-2/40 p-4 space-y-3">
                       <label className="flex items-center gap-2 text-[13px] cursor-pointer">
@@ -667,7 +666,6 @@ export default function Home() {
                       metrics={b.metrics}
                       error={b.error}
                       latencyMs={b.latencyMs}
-                      historyContext={b.method === "history" ? b.historyContext : undefined}
                       themeTopK={themeTopK}
                       similarityExplanation={b.similarityExplanation}
                       onRemove={() => removeBaseline(b.key)}
@@ -691,17 +689,6 @@ export default function Home() {
                 {baselines.length > 0 && sapiens?.metrics && (
                   <ScoreboardTable sapiens={sapiens} baselines={baselines} />
                 )}
-
-                <div className="mt-6 pt-4 border-t border-border">
-                  <button
-                    type="button"
-                    onClick={openBenchmarking}
-                    disabled={!tribeId}
-                    className="text-[13px] text-accent hover:underline disabled:opacity-40"
-                  >
-                    View benchmarking →
-                  </button>
-                </div>
               </div>
             )}
           </>
@@ -803,39 +790,71 @@ function LearnedTribePanel({
     { key: "frictionPoints", label: "Friction points", items: q.frictionPoints },
     { key: "implicitGoals", label: "Implicit goals", items: q.implicitGoals },
   ];
+  const traitCount = groups.reduce((n, g) => n + g.items.length, 0);
 
   return (
-    <div className="card-soft p-4 mt-2">
-      <button onClick={onToggle} className="flex items-center gap-1.5 text-[13px] font-medium w-full text-left">
-        <span className={`transition-transform ${open ? "rotate-90" : ""}`}>▶</span>
-        Learned tribe from Sapiens
-      </button>
-      {open && (
-        <div className="mt-4 space-y-4 max-h-[24rem] overflow-y-auto">
-          {groups.map((g) => (
-            <TraitGroup key={g.key} label={g.label} items={g.items} />
-          ))}
+    <div className="rounded-xl border border-border bg-surface-2/30 p-4 sm:p-5 mt-4">
+      <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
+        <div className="space-y-2 min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-2">
+            Tribe population
+          </p>
+          <p className="text-[13px] text-foreground/90 leading-relaxed">
+            {tribe.populationDefinition?.trim() || "No population definition available."}
+          </p>
         </div>
-      )}
+
+        <div className="min-w-0 lg:border-l lg:border-border lg:pl-6 pt-4 lg:pt-0 border-t lg:border-t-0 border-border">
+          <button
+            type="button"
+            onClick={onToggle}
+            className="flex items-center justify-between gap-3 w-full text-left rounded-lg border border-border bg-surface-1 px-3 py-2.5 hover:border-border-strong transition"
+          >
+            <span className="flex items-center gap-1.5 text-[13px] font-medium text-foreground">
+              <span className={`transition-transform text-[10px] text-muted-2 ${open ? "rotate-90" : ""}`}>▶</span>
+              Learned tribe from Sapiens
+            </span>
+            <span className="text-[11px] text-muted-2 shrink-0">{traitCount} traits</span>
+          </button>
+          {open && (
+            <div className="mt-3 space-y-2 max-h-[22rem] overflow-y-auto pr-1">
+              {groups.map((g) => (
+                <TraitGroupDrawer key={g.key} label={g.label} items={g.items} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
 
-function TraitGroup({ label, items }: { label: string; items: string[] }) {
+function TraitGroupDrawer({ label, items }: { label: string; items: string[] }) {
+  const [open, setOpen] = useState(false);
   if (!items.length) return null;
   return (
-    <div>
-      <p className="text-[11px] uppercase tracking-wide text-muted-2 mb-1.5">
-        {label} ({items.length})
-      </p>
-      <ul className="space-y-2">
-        {items.map((it, i) => (
-          <li key={i} className="text-[12.5px] text-muted leading-relaxed flex gap-2">
-            <span className="text-accent-soft mt-0.5 shrink-0">•</span>
-            <span>{it}</span>
-          </li>
-        ))}
-      </ul>
+    <div className="rounded-lg border border-border bg-surface-1/60 overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center justify-between w-full px-3 py-2 text-left hover:bg-surface-2/40 transition"
+      >
+        <span className="flex items-center gap-1.5 text-[12px] font-medium text-foreground/90">
+          <span className={`transition-transform text-[9px] text-muted-2 ${open ? "rotate-90" : ""}`}>▶</span>
+          {label}
+        </span>
+        <span className="text-[10px] text-muted-2 uppercase tracking-wide">{items.length}</span>
+      </button>
+      {open && (
+        <ul className="px-3 pb-3 pt-1 space-y-2 border-t border-border/60">
+          {items.map((it, i) => (
+            <li key={i} className="text-[12px] text-muted leading-relaxed flex gap-2">
+              <span className="text-accent-soft mt-0.5 shrink-0">•</span>
+              <span>{it}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -864,7 +883,7 @@ function TribeSelectCard({
         <span className="text-[13px] font-semibold leading-snug">{tribe.name}</span>
         {tribe.domain && (
           <span className="text-[10px] uppercase tracking-wide text-muted-2 ml-auto shrink-0">
-            {tribe.domain === "healthcare" ? "Healthcare" : "Video Games"}
+            {tribe.domain === "healthcare" ? "Healthcare" : "Video Games & Software"}
           </span>
         )}
       </div>
@@ -962,7 +981,7 @@ function ProductDescriptionEditor({
 }) {
   return (
     <div className={`rounded-xl border border-border bg-surface-2/40 ${compact ? "p-3" : "p-4"}`}>
-      <Label>Product description</Label>
+      <Label>Main product description</Label>
       {category && (
         <p className="text-[11px] text-muted-2 mb-2">{category}</p>
       )}
@@ -970,7 +989,7 @@ function ProductDescriptionEditor({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={compact ? 3 : 4}
-        placeholder="Write or edit the product description used for predictions…"
+        placeholder="Write or edit the main product description used for predictions…"
         className="w-full rounded-lg border border-border bg-surface-1 px-3 py-2.5 text-[13px] text-foreground leading-relaxed resize-y min-h-[4.5rem]"
       />
     </div>
@@ -1028,57 +1047,6 @@ function ScoreboardTable({
   );
 }
 
-function HistoryContextPanel({
-  items,
-  loading,
-  targetCategory,
-}: {
-  items: HistoryContextItem[] | null;
-  loading: boolean;
-  targetCategory: string;
-}) {
-  const [open, setOpen] = useState(true);
-  const count = items?.length ?? 0;
-
-  if (!loading && count === 0) return null;
-  return (
-    <div className="rounded-xl border border-border bg-surface-2/40 p-4 space-y-3">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center justify-between w-full text-left gap-3"
-      >
-        <div>
-          <p className="text-[13px] font-medium text-foreground">User history sent as context</p>
-        </div>
-        <span className="text-[12px] text-muted shrink-0">
-          {loading ? "Loading…" : `${count} review${count === 1 ? "" : "s"}`}
-        </span>
-      </button>
-      {open && !loading && (
-        <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
-          {count === 0 ? (
-            <p className="text-[12px] text-muted-2">
-              No user history is available for this user.
-            </p>
-          ) : (
-            items?.map((item, i) => (
-              <div key={i} className="rounded-lg border border-border bg-surface-1 p-3">
-                <p className="text-[10px] uppercase tracking-wide text-muted-2 mb-1.5">
-                  Example {i + 1}
-                </p>
-                <p className="text-[12.5px] text-foreground/90 whitespace-pre-wrap leading-relaxed">
-                  {item.reviewText.replace(/<br\s*\/?>/gi, "\n")}
-                </p>
-              </div>
-            ))
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function ResultCard({
   tone,
   title,
@@ -1090,7 +1058,6 @@ function ResultCard({
   loading,
   error,
   latencyMs,
-  historyContext,
   themeTopK,
   sapiensThemeDisplay,
   themeDisplayGroundTruth,
@@ -1107,7 +1074,6 @@ function ResultCard({
   loading?: boolean;
   error?: string;
   latencyMs?: number;
-  historyContext?: HistoryContextItem[];
   themeTopK: number;
   /** Sapiens only: tie-aware theme list, GT match first among equal scores. */
   sapiensThemeDisplay?: boolean;
@@ -1116,7 +1082,6 @@ function ResultCard({
   onRemove?: () => void;
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [contextOpen, setContextOpen] = useState(false);
   const isGenerated = tone !== "real";
   const showSkeleton = loading && isGenerated && !text;
   const themeEntries = sapiensThemeDisplay
@@ -1189,29 +1154,6 @@ function ResultCard({
         </p>
       ) : (
         <p className="text-[12.5px] text-muted-2">{loading ? "Generating…" : "No review yet."}</p>
-      )}
-      {historyContext && historyContext.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-border">
-          <button
-            type="button"
-            onClick={() => setContextOpen((v) => !v)}
-            className="flex items-center gap-1.5 text-[11px] text-muted-2 hover:text-muted transition w-full text-left"
-          >
-            <span className={`transition-transform text-[10px] ${contextOpen ? "rotate-90" : ""}`}>▶</span>
-            Context reviews ({historyContext.length})
-          </button>
-          {contextOpen && (
-            <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
-              {historyContext.map((item, i) => (
-                <p key={i} className="text-[11px] text-muted leading-relaxed whitespace-pre-wrap">
-                  <span className="text-muted-2">Ex {i + 1}: </span>
-                  {item.reviewText.slice(0, 280)}
-                  {item.reviewText.length > 280 ? "…" : ""}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
       )}
       {hasDetails && text && (
         <div className="mt-3 pt-3 border-t border-border">

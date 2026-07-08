@@ -1,5 +1,5 @@
 import type { BaselineMethod } from "./baselines";
-import { getCategoryThemes, getCategoryThemesForBaselinePrompt } from "./category-themes";
+import { getCategoryThemes } from "./category-themes";
 import { DEFAULT_THEMES } from "./prompts-constants";
 import type { HistoryContextItem, Qualitative, ReviewSentiment } from "./types";
 import type { Product, Tribe, User } from "./master";
@@ -101,8 +101,9 @@ function themesForCategory(category: string): string[] {
   return getCategoryThemes(category);
 }
 
-function themesForBaselineCategory(category: string, groundTruthThemes: string[]): string[] {
-  return getCategoryThemesForBaselinePrompt(category, groundTruthThemes);
+/** Baselines: full category theme list (GT k-filter kept in category-themes for later). */
+function themesForBaselineCategory(category: string, _groundTruthThemes: string[]): string[] {
+  return getCategoryThemes(category);
 }
 
 function resolveLengthConstraint(product: Product | null | undefined): number {

@@ -9,6 +9,7 @@ type RawTrait = { text: string };
 type RawReview = {
   review_key: string;
   product_description: string;
+  main_product_description?: string;
   review_text: string;
   rating?: number | null;
   category: string;
@@ -75,6 +76,7 @@ type RawUserHistoryReview = {
 export type Product = {
   reviewKey: string;
   productDescription: string;
+  mainProductDescription: string;
   category: string;
   rating: number | null;
   groundTruthReview: string;
@@ -91,6 +93,11 @@ export type Product = {
   userNormContext?: string;
   leaveOneOutHistoryReviews?: string[];
 };
+
+/** Prefer full meta description for display and prediction prompts. */
+export function getEffectiveProductDescription(product: Product | null | undefined): string {
+  return product?.mainProductDescription?.trim() || product?.productDescription?.trim() || "";
+}
 
 /** User history review text for healthcare Sapiens context. */
 export function getUserHistoryReview(product: Product | null | undefined): string {
@@ -174,9 +181,12 @@ function productSortScore(p: Product, sortMode: string): number {
 }
 
 function normalizeProduct(r: RawReview): Product {
+  const mainProductDescription =
+    r.main_product_description?.trim() || r.product_description?.trim() || "";
   return {
     reviewKey: r.review_key,
     productDescription: r.product_description,
+    mainProductDescription,
     category: r.category,
     rating: typeof r.rating === "number" ? r.rating : null,
     groundTruthReview: r.review_text,
@@ -325,6 +335,7 @@ export function getCatalogTribe(id: string): CatalogTribe | undefined {
       products: u.products.map((p) => ({
         reviewKey: p.reviewKey,
         productDescription: p.productDescription,
+        mainProductDescription: p.mainProductDescription,
         category: p.category,
         groundTruthThemes: p.predictedThemes,
         groundTruthSentiment: p.groundTruthSentiment,

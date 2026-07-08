@@ -13,6 +13,7 @@ export type Qualitative = {
 export type CatalogProduct = {
   reviewKey: string;
   productDescription: string;
+  mainProductDescription?: string;
   category: string;
   groundTruthThemes?: string[];
   groundTruthSentiment?: ReviewSentiment | null;

@@ -429,6 +429,28 @@ def product_descriptions_by_review_key(details: dict) -> dict[str, str]:
     return out
 
 
+def main_product_descriptions_by_review_key(details: dict) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for _uid, revs in (details.get("members_grouped_by_user") or {}).items():
+        for rev in revs or []:
+            rk = str(rev.get("review_key") or "").strip()
+            main_desc = str(
+                rev.get("main_product_description") or rev.get("product_description") or ""
+            ).strip()
+            if rk and main_desc:
+                out[rk] = main_desc
+    return out
+
+
+def attach_main_product_description(product: dict, main_by_key: dict[str, str]) -> dict:
+    review_key = str(product.get("review_key") or "").strip()
+    if review_key and review_key in main_by_key:
+        product["main_product_description"] = main_by_key[review_key]
+    elif not str(product.get("main_product_description") or "").strip():
+        product["main_product_description"] = str(product.get("product_description") or "")
+    return product
+
+
 def enrich_product_description_from_details(row: dict, details_desc: dict[str, str]) -> dict:
     """Use micro_cluster_details product text when blind run has a placeholder description."""
     review_key = str(row.get("review_key") or "").strip()
@@ -442,6 +464,18 @@ def enrich_product_description_from_details(row: dict, details_desc: dict[str, s
         enriched["product_description"] = fallback
         return enriched
     return row
+
+
+def enrich_main_product_description_from_details(
+    row: dict, main_details_desc: dict[str, str]
+) -> dict:
+    review_key = str(row.get("review_key") or "").strip()
+    fallback = main_details_desc.get(review_key, "")
+    if not fallback:
+        return row
+    enriched = dict(row)
+    enriched["main_product_description"] = fallback
+    return enriched
 
 
 def format_i0_user_gap_section(gap_context: str) -> str:
@@ -827,6 +861,9 @@ def healthcare_product_from_entry(
     product: dict[str, Any] = {
         "review_key": review_key,
         "product_description": entry.get("product_description", ""),
+        "main_product_description": str(
+            entry.get("main_product_description") or entry.get("product_description") or ""
+        ),
         "review_text": gt.get("review", ""),
         "rating": gt.get("rating"),
         "category": entry.get("main_category", "Health & Personal Care"),
@@ -886,6 +923,9 @@ def video_games_benchmark_product_from_row(
     product: dict[str, Any] = {
         "review_key": review_key,
         "product_description": row.get("product_description", ""),
+        "main_product_description": str(
+            row.get("main_product_description") or row.get("product_description") or ""
+        ),
         "review_text": actual.get("review_text") or actual.get("review") or "",
         "rating": actual.get("rating"),
         "category": row.get("category", VIDEO_GAMES_MAIN),
@@ -1519,7 +1559,10 @@ def apply_product_ordering(
         if not canonical_key:
             # Healthcare entry has no matching tribe product — skip merge (wrong tribe/user slot).
             continue
+        existing = by_key.get(canonical_key)
         product = healthcare_product_from_entry(entry, review_key=canonical_key)
+        if existing and str(existing.get("main_product_description") or "").strip():
+            product["main_product_description"] = existing["main_product_description"]
         product["healthcare_benchmark"] = True
         by_key[canonical_key] = product
 
@@ -1588,6 +1631,7 @@ def build_healthcare_digital_tribe(
         m["user_id"]: normalize_user_characteristics_text(m.get("characteristic_summary", ""))
         for m in members
     }
+    main_details_desc = main_product_descriptions_by_review_key(details)
     users_out: list[dict] = []
     for uid, entries in users_data.items():
         products: list[dict] = []
@@ -1605,6 +1649,7 @@ def build_healthcare_digital_tribe(
                     by_user=history_gpt5_by_user,
                 ),
             )
+            attach_main_product_description(product, main_details_desc)
             if not canonicalize_product_review_key(product, uid, global_keys):
                 product["review_key"] = review_key
             products.append(product)
@@ -1774,6 +1819,7 @@ def build_video_games_software_benchmark_tribe(
     tribe_desc = tribe_persona_description(tribe_def, tribe_name)
 
     details_desc = product_descriptions_by_review_key(details)
+    main_details_desc = main_product_descriptions_by_review_key(details)
     by_user: dict[str, list[dict]] = {}
     for row in load_blind_run_reviews(blind_run_path):
         review_key = str(row.get("review_key") or "").strip()
@@ -1782,7 +1828,9 @@ def build_video_games_software_benchmark_tribe(
         uid = str(row.get("user_id") or "").strip()
         if not uid:
             continue
-        by_user.setdefault(uid, []).append(enrich_product_description_from_details(row, details_desc))
+        enriched = enrich_product_description_from_details(row, details_desc)
+        enriched = enrich_main_product_description_from_details(enriched, main_details_desc)
+        by_user.setdefault(uid, []).append(enriched)
 
     members = details.get("member_user_characteristics") or []
     char_by_user = {
@@ -2033,6 +2081,9 @@ def build_tribe(
                 {
                     "review_key": r["review_key"],
                     "product_description": r["product_description"],
+                    "main_product_description": str(
+                        r.get("main_product_description") or r.get("product_description") or ""
+                    ),
                     "review_text": r["review_text"],
                     "rating": r["rating"],
                     "category": r["category"],
@@ -2103,6 +2154,9 @@ def build_tribe(
             for r in reviews:
                 product = {
                     "product_description": r.get("product_description", ""),
+                    "main_product_description": str(
+                        r.get("main_product_description") or r.get("product_description") or ""
+                    ),
                     "review_text": r.get("review_text", ""),
                     "rating": r.get("rating"),
                     "category": r.get("category", "Health & Personal Care"),
@@ -2386,7 +2440,7 @@ def main() -> None:
 
     index.sort(
         key=lambda t: (
-            0 if t.get("domain") == "healthcare" else 1,
+            0 if t.get("domain") == "video_games" else 1,
             -float(
                 t.get("meanSapiensBaselineGap") or 0
                 if t.get("domain") in {"healthcare", "video_games"}
