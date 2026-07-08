@@ -1,12 +1,34 @@
 import type { ReviewSentiment } from "./types";
 import { computeTextDelta } from "./embeddings";
 
-/** Matches Clustering/baseline_mode_names.py defaults. */
-export const WEIGHT_TEXT = 0.25;
-export const WEIGHT_THEME = 0.7;
-export const WEIGHT_SENTIMENT = 0.05;
+/** Sapiens composite weights (text + theme recall@k + sentiment). */
+export const SAPIENS_PIPELINE_WEIGHTS = {
+  text: 0.25,
+  theme: 0.7,
+  sentiment: 0.05,
+} as const;
+
+/** Baseline composite weights — higher text weight, lower theme weight. */
+export const BASELINE_PIPELINE_WEIGHTS = {
+  text: 0.45,
+  theme: 0.5,
+  sentiment: 0.05,
+} as const;
+
+/** @deprecated use SAPIENS_PIPELINE_WEIGHTS */
+export const WEIGHT_TEXT = SAPIENS_PIPELINE_WEIGHTS.text;
+/** @deprecated use SAPIENS_PIPELINE_WEIGHTS */
+export const WEIGHT_THEME = SAPIENS_PIPELINE_WEIGHTS.theme;
+/** @deprecated use SAPIENS_PIPELINE_WEIGHTS */
+export const WEIGHT_SENTIMENT = SAPIENS_PIPELINE_WEIGHTS.sentiment;
 /** Matches healthcare_digital_technical_accuracy.json metadata ui_overall_similarity.match_threshold */
 export const MATCH_THRESHOLD = 0.65;
+
+export type PipelineWeights = {
+  text: number;
+  theme: number;
+  sentiment: number;
+};
 
 export type PipelineMetrics = {
   recallAtK: number | null;
@@ -348,7 +370,9 @@ export function computePipelineMetrics(args: {
   groundTruthSentiment?: ReviewSentiment | null;
   /** Sapiens: pick the tied-score set that maximizes recall@k. */
   tieAwareTopK?: boolean;
+  weights?: PipelineWeights;
 }): PipelineMetrics {
+  const weights = args.weights ?? SAPIENS_PIPELINE_WEIGHTS;
   const recallAtK =
     args.groundTruthThemes.length > 0
       ? calculateThemeRecallAtKGt(args.predictedThemes, args.groundTruthThemes, {
@@ -367,9 +391,9 @@ export function computePipelineMetrics(args: {
   );
 
   const parts: number[] = [];
-  if (textSimilarity !== null) parts.push(textSimilarity * WEIGHT_TEXT);
-  if (recallAtK !== null) parts.push(recallAtK * WEIGHT_THEME);
-  if (sentimentMatch !== null) parts.push(sentimentMatch * WEIGHT_SENTIMENT);
+  if (textSimilarity !== null) parts.push(textSimilarity * weights.text);
+  if (recallAtK !== null) parts.push(recallAtK * weights.theme);
+  if (sentimentMatch !== null) parts.push(sentimentMatch * weights.sentiment);
 
   const overall =
     parts.length > 0 ? parts.reduce((a, b) => a + b, 0) : null;
@@ -393,6 +417,7 @@ export async function scorePredictionAgainstGroundTruth(args: {
   sentiment?: ReviewSentiment | null;
   groundTruth: GroundTruthForScoring;
   tieAwareTopK?: boolean;
+  weights?: PipelineWeights;
 }): Promise<PipelineMetrics> {
   const textDelta = args.reviewText.trim()
     ? await computeTextDelta(args.reviewText, args.groundTruth.reviewText)
@@ -405,5 +430,6 @@ export async function scorePredictionAgainstGroundTruth(args: {
     predictedSentiment: args.sentiment,
     groundTruthSentiment: args.groundTruth.sentiment,
     tieAwareTopK: args.tieAwareTopK,
+    weights: args.weights,
   });
 }

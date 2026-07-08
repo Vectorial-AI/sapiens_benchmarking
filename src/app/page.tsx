@@ -47,11 +47,12 @@ function defaultReviewKeyForUser(user: CatalogTribe["users"][number] | null | un
   return user.products[0]?.reviewKey ?? null;
 }
 
+/** Benchmark product text — must match ground-truth review pairing (blind_run product_description). */
 function catalogProductDescription(product: {
   mainProductDescription?: string;
   productDescription: string;
 }): string {
-  return product.mainProductDescription?.trim() || product.productDescription.trim();
+  return product.productDescription.trim() || product.mainProductDescription?.trim() || "";
 }
 
 export default function Home() {
@@ -199,6 +200,7 @@ export default function Home() {
       const t: CatalogTribe = data.tribe;
       setTribe(t);
       setTribeId(id);
+      setTraitsOpen(true);
       const firstUser = t.users[0];
       setUserId(firstUser?.id ?? "");
       setReviewKey(defaultReviewKeyForUser(firstUser));
@@ -386,42 +388,52 @@ export default function Home() {
         ) : (
           <>
             {step === 0 && (
-              <div className="space-y-4">
-                {DOMAIN_SECTIONS.map(({ id: domain, label }) => {
-                  const domainTribes = tribeIndex.filter((t) => t.domain === domain);
-                  if (domainTribes.length === 0) return null;
-                  return (
-                    <div key={domain} className="space-y-2">
-                      <h3 className="text-[12px] font-semibold uppercase tracking-wide text-muted-2">
-                        {label}
-                      </h3>
-                      <div className="grid gap-2 sm:grid-cols-2 max-h-[22rem] overflow-y-auto pr-1">
-                        {domainTribes.map((t) => (
-                          <TribeSelectCard
-                            key={t.id}
-                            tribe={t}
-                            selected={tribeId === t.id}
-                            onSelect={() => void loadTribe(t.id)}
-                          />
-                        ))}
+              <div className="flex flex-col lg:flex-row lg:items-start gap-5 lg:gap-6">
+                <div className="flex-1 min-w-0 space-y-4">
+                  {DOMAIN_SECTIONS.map(({ id: domain, label }) => {
+                    const domainTribes = tribeIndex.filter((t) => t.domain === domain);
+                    if (domainTribes.length === 0) return null;
+                    return (
+                      <div key={domain} className="space-y-2">
+                        <h3 className="text-[12px] font-semibold uppercase tracking-wide text-muted-2">
+                          {label}
+                        </h3>
+                        <div className="grid gap-2 sm:grid-cols-2 max-h-[22rem] overflow-y-auto pr-1">
+                          {domainTribes.map((t) => (
+                            <TribeSelectCard
+                              key={t.id}
+                              tribe={t}
+                              selected={tribeId === t.id}
+                              onSelect={() => void loadTribe(t.id)}
+                            />
+                          ))}
+                        </div>
                       </div>
+                    );
+                  })}
+
+                  {tribeLoading && (
+                    <div className="flex items-center gap-2 text-[13px] text-muted">
+                      <Spinner /> Loading tribe…
                     </div>
-                  );
-                })}
+                  )}
+                </div>
 
-                {tribeLoading && (
-                  <div className="flex items-center gap-2 text-[13px] text-muted">
-                    <Spinner /> Loading tribe…
-                  </div>
-                )}
-
-                {tribe && !tribeLoading && (
-                  <LearnedTribePanel
-                    tribe={tribe}
-                    open={traitsOpen}
-                    onToggle={() => setTraitsOpen((v) => !v)}
-                  />
-                )}
+                <aside className="w-full lg:w-[min(22rem,38%)] lg:shrink-0 lg:sticky lg:top-4">
+                  {tribe && !tribeLoading ? (
+                    <LearnedTribePanel
+                      tribe={tribe}
+                      open={traitsOpen}
+                      onToggle={() => setTraitsOpen((v) => !v)}
+                    />
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-border bg-surface-2/20 px-4 py-8 text-center">
+                      <p className="text-[13px] text-muted leading-relaxed">
+                        Select a tribe to view population and learned traits.
+                      </p>
+                    </div>
+                  )}
+                </aside>
               </div>
             )}
 
@@ -463,7 +475,7 @@ export default function Home() {
                       {p.mainProductDescription &&
                         p.mainProductDescription.trim() !== p.productDescription.trim() && (
                           <p className="text-[11px] text-muted-2 mt-1 line-clamp-1">
-                            {p.productDescription}
+                            {p.mainProductDescription}
                           </p>
                         )}
                       <p className="text-[11px] text-muted-2 mt-1.5">
@@ -793,8 +805,8 @@ function LearnedTribePanel({
   const traitCount = groups.reduce((n, g) => n + g.items.length, 0);
 
   return (
-    <div className="rounded-xl border border-border bg-surface-2/30 p-4 sm:p-5 mt-4">
-      <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
+    <div className="rounded-xl border border-border bg-surface-2/30 p-4 sm:p-5">
+      <div className="space-y-4">
         <div className="space-y-2 min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-2">
             Tribe population
@@ -804,7 +816,7 @@ function LearnedTribePanel({
           </p>
         </div>
 
-        <div className="min-w-0 lg:border-l lg:border-border lg:pl-6 pt-4 lg:pt-0 border-t lg:border-t-0 border-border">
+        <div className="min-w-0 pt-4 border-t border-border">
           <button
             type="button"
             onClick={onToggle}

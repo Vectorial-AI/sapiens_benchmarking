@@ -101,11 +101,6 @@ function themesForCategory(category: string): string[] {
   return getCategoryThemes(category);
 }
 
-/** Baselines: full category theme list (GT k-filter kept in category-themes for later). */
-function themesForBaselineCategory(category: string, _groundTruthThemes: string[]): string[] {
-  return getCategoryThemes(category);
-}
-
 function resolveLengthConstraint(product: Product | null | undefined): number {
   return groundTruthLengthConstraint(product) ?? formatLengthConstraint(referenceReviewForLength(product)) ?? 250;
 }
@@ -355,7 +350,7 @@ export function buildTribePersonaPrompt(args: {
   groundTruthThemes: string[];
 }): string {
   const { tribe, productDescription, category, groundTruthThemes } = args;
-  const themes = themesForBaselineCategory(category, groundTruthThemes);
+  const themes = themesForCategory(category);
   return `You are someone who belongs to ${tribe.name}.
 
 Respond ONLY with valid JSON.
@@ -396,8 +391,8 @@ export function buildPopulationPersonaPrompt(args: {
   groundTruthThemes: string[];
   populationDefinition?: string;
 }): string {
-  const { tribe, productDescription, category, populationDefinition, groundTruthThemes } = args;
-  const themes = themesForBaselineCategory(category, groundTruthThemes);
+  const { tribe, productDescription, category, populationDefinition } = args;
+  const themes = themesForCategory(category);
   const popName = `${category} shoppers`;
   const definition = populationDefinition?.trim() || args.tribe.populationDefinition;
   return `You are someone who belongs to ${popName}.
@@ -503,8 +498,8 @@ export function buildHistoryPrompt(args: {
   excludeReviewKey?: string;
   groundTruthThemes: string[];
 }): string {
-  const { user, productDescription, personaName, category, product, excludeReviewKey, groundTruthThemes } = args;
-  const themes = themesForBaselineCategory(category, groundTruthThemes);
+  const { user, productDescription, personaName, category, product, excludeReviewKey } = args;
+  const themes = themesForCategory(category);
   const historyItems = buildUserHistoryContext(user, {
     excludeReviewKey,
     excludeReviewText: product?.groundTruthReview,

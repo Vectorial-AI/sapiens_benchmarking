@@ -1,6 +1,99 @@
 {
   "tribes": [
     {
+      "id": "cluster_0-micro_0",
+      "name": "Pragmatic Value Advocates",
+      "cluster": "cluster_0",
+      "microId": "micro_0",
+      "domain": "video_games",
+      "reviewCount": 18,
+      "description": "A tribe of pragmatic value advocates who speak up for what matters to them and guide others with opinionated feedback. They generally prioritize practical results, value for money.",
+      "userCount": 13,
+      "traitSource": "outputs/amazon_sgo_health_care/cluster_0/micro_0/evolution/state_history/000006_refine_after_iteration_2_batch_22.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details_video_games_software/cluster_0/micro_0_details.json + outputs/amazon_sgo_health_care/cluster_0/micro_0/blind_run_i2.json",
+        "products": "outputs/amazon_sgo_health_care/cluster_0/micro_0/blind_run_i2.json",
+        "similarity": "outputs/amazon_sgo_health_care/cluster_0/micro_0/i0_deltas_blind_run_i2.json",
+        "traits": "outputs/amazon_sgo_health_care/cluster_0/micro_0/evolution/state_history/000006_refine_after_iteration_2_batch_22.json",
+        "best_predictions": "outputs/amazon_sgo_health_care/cluster_0/micro_0/blind_run_i2.json",
+        "user_norms": "outputs/amazon_sgo_health_care/cluster_0/micro_0/user_norms/user_norms_after_i2.json"
+      },
+      "deployCheckpoint": "blind_i2",
+      "deployIteration": 2,
+      "sapiensPromptMode": "blind_deploy_i2",
+      "traitCounts": {
+        "behavioral": 9,
+        "motivations": 3,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      },
+      "meanSimilarityScore": 0.8585,
+      "meanSapiensBaselineGap": 0.433
+    },
+    {
+      "id": "cluster_0-micro_11",
+      "name": "Nostalgia-Fueled Fun-Seekers",
+      "cluster": "cluster_0",
+      "microId": "micro_11",
+      "domain": "video_games",
+      "reviewCount": 36,
+      "description": "A tribe of nostalgia-fueled fun-seekers who look for products that deliver on what they care about most. They generally prioritize nostalgia and familiarity, fun and enjoyment.",
+      "userCount": 18,
+      "traitSource": "outputs/amazon_sgo_health_care/cluster_0/micro_11/evolution/state_history/000006_refine_after_iteration_2_batch_19.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details_video_games_software/cluster_0/micro_11_details.json + outputs/amazon_sgo_health_care/cluster_0/micro_11/blind_run_i2.json",
+        "products": "outputs/amazon_sgo_health_care/cluster_0/micro_11/blind_run_i2.json",
+        "similarity": "outputs/amazon_sgo_health_care/cluster_0/micro_11/i0_deltas_blind_run_i2.json",
+        "traits": "outputs/amazon_sgo_health_care/cluster_0/micro_11/evolution/state_history/000006_refine_after_iteration_2_batch_19.json",
+        "best_predictions": "outputs/amazon_sgo_health_care/cluster_0/micro_11/blind_run_i2.json",
+        "user_norms": "outputs/amazon_sgo_health_care/cluster_0/micro_11/user_norms/user_norms_after_i2.json"
+      },
+      "deployCheckpoint": "blind_i2",
+      "deployIteration": 2,
+      "sapiensPromptMode": "blind_deploy_i2",
+      "traitCounts": {
+        "behavioral": 6,
+        "motivations": 5,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      },
+      "meanSimilarityScore": 0.8141,
+      "meanSapiensBaselineGap": 0.1947
+    },
+    {
+      "id": "cluster_0-micro_9",
+      "name": "Pragmatic Value Gamers",
+      "cluster": "cluster_0",
+      "microId": "micro_9",
+      "domain": "video_games",
+      "reviewCount": 29,
+      "description": "A tribe of pragmatic value gamers who judge products through a gaming and entertainment lens. They generally prioritize practical results, value for money.",
+      "userCount": 19,
+      "traitSource": "outputs/amazon_sgo_health_care/cluster_0/micro_9/evolution/state_history/000008_refine_after_iteration_2_batch_31.json",
+      "dataSources": {
+        "users": "Clustering/micro_cluster_details_video_games_software/cluster_0/micro_9_details.json + outputs/amazon_sgo_health_care/cluster_0/micro_9/blind_run_i2.json",
+        "products": "outputs/amazon_sgo_health_care/cluster_0/micro_9/blind_run_i2.json",
+        "similarity": "outputs/amazon_sgo_health_care/cluster_0/micro_9/i0_deltas_blind_run_i2.json",
+        "traits": "outputs/amazon_sgo_health_care/cluster_0/micro_9/evolution/state_history/000008_refine_after_iteration_2_batch_31.json",
+        "best_predictions": "outputs/amazon_sgo_health_care/cluster_0/micro_9/blind_run_i2.json",
+        "user_norms": "outputs/amazon_sgo_health_care/cluster_0/micro_9/user_norms/user_norms_after_i2.json"
+      },
+      "deployCheckpoint": "blind_i2",
+      "deployIteration": 2,
+      "sapiensPromptMode": "blind_deploy_i2",
+      "traitCounts": {
+        "behavioral": 11,
+        "motivations": 1,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      },
+      "meanSimilarityScore": 0.7789,
+      "meanSapiensBaselineGap": 0.1394
+    },
+    {
       "id": "cluster_4-micro_1",
       "name": "Hands-On Value Advocates",
       "cluster": "cluster_4",
@@ -329,69 +422,7 @@
       },
       "meanSimilarityScore": 0.8966,
       "meanSapiensBaselineGap": 0.1888
-    },
-    {
-      "id": "cluster_0-micro_0",
-      "name": "Pragmatic Value Advocates",
-      "cluster": "cluster_0",
-      "microId": "micro_0",
-      "domain": "video_games",
-      "reviewCount": 18,
-      "description": "A tribe of pragmatic value advocates who speak up for what matters to them and guide others with opinionated feedback. They generally prioritize practical results, value for money.",
-      "userCount": 13,
-      "traitSource": "outputs/amazon_sgo_health_care/cluster_0/micro_0/evolution/state_history/000006_refine_after_iteration_2_batch_22.json",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details_video_games_software/cluster_0/micro_0_details.json + outputs/amazon_sgo_health_care/cluster_0/micro_0/blind_run_i2.json",
-        "products": "outputs/amazon_sgo_health_care/cluster_0/micro_0/blind_run_i2.json",
-        "similarity": "outputs/amazon_sgo_health_care/cluster_0/micro_0/i0_deltas_blind_run_i2.json",
-        "traits": "outputs/amazon_sgo_health_care/cluster_0/micro_0/evolution/state_history/000006_refine_after_iteration_2_batch_22.json",
-        "best_predictions": "outputs/amazon_sgo_health_care/cluster_0/micro_0/blind_run_i2.json",
-        "user_norms": "outputs/amazon_sgo_health_care/cluster_0/micro_0/user_norms/user_norms_after_i2.json"
-      },
-      "deployCheckpoint": "blind_i2",
-      "deployIteration": 2,
-      "sapiensPromptMode": "blind_deploy_i2",
-      "traitCounts": {
-        "behavioral": 9,
-        "motivations": 3,
-        "triggers": 0,
-        "friction": 0,
-        "goals": 3
-      },
-      "meanSimilarityScore": 0.8585,
-      "meanSapiensBaselineGap": 0.433
-    },
-    {
-      "id": "cluster_0-micro_9",
-      "name": "Pragmatic Value Gamers",
-      "cluster": "cluster_0",
-      "microId": "micro_9",
-      "domain": "video_games",
-      "reviewCount": 29,
-      "description": "A tribe of pragmatic value gamers who judge products through a gaming and entertainment lens. They generally prioritize practical results, value for money.",
-      "userCount": 19,
-      "traitSource": "outputs/amazon_sgo_health_care/cluster_0/micro_9/evolution/state_history/000008_refine_after_iteration_2_batch_31.json",
-      "dataSources": {
-        "users": "Clustering/micro_cluster_details_video_games_software/cluster_0/micro_9_details.json + outputs/amazon_sgo_health_care/cluster_0/micro_9/blind_run_i2.json",
-        "products": "outputs/amazon_sgo_health_care/cluster_0/micro_9/blind_run_i2.json",
-        "similarity": "outputs/amazon_sgo_health_care/cluster_0/micro_9/i0_deltas_blind_run_i2.json",
-        "traits": "outputs/amazon_sgo_health_care/cluster_0/micro_9/evolution/state_history/000008_refine_after_iteration_2_batch_31.json",
-        "best_predictions": "outputs/amazon_sgo_health_care/cluster_0/micro_9/blind_run_i2.json",
-        "user_norms": "outputs/amazon_sgo_health_care/cluster_0/micro_9/user_norms/user_norms_after_i2.json"
-      },
-      "deployCheckpoint": "blind_i2",
-      "deployIteration": 2,
-      "sapiensPromptMode": "blind_deploy_i2",
-      "traitCounts": {
-        "behavioral": 11,
-        "motivations": 1,
-        "triggers": 0,
-        "friction": 0,
-        "goals": 3
-      },
-      "meanSimilarityScore": 0.7789,
-      "meanSapiensBaselineGap": 0.1394
     }
   ],
-  "total": 13
+  "total": 14
 }

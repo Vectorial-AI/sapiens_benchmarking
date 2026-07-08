@@ -111,6 +111,24 @@ TRIBE_BENCHMARK_CONFIGS: dict[tuple[str, str], dict[str, Any]] = {
         "deploy_checkpoint": "blind_i2",
         "deploy_iteration": 2,
     },
+    ("cluster_0", "micro_11"): {
+        "blind_run_i2": OUTPUTS / "amazon_sgo_health_care/cluster_0/micro_11/blind_run_i2.json",
+        "deltas_i2": OUTPUTS / "amazon_sgo_health_care/cluster_0/micro_11/i0_deltas_blind_run_i2.json",
+        "user_norms_i2": OUTPUTS
+        / "amazon_sgo_health_care/cluster_0/micro_11/user_norms/user_norms_after_i2.json",
+        "baseline_analysis": OUTPUTS
+        / "amazon_sgo_health_care/cluster_0/micro_11/sapiens_vs_baselines_analysis.json",
+        "evolution_i2": OUTPUTS
+        / "amazon_sgo_health_care/cluster_0/micro_11/evolution/state_history/000006_refine_after_iteration_2_batch_19.json",
+        "filter_mode": "baseline_gap",
+        "min_baseline_gap": 0.05,
+        "min_overall_similarity": 0.0,
+        "sort_by": "baseline_gap",
+        "catalog_sort_by": "baseline_gap",
+        "sapiens_prompt_mode": "blind_deploy_i2",
+        "deploy_checkpoint": "blind_i2",
+        "deploy_iteration": 2,
+    },
 }
 
 SELECTED_TRIBES: list[tuple[str, str, str]] = []
@@ -139,6 +157,8 @@ EVOLUTION_OVERRIDES: dict[tuple[str, str], Path] = {
     / "amazon_sgo_health_care/cluster_0/micro_0/evolution/state_history/000006_refine_after_iteration_2_batch_22.json",
     ("cluster_0", "micro_9"): OUTPUTS
     / "amazon_sgo_health_care/cluster_0/micro_9/evolution/state_history/000008_refine_after_iteration_2_batch_31.json",
+    ("cluster_0", "micro_11"): OUTPUTS
+    / "amazon_sgo_health_care/cluster_0/micro_11/evolution/state_history/000006_refine_after_iteration_2_batch_19.json",
 }
 
 

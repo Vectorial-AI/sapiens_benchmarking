@@ -17,7 +17,11 @@ import {
 } from "@/lib/prompts";
 import { hasGatewayKey, mockPrediction, runModel } from "@/lib/ai";
 import { generateSimilarityExplanation } from "@/lib/similarity-explanation";
-import { scorePredictionAgainstGroundTruth, themeTopKFromGroundTruth } from "@/lib/scoring";
+import {
+  BASELINE_PIPELINE_WEIGHTS,
+  scorePredictionAgainstGroundTruth,
+  themeTopKFromGroundTruth,
+} from "@/lib/scoring";
 import type { EngineResult, ReviewSentiment, RunMode } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -41,6 +45,7 @@ async function attachMetrics(
     sentiment: result.sentiment,
     groundTruth,
     tieAwareTopK: result.engine === "sapiens",
+    weights: result.engine === "baseline" ? BASELINE_PIPELINE_WEIGHTS : undefined,
   });
   const similarityExplanation = await generateSimilarityExplanation({
     generatedReview: result.reviewText,
