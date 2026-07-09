@@ -47,12 +47,9 @@ function defaultReviewKeyForUser(user: CatalogTribe["users"][number] | null | un
   return user.products[0]?.reviewKey ?? null;
 }
 
-/** Benchmark product text — must match ground-truth review pairing (blind_run product_description). */
-function catalogProductDescription(product: {
-  mainProductDescription?: string;
-  productDescription: string;
-}): string {
-  return product.productDescription.trim() || product.mainProductDescription?.trim() || "";
+/** Prompt/scoring product text — product_description only (never main_product_description). */
+function catalogProductDescription(product: { productDescription: string }): string {
+  return product.productDescription.trim();
 }
 
 export default function Home() {
@@ -344,7 +341,7 @@ export default function Home() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-6 py-8 sm:py-12">
+    <div className={`mx-auto w-full px-6 py-8 sm:py-12 ${step === 0 ? "max-w-6xl" : "max-w-4xl"}`}>
       <Header connected={gatewayConnected} />
 
       <Stepper step={step} onStep={goTo} />
@@ -388,17 +385,17 @@ export default function Home() {
         ) : (
           <>
             {step === 0 && (
-              <div className="flex flex-col lg:flex-row lg:items-start gap-5 lg:gap-6">
-                <div className="flex-1 min-w-0 space-y-4">
+              <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_min(20rem,32%)] lg:gap-8 lg:items-start">
+                <div className="min-w-0 max-h-[min(32rem,72vh)] overflow-y-auto pr-1 space-y-6">
                   {DOMAIN_SECTIONS.map(({ id: domain, label }) => {
                     const domainTribes = tribeIndex.filter((t) => t.domain === domain);
                     if (domainTribes.length === 0) return null;
                     return (
-                      <div key={domain} className="space-y-2">
-                        <h3 className="text-[12px] font-semibold uppercase tracking-wide text-muted-2">
+                      <div key={domain} className="space-y-2.5">
+                        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-2 px-0.5">
                           {label}
                         </h3>
-                        <div className="grid gap-2 sm:grid-cols-2 max-h-[22rem] overflow-y-auto pr-1">
+                        <div className="grid gap-2.5 sm:grid-cols-2">
                           {domainTribes.map((t) => (
                             <TribeSelectCard
                               key={t.id}
@@ -413,13 +410,13 @@ export default function Home() {
                   })}
 
                   {tribeLoading && (
-                    <div className="flex items-center gap-2 text-[13px] text-muted">
+                    <div className="flex items-center gap-2 text-[13px] text-muted px-0.5">
                       <Spinner /> Loading tribe…
                     </div>
                   )}
                 </div>
 
-                <aside className="w-full lg:w-[min(22rem,38%)] lg:shrink-0 lg:sticky lg:top-4">
+                <aside className="min-w-0 lg:sticky lg:top-4 lg:max-h-[min(32rem,72vh)] lg:overflow-y-auto">
                   {tribe && !tribeLoading ? (
                     <LearnedTribePanel
                       tribe={tribe}
@@ -427,8 +424,8 @@ export default function Home() {
                       onToggle={() => setTraitsOpen((v) => !v)}
                     />
                   ) : (
-                    <div className="rounded-xl border border-dashed border-border bg-surface-2/20 px-4 py-8 text-center">
-                      <p className="text-[13px] text-muted leading-relaxed">
+                    <div className="rounded-xl border border-dashed border-border bg-surface-2/20 px-4 py-10 text-center h-full min-h-[12rem] flex items-center justify-center">
+                      <p className="text-[13px] text-muted leading-relaxed max-w-[16rem]">
                         Select a tribe to view population and learned traits.
                       </p>
                     </div>
@@ -805,10 +802,10 @@ function LearnedTribePanel({
   const traitCount = groups.reduce((n, g) => n + g.items.length, 0);
 
   return (
-    <div className="rounded-xl border border-border bg-surface-2/30 p-4 sm:p-5">
+    <div className="rounded-xl border border-border bg-surface-2/30 p-4 sm:p-5 h-full">
       <div className="space-y-4">
-        <div className="space-y-2 min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-2">
+        <div className="space-y-2 min-w-0 pb-4 border-b border-border">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-2">
             Tribe population
           </p>
           <p className="text-[13px] text-foreground/90 leading-relaxed">
@@ -816,20 +813,20 @@ function LearnedTribePanel({
           </p>
         </div>
 
-        <div className="min-w-0 pt-4 border-t border-border">
+        <div className="min-w-0">
           <button
             type="button"
             onClick={onToggle}
             className="flex items-center justify-between gap-3 w-full text-left rounded-lg border border-border bg-surface-1 px-3 py-2.5 hover:border-border-strong transition"
           >
-            <span className="flex items-center gap-1.5 text-[13px] font-medium text-foreground">
+            <span className="flex items-center gap-2 text-[13px] font-medium text-foreground">
               <span className={`transition-transform text-[10px] text-muted-2 ${open ? "rotate-90" : ""}`}>▶</span>
               Learned tribe from Sapiens
             </span>
-            <span className="text-[11px] text-muted-2 shrink-0">{traitCount} traits</span>
+            <span className="text-[11px] text-muted-2 shrink-0 tabular-nums">{traitCount} traits</span>
           </button>
           {open && (
-            <div className="mt-3 space-y-2 max-h-[22rem] overflow-y-auto pr-1">
+            <div className="mt-3 space-y-2">
               {groups.map((g) => (
                 <TraitGroupDrawer key={g.key} label={g.label} items={g.items} />
               ))}
@@ -887,21 +884,20 @@ function TribeSelectCard({
       type="button"
       onClick={onSelect}
       className={`w-full text-left rounded-xl border p-3.5 transition ${
-        selected ? "border-accent bg-accent/[0.04]" : "border-border hover:border-border-strong"
+        selected ? "border-accent bg-accent/[0.04] ring-1 ring-accent/20" : "border-border hover:border-border-strong bg-surface-1"
       }`}
     >
-      <div className="flex items-center gap-2 mb-1">
-        <Dot tone="sapiens" />
-        <span className="text-[13px] font-semibold leading-snug">{tribe.name}</span>
-        {tribe.domain && (
-          <span className="text-[10px] uppercase tracking-wide text-muted-2 ml-auto shrink-0">
-            {tribe.domain === "healthcare" ? "Healthcare" : "Video Games & Software"}
-          </span>
-        )}
+      <div className="flex items-start gap-2.5">
+        <span className="mt-1.5 shrink-0">
+          <Dot tone="sapiens" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] font-semibold leading-snug text-foreground">{tribe.name}</p>
+          {description ? (
+            <p className="text-[12px] text-muted leading-relaxed mt-1.5 line-clamp-4">{description}</p>
+          ) : null}
+        </div>
       </div>
-      {description && (
-        <p className="text-[12px] text-muted leading-relaxed">{description}</p>
-      )}
     </button>
   );
 }

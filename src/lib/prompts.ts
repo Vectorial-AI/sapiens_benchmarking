@@ -11,11 +11,19 @@ import {
   formatLengthConstraint,
   groundTruthLengthConstraint,
   referenceReviewForLength,
+  sapiensLengthConstraint,
   wordCount,
 } from "./review-history";
 import { formatUserCharacteristics } from "./user-characteristics";
 
-export { wordCount, formatLengthConstraint, groundTruthLengthConstraint, referenceReviewForLength, DEFAULT_THEMES };
+export {
+  wordCount,
+  formatLengthConstraint,
+  groundTruthLengthConstraint,
+  sapiensLengthConstraint,
+  referenceReviewForLength,
+  DEFAULT_THEMES,
+};
 
 export type ParsedPrediction = {
   reviewText: string;
@@ -102,7 +110,11 @@ function themesForCategory(category: string): string[] {
 }
 
 function resolveLengthConstraint(product: Product | null | undefined): number {
-  return groundTruthLengthConstraint(product) ?? formatLengthConstraint(referenceReviewForLength(product)) ?? 250;
+  return (
+    sapiensLengthConstraint(product) ??
+    formatLengthConstraint(referenceReviewForLength(product), 10) ??
+    260
+  );
 }
 
 function referenceReviewSection(
@@ -283,7 +295,7 @@ ${SENTIMENT_INSTRUCTION}
 **CRITICAL:**
 - Theme names must match EXACTLY as shown above (case-sensitive)
 - sentiment must be exactly: Positive, Negative, or Neutral
-- Write exactly **${lengthConstraint}** words in review_text — same length as the real review
+- Write exactly **${lengthConstraint}** words in review_text
 
 Provide the following in a single JSON object. Respond with *only* the JSON object and nothing else.
 
@@ -292,9 +304,9 @@ ${predictionOutputBlock(themes, "predicted_themes")}`;
 
 /**
  * SAPIENS prompt routing (by tribe):
- * - healthcare → full tribe + user context, reference review/themes, reference length cap
- * - blind_deploy_i2 (video games/software deploy) → full i2 prompt + exact GT word cap
- * - video_games fallback → traits + user chars + exact GT word cap
+ * - healthcare → full tribe + user context, reference review/themes, exact GT word cap
+ * - blind_deploy_i2 (video games/software deploy) → full i2 prompt + GT+10 word cap, norm hints
+ * - video_games fallback → traits + user chars + GT+10 word cap
  */
 function buildSapiensPromptSections(args: {
   tribe: Tribe;

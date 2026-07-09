@@ -21,7 +21,7 @@ export const TONE_BG: Record<Tone, string> = {
 
 export function Dot({ tone }: { tone: Tone }) {
   return (
-    <span className={`inline-block h-2 w-2 rounded-full ${TONE_BG[tone]}`} />
+    <span className={`inline-block h-2 w-2 shrink-0 rounded-full ${TONE_BG[tone]}`} />
   );
 }
 

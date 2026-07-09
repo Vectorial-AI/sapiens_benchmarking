@@ -4,6 +4,8 @@ import type { HistoryContextItem } from "./types";
 import { mapCategoryToMain } from "./category-themes";
 
 export const DEFAULT_LENGTH_MARGIN_WORDS = 0;
+/** Extra words allowed above ground-truth length for Sapiens predictions. */
+export const SAPIENS_LENGTH_MARGIN_WORDS = 10;
 export const MAX_CHARS_PER_REVIEW = 900;
 
 export type ReviewHistoryProduct = {
@@ -34,6 +36,26 @@ export function groundTruthLengthConstraint(
   const gt = product?.groundTruthReview?.trim();
   if (!gt) return null;
   return wordCount(gt);
+}
+
+/** Sapiens target length = ground-truth word count + margin (default +10). */
+export function sapiensLengthConstraint(
+  product: { groundTruthReview?: string } | null | undefined,
+  margin = SAPIENS_LENGTH_MARGIN_WORDS,
+): number | null {
+  const base = groundTruthLengthConstraint(product);
+  if (base === null) return null;
+  return base + margin;
+}
+
+/** Sapiens target length from reference text + margin. */
+export function sapiensLengthConstraintFromText(
+  referenceText: string,
+  margin = SAPIENS_LENGTH_MARGIN_WORDS,
+): number | null {
+  const base = formatLengthConstraint(referenceText, 0);
+  if (base === null) return null;
+  return base + margin;
 }
 
 /** Reference review text for length cap — prefer user history / best pred over held-out GT. */

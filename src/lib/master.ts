@@ -94,9 +94,9 @@ export type Product = {
   leaveOneOutHistoryReviews?: string[];
 };
 
-/** Product description aligned with ground-truth review (blind_run target product). */
+/** Prompt/scoring — product_description only; main_product_description is display-only in UI. */
 export function getEffectiveProductDescription(product: Product | null | undefined): string {
-  return product?.productDescription?.trim() || product?.mainProductDescription?.trim() || "";
+  return product?.productDescription?.trim() || "";
 }
 
 /** User history review text for healthcare Sapiens context. */

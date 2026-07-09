@@ -504,13 +504,12 @@ def format_i0_user_gap_section(gap_context: str) -> str:
         return ""
     return (
         "---\n"
-        "SECTION 2B: How This User Evaluates (STRONG behavioral profile — mandatory)\n\n"
-        "These are hardened rules learned from this reviewer's real past reviews. They override "
-        "generic tribe habits when they conflict. Apply every rule that fits this product:\n"
-        "- what to lead with and what counts as pass/fail\n"
-        "- what to emphasize vs never invent\n"
-        "- theme areas to score high vs skip\n"
-        "- category-specific habits when present\n\n"
+        "SECTION 2B: How This User Tends to Evaluate (behavioral hints — not a script)\n\n"
+        "These notes summarize patterns from this reviewer's past reviews. Use them as **hints only**:\n"
+        "- Capture the **gist** of what they care about — do NOT copy these bullets word-for-word or mirror their phrasing.\n"
+        "- Write in **your own voice** as this persona (Section 1 + Section 2): natural sentences, your framing, not a checklist rewrite.\n"
+        "- Cover similar concerns when they fit this product, but produce a **fresh, better prediction** — take direction, not dictation.\n"
+        "- What to lead with, pass/fail heuristics, theme emphasis — infer intent, then express it originally.\n\n"
         f"{text}\n"
     )
 
@@ -943,9 +942,9 @@ def video_games_benchmark_product_from_row(
     product: dict[str, Any] = {
         "review_key": review_key,
         "product_description": row.get("product_description", ""),
-        "main_product_description": str(
-            row.get("main_product_description") or row.get("product_description") or ""
-        ),
+        # Benchmark GT is paired with blind_run product_description; do not use details
+        # main_product_description (review_key indices differ across sources).
+        "main_product_description": str(row.get("product_description") or "").strip(),
         "review_text": actual.get("review_text") or actual.get("review") or "",
         "rating": actual.get("rating"),
         "category": row.get("category", VIDEO_GAMES_MAIN),
@@ -1839,7 +1838,6 @@ def build_video_games_software_benchmark_tribe(
     tribe_desc = tribe_persona_description(tribe_def, tribe_name)
 
     details_desc = product_descriptions_by_review_key(details)
-    main_details_desc = main_product_descriptions_by_review_key(details)
     by_user: dict[str, list[dict]] = {}
     for row in load_blind_run_reviews(blind_run_path):
         review_key = str(row.get("review_key") or "").strip()
@@ -1849,7 +1847,6 @@ def build_video_games_software_benchmark_tribe(
         if not uid:
             continue
         enriched = enrich_product_description_from_details(row, details_desc)
-        enriched = enrich_main_product_description_from_details(enriched, main_details_desc)
         by_user.setdefault(uid, []).append(enriched)
 
     members = details.get("member_user_characteristics") or []

@@ -4,7 +4,7 @@ import { getCategoryThemes } from "./category-themes";
 import type { Qualitative, ReviewSentiment } from "./types";
 import type { Product, Tribe, User } from "./master";
 import { formatUserCharacteristics } from "./user-characteristics";
-import { formatLengthConstraint, groundTruthLengthConstraint, referenceReviewForLength } from "./review-history";
+import { referenceReviewForLength, sapiensLengthConstraint, sapiensLengthConstraintFromText } from "./review-history";
 
 const PROMPT_PATH = path.join(
   process.cwd(),
@@ -48,13 +48,12 @@ function formatUserGapSection(gapContext: string): string {
   if (!text) return "";
   return (
     "---\n" +
-    "SECTION 2B: How This User Evaluates (STRONG behavioral profile — mandatory)\n\n" +
-    "These are hardened rules learned from this reviewer's real past reviews. They override " +
-    "generic tribe habits when they conflict. Apply every rule that fits this product:\n" +
-    "- what to lead with and what counts as pass/fail\n" +
-    "- what to emphasize vs never invent\n" +
-    "- theme areas to score high vs skip\n" +
-    "- category-specific habits when present\n\n" +
+    "SECTION 2B: How This User Tends to Evaluate (behavioral hints — not a script)\n\n" +
+    "These notes summarize patterns from this reviewer's past reviews. Use them as **hints only**:\n" +
+    "- Capture the **gist** of what they care about — do NOT copy these bullets word-for-word or mirror their phrasing.\n" +
+    "- Write in **your own voice** as this persona (Section 1 + Section 2): natural sentences, your framing, not a checklist rewrite.\n" +
+    "- Cover similar concerns when they fit this product, but produce a **fresh, better prediction** — take direction, not dictation.\n" +
+    "- What to lead with, pass/fail heuristics, theme emphasis — infer intent, then express it originally. Don't follow the same order and copy exactly!\n\n" +
     `${text}\n`
   );
 }
@@ -104,9 +103,9 @@ export function buildBlindDeployI2Prompt(args: {
     product?.groundTruthReview?.trim() ||
     referenceReviewForLength(product);
   const lengthConstraint =
-    groundTruthLengthConstraint(product) ??
-    formatLengthConstraint(lengthReference) ??
-    250;
+    sapiensLengthConstraint(product) ??
+    sapiensLengthConstraintFromText(lengthReference) ??
+    250 + 10;
 
   let prompt = template
     .replaceAll("{persona_name}", tribe.name)
