@@ -411,7 +411,7 @@ export default function Home() {
       {step === 0 && tribeIndex ? (
         <div
           className={`grid gap-5 lg:gap-6 animate-in ${
-            tribe && !tribeLoading
+            tribeId
               ? "lg:grid-cols-[minmax(0,1fr)_min(24rem,38%)] lg:items-stretch"
               : "lg:grid-cols-1"
           }`}
@@ -419,7 +419,7 @@ export default function Home() {
         >
           <section
             className={`card p-6 sm:p-7 min-w-0 flex flex-col ${
-              tribe && !tribeLoading ? "lg:h-[min(36rem,70vh)]" : ""
+              tribeId ? "lg:h-[min(36rem,70vh)]" : ""
             }`}
           >
             <div className="min-h-0 flex-1 overflow-y-auto pr-1 space-y-6">
@@ -453,9 +453,17 @@ export default function Home() {
             </div>
           </section>
 
-          {tribe && !tribeLoading && (
+          {tribeId && (
             <aside className="min-w-0 lg:h-[min(36rem,70vh)]">
-              <LearnedTribePanel tribe={tribe} />
+              {tribe && !tribeLoading ? (
+                <LearnedTribePanel tribe={tribe} />
+              ) : (
+                <div className="h-full rounded-[20px] border border-accent/30 bg-accent/15 ring-1 ring-accent/30 flex items-center justify-center">
+                  <span className="flex items-center gap-2 text-[13px] font-normal text-foreground/50">
+                    <Spinner /> Loading…
+                  </span>
+                </div>
+              )}
             </aside>
           )}
         </div>
@@ -951,7 +959,7 @@ function TribeSelectCard({
     >
       <p className="text-[13px] font-semibold text-foreground leading-snug">{tribe.name}</p>
       {description ? (
-        <p className="text-[13px] font-normal text-foreground leading-relaxed mt-1.5 line-clamp-4">{description}</p>
+        <p className="text-[13px] font-normal text-foreground leading-relaxed mt-1.5">{description}</p>
       ) : null}
     </button>
   );
