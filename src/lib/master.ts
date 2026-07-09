@@ -1,8 +1,18 @@
 import fs from "fs";
 import path from "path";
 import catalogIndexJson from "@/data/catalog-index.json";
+import productTitlesJson from "@/data/product_titles.json";
 import type { CatalogTribe, CatalogTribeIndex, Qualitative, ReviewSentiment } from "./types";
 import { normalizeSentimentLabel } from "./scoring";
+
+/** review_key -> static UI product title */
+const PRODUCT_TITLES: Record<string, string> =
+  typeof productTitlesJson === "object" &&
+  productTitlesJson !== null &&
+  "titles" in productTitlesJson &&
+  typeof (productTitlesJson as { titles?: unknown }).titles === "object"
+    ? ((productTitlesJson as { titles: Record<string, string> }).titles ?? {})
+    : {};
 
 /** Raw shapes from tribe JSON files. */
 type RawTrait = { text: string };
@@ -23,6 +33,7 @@ type RawReview = {
   best_prediction_themes?: string[];
   healthcare_benchmark?: boolean;
   video_games_benchmark?: boolean;
+  catalog_priority_tier?: string;
   sapiens_baseline_gap?: number;
   overall_similarity_score?: number;
   user_norm_context?: string;
@@ -75,8 +86,9 @@ type RawUserHistoryReview = {
 
 export type Product = {
   reviewKey: string;
+  productTitle?: string;
   productDescription: string;
-  mainProductDescription: string;
+  mainProductDescription?: string;
   category: string;
   rating: number | null;
   groundTruthReview: string;
@@ -88,15 +100,31 @@ export type Product = {
   historyBaselineContextReviews?: string[];
   healthcareBenchmark?: boolean;
   videoGamesBenchmark?: boolean;
+  catalogPriorityTier?: "high" | "medium" | "low";
   sapiensBaselineGap?: number;
   overallSimilarityScore?: number;
   userNormContext?: string;
   leaveOneOutHistoryReviews?: string[];
 };
 
-/** Prompt/scoring — product_description only; main_product_description is display-only in UI. */
+/** Prompt/scoring — product_description only. */
 export function getEffectiveProductDescription(product: Product | null | undefined): string {
   return product?.productDescription?.trim() || "";
+}
+
+function fallbackProductTitle(description: string): string {
+  const text = description.trim();
+  if (!text) return "Untitled product";
+  const firstLine = text.split(/\n|\. /)[0]?.trim() || text;
+  if (firstLine.length <= 160) return firstLine;
+  const cut = firstLine.slice(0, 157).trim();
+  return `${cut.slice(0, cut.lastIndexOf(" ")).trim()}…`;
+}
+
+function resolveProductTitle(reviewKey: string, description: string): string {
+  const titled = PRODUCT_TITLES[reviewKey]?.trim();
+  if (titled) return titled;
+  return fallbackProductTitle(description);
 }
 
 /** User history review text for healthcare Sapiens context. */
@@ -173,6 +201,12 @@ function normalizeQualitative(raw: RawTribe["qualitative_summary"]): Qualitative
   };
 }
 
+const PRIORITY_TIER_ORDER: Record<string, number> = { high: 0, medium: 1, low: 2 };
+
+function priorityTierOrder(tier: string | undefined): number {
+  return PRIORITY_TIER_ORDER[(tier ?? "medium").toLowerCase()] ?? 1;
+}
+
 function productSortScore(p: Product, sortMode: string): number {
   if (sortMode === "overall_similarity") {
     return p.overallSimilarityScore ?? 0;
@@ -180,13 +214,51 @@ function productSortScore(p: Product, sortMode: string): number {
   return p.sapiensBaselineGap ?? 0;
 }
 
-function normalizeProduct(r: RawReview): Product {
-  const mainProductDescription =
-    r.main_product_description?.trim() || r.product_description?.trim() || "";
+function compareProducts(a: Product, b: Product, sortMode: string): number {
+  if (sortMode === "priority_tier_gap") {
+    const tierDiff =
+      priorityTierOrder(a.catalogPriorityTier) - priorityTierOrder(b.catalogPriorityTier);
+    if (tierDiff !== 0) return tierDiff;
+  }
+  return (
+    productSortScore(b, sortMode) - productSortScore(a, sortMode) ||
+    a.reviewKey.localeCompare(b.reviewKey)
+  );
+}
+
+function userHighPriorityStats(user: User): { highCount: number; maxHighGap: number; maxGap: number } {
+  const high = user.products.filter((p) => p.catalogPriorityTier === "high");
+  const highGaps = high.map((p) => p.sapiensBaselineGap ?? 0);
+  const allGaps = user.products.map((p) => p.sapiensBaselineGap ?? 0);
   return {
+    highCount: high.length,
+    maxHighGap: highGaps.length ? Math.max(...highGaps) : 0,
+    maxGap: allGaps.length ? Math.max(...allGaps) : 0,
+  };
+}
+
+function compareUsers(a: User, b: User, sortMode: string): number {
+  if (sortMode === "priority_tier_gap") {
+    const aStats = userHighPriorityStats(a);
+    const bStats = userHighPriorityStats(b);
+    return (
+      bStats.highCount - aStats.highCount ||
+      bStats.maxHighGap - aStats.maxHighGap ||
+      bStats.maxGap - aStats.maxGap ||
+      b.similarityScore - a.similarityScore ||
+      a.id.localeCompare(b.id)
+    );
+  }
+  return b.similarityScore - a.similarityScore || a.id.localeCompare(b.id);
+}
+
+function normalizeProduct(r: RawReview, domain?: "healthcare" | "video_games"): Product {
+  const productDescription = r.product_description?.trim() || "";
+  const mainProductDescription =
+    r.main_product_description?.trim() || productDescription;
+  const product: Product = {
     reviewKey: r.review_key,
-    productDescription: r.product_description,
-    mainProductDescription,
+    productDescription,
     category: r.category,
     rating: typeof r.rating === "number" ? r.rating : null,
     groundTruthReview: r.review_text,
@@ -206,6 +278,7 @@ function normalizeProduct(r: RawReview): Product {
       .filter(Boolean),
     healthcareBenchmark: Boolean(r.healthcare_benchmark),
     videoGamesBenchmark: Boolean(r.video_games_benchmark),
+    catalogPriorityTier: normalizePriorityTier(r.catalog_priority_tier),
     sapiensBaselineGap:
       typeof r.sapiens_baseline_gap === "number" ? r.sapiens_baseline_gap : undefined,
     overallSimilarityScore:
@@ -220,6 +293,12 @@ function normalizeProduct(r: RawReview): Product {
       })
       .filter(Boolean),
   };
+  if (domain === "video_games") {
+    product.productTitle = resolveProductTitle(r.review_key, productDescription);
+  } else if (domain === "healthcare") {
+    product.mainProductDescription = mainProductDescription;
+  }
+  return product;
 }
 
 function normalizeUserHistoryReviews(
@@ -235,17 +314,19 @@ function normalizeUserHistoryReviews(
     }));
 }
 
+function normalizePriorityTier(value: string | undefined): "high" | "medium" | "low" | undefined {
+  const tier = value?.trim().toLowerCase();
+  if (tier === "high" || tier === "medium" || tier === "low") return tier;
+  return undefined;
+}
+
 function normalizeTribe(raw: RawTribe): Tribe {
   const sortMode = raw.catalog_sort_by ?? "baseline_gap";
 
   const users: User[] = raw.member_user_characteristics.map((u) => {
     const reviews = raw.members_grouped_by_user[u.user_id] ?? [];
-    const products: Product[] = reviews.map(normalizeProduct);
-    products.sort(
-      (a, b) =>
-        productSortScore(b, sortMode) - productSortScore(a, sortMode) ||
-        a.reviewKey.localeCompare(b.reviewKey),
-    );
+    const products: Product[] = reviews.map((r) => normalizeProduct(r, raw.domain));
+    products.sort((a, b) => compareProducts(a, b, sortMode));
     const userHistoryReviews = normalizeUserHistoryReviews(
       u.user_history_reviews ?? u.history_noise_reviews,
     );
@@ -259,7 +340,7 @@ function normalizeTribe(raw: RawTribe): Tribe {
     };
   });
 
-  users.sort((a, b) => b.similarityScore - a.similarityScore);
+  users.sort((a, b) => compareUsers(a, b, sortMode));
 
   return {
     id: raw.id,
@@ -340,6 +421,7 @@ export function getCatalogTribe(id: string): CatalogTribe | undefined {
       })),
       products: u.products.map((p) => ({
         reviewKey: p.reviewKey,
+        productTitle: p.productTitle,
         productDescription: p.productDescription,
         mainProductDescription: p.mainProductDescription,
         category: p.category,

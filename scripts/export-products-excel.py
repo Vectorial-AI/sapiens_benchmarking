@@ -12,6 +12,7 @@ from openpyxl.utils import get_column_letter
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "src" / "data"
 OUTPUT = ROOT / "sapiens_benchmarking_products.xlsx"
+TITLES_PATH = DATA_DIR / "product_titles.json"
 
 HEADER_FILL = PatternFill(start_color="1F4E79", end_color="1F4E79", fill_type="solid")
 HEADER_FONT = Font(bold=True, color="FFFFFF", size=11)
@@ -19,14 +20,27 @@ SUBHEADER_FILL = PatternFill(start_color="D6E4F0", end_color="D6E4F0", fill_type
 WRAP = Alignment(wrap_text=True, vertical="top")
 
 
+def load_product_titles() -> dict[str, str]:
+    if not TITLES_PATH.is_file():
+        return {}
+    data = json.loads(TITLES_PATH.read_text())
+    raw = data.get("titles") if isinstance(data, dict) else data
+    if not isinstance(raw, dict):
+        return {}
+    return {str(k): str(v).strip() for k, v in raw.items() if str(v).strip()}
+
+
 def load_catalog_rows():
     catalog = json.loads((DATA_DIR / "catalog-index.json").read_text())
     tribes_dir = DATA_DIR / "tribes"
+    titles = load_product_titles()
     rows = []
 
     for tribe_meta in catalog["tribes"]:
         tribe_id = tribe_meta["id"]
         tribe = json.loads((tribes_dir / f"{tribe_id}.json").read_text())
+        tribe_high_count = tribe_meta.get("highPriorityCount")
+        tribe_max_high_gap = tribe_meta.get("maxHighPriorityGap")
 
         for user in tribe.get("member_user_characteristics", []):
             user_id = user["user_id"]
@@ -35,12 +49,19 @@ def load_catalog_rows():
 
             for idx, p in enumerate(products, start=1):
                 product_desc = (p.get("product_description") or "").strip()
+                review_key = p.get("review_key", "")
+                domain = tribe.get("domain", tribe_meta.get("domain", ""))
                 main_desc = (p.get("main_product_description") or "").strip()
-                ui_display_name = main_desc if main_desc and main_desc != product_desc else product_desc
+                if domain == "video_games":
+                    product_title = titles.get(review_key, "")
+                    ui_display_name = product_title or product_desc
+                else:
+                    product_title = ""
+                    ui_display_name = main_desc if main_desc and main_desc != product_desc else product_desc
 
                 rows.append(
                     {
-                        "domain": tribe.get("domain", tribe_meta.get("domain", "")),
+                        "domain": domain,
                         "tribe_id": tribe_id,
                         "tribe_name": tribe.get("tribe_name", tribe_meta["name"]),
                         "cluster": tribe_meta.get("cluster", ""),
@@ -48,10 +69,14 @@ def load_catalog_rows():
                         "user_id": user_id,
                         "user_characteristic_summary": char_summary,
                         "product_rank_in_user": idx,
-                        "review_key": p.get("review_key", ""),
+                        "catalog_priority_tier": p.get("catalog_priority_tier", ""),
+                        "high_priority_count": tribe_high_count,
+                        "max_high_priority_gap": tribe_max_high_gap,
+                        "review_key": review_key,
+                        "product_title": product_title,
                         "ui_product_name": ui_display_name,
                         "product_description": product_desc,
-                        "main_product_description": main_desc,
+                        "main_product_description": main_desc if domain == "healthcare" else "",
                         "category": p.get("category", ""),
                         "major_subcategory": p.get("major_subcategory", ""),
                         "sentiment": p.get("sentiment", ""),
@@ -143,6 +168,8 @@ def build_workbook(rows, catalog):
         "Tribe ID",
         "User ID",
         "Product Rank (per user)",
+        "Priority Tier",
+        "Product Title",
         "UI Product Name",
         "Product Description",
         "Main Product Description",
@@ -161,9 +188,11 @@ def build_workbook(rows, catalog):
     sorted_rows = sorted(
         rows,
         key=lambda r: (
+            r["domain"] != "video_games",
+            -(r.get("high_priority_count") or 0),
+            -(r.get("max_high_priority_gap") or 0),
+            {"high": 0, "medium": 1, "low": 2}.get(str(r.get("catalog_priority_tier") or "medium").lower(), 1),
             -(r["sapiens_baseline_gap"] or 0),
-            -(r["overall_similarity_score"] or 0),
-            r["domain"],
             r["tribe_name"],
             r["user_id"],
             r["review_key"],
@@ -174,8 +203,8 @@ def build_workbook(rows, catalog):
         key=lambda r: (
             r["domain"],
             r["tribe_name"],
+            {"high": 0, "medium": 1, "low": 2}.get(str(r.get("catalog_priority_tier") or "medium").lower(), 1),
             -(r["sapiens_baseline_gap"] or 0),
-            -(r["overall_similarity_score"] or 0),
             r["user_id"],
             r["review_key"],
         ),
@@ -187,6 +216,8 @@ def build_workbook(rows, catalog):
             r["tribe_id"],
             r["user_id"],
             r["product_rank_in_user"],
+            (r.get("catalog_priority_tier") or "").title(),
+            r["product_title"],
             r["ui_product_name"],
             r["product_description"],
             r["main_product_description"] if r["main_product_description"] != r["product_description"] else "",
@@ -216,6 +247,7 @@ def build_workbook(rows, catalog):
         "Tribe Name",
         "Domain",
         "Product #",
+        "Product Title",
         "UI Product Name",
         "Category",
         "Sapiens Baseline Gap",
@@ -234,6 +266,7 @@ def build_workbook(rows, catalog):
                 r["tribe_name"],
                 r["domain"],
                 product_num,
+                r["product_title"],
                 r["ui_product_name"],
                 r["category"],
                 r["sapiens_baseline_gap"],
@@ -273,7 +306,8 @@ def build_workbook(rows, catalog):
     vg_data = [
         [
             r["tribe_name"],
-            r["ui_product_name"],
+            r["product_title"],
+            (r.get("catalog_priority_tier") or "").title(),
             r["category"],
             r["sapiens_baseline_gap"],
             r["overall_similarity_score"],
@@ -283,7 +317,7 @@ def build_workbook(rows, catalog):
     ]
     write_sheet(
         ws_vg,
-        ["Tribe Name", "UI Product Name", "Category", "Sapiens Baseline Gap", "Similarity Score", "Review Key"],
+        ["Tribe Name", "UI Product Name", "Priority Tier", "Category", "Sapiens Baseline Gap", "Similarity Score", "Review Key"],
         vg_data,
     )
     auto_width(ws_vg, max_width=55)
@@ -312,7 +346,7 @@ def build_workbook(rows, catalog):
         "All products must beat the best baseline by >10 percentage points.",
         "UI Product Name = product_description field shown in the product picker (Step 2).",
         "Sapiens Baseline Gap = Sapiens overall similarity score minus best baseline overall similarity score.",
-        "Main product sheets are ordered by highest Sapiens Baseline Gap, then highest Overall Similarity Score.",
+        "Main product sheets sort video games by tribe high-priority count, then High/Medium/Low tier, then Sapiens Baseline Gap.",
     ]
     for i, note in enumerate(notes, start=10):
         ws_meta[f"A{i}"] = note

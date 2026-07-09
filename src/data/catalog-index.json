@@ -2,12 +2,12 @@
   "tribes": [
     {
       "id": "cluster_0-micro_11",
-      "name": "Nostalgia-Fueled Fun-Seekers",
+      "name": "Classic Remaster & Story RPG Gamers",
       "cluster": "cluster_0",
       "microId": "micro_11",
       "domain": "video_games",
       "reviewCount": 12,
-      "description": "A tribe of nostalgia-fueled fun-seekers who look for products that deliver on what they care about most. They generally prioritize nostalgia and familiarity, fun and enjoyment.",
+      "description": "Gamers who revisit beloved worlds and follow long-running series across generations. They care most about story, emotional payoff, and whether a re-release or sequel honors what made the original special.",
       "userCount": 9,
       "traitSource": "outputs/amazon_sgo_health_care/cluster_0/micro_11/evolution/state_history/000006_refine_after_iteration_2_batch_19.json",
       "dataSources": {
@@ -29,16 +29,18 @@
         "goals": 3
       },
       "meanSimilarityScore": 0.9042,
-      "meanSapiensBaselineGap": 0.451
+      "meanSapiensBaselineGap": 0.451,
+      "highPriorityCount": 9,
+      "maxHighPriorityGap": 0.7933
     },
     {
       "id": "cluster_0-micro_0",
-      "name": "Pragmatic Value Advocates",
+      "name": "Mobile & Casual Game Advocates",
       "cluster": "cluster_0",
       "microId": "micro_0",
       "domain": "video_games",
       "reviewCount": 14,
-      "description": "A tribe of pragmatic value advocates who speak up for what matters to them and guide others with opinionated feedback. They generally prioritize practical results, value for money.",
+      "description": "Everyday gamers who mostly play quick mobile sessions but also buy console titles and gear. They scrutinize hidden costs, compatibility issues, and whether a product is worth the money before recommending it to others.",
       "userCount": 10,
       "traitSource": "outputs/amazon_sgo_health_care/cluster_0/micro_0/evolution/state_history/000006_refine_after_iteration_2_batch_22.json",
       "dataSources": {
@@ -60,17 +62,19 @@
         "goals": 3
       },
       "meanSimilarityScore": 0.8944,
-      "meanSapiensBaselineGap": 0.4186
+      "meanSapiensBaselineGap": 0.4186,
+      "highPriorityCount": 4,
+      "maxHighPriorityGap": 0.7644
     },
     {
       "id": "cluster_0-micro_9",
-      "name": "Pragmatic Value Gamers",
+      "name": "Gaming Peripherals & VR Evaluators",
       "cluster": "cluster_0",
       "microId": "micro_9",
       "domain": "video_games",
-      "reviewCount": 7,
-      "description": "A tribe of pragmatic value gamers who judge products through a gaming and entertainment lens. They generally prioritize practical results, value for money.",
-      "userCount": 6,
+      "reviewCount": 6,
+      "description": "Buyers who invest in their gaming environment — headsets, controllers, creative tools, and immersive experiences. They test gear hands-on, compare it against trusted benchmarks, and share practical setup advice.",
+      "userCount": 5,
       "traitSource": "outputs/amazon_sgo_health_care/cluster_0/micro_9/evolution/state_history/000008_refine_after_iteration_2_batch_31.json",
       "dataSources": {
         "users": "Clustering/micro_cluster_details_video_games_software/cluster_0/micro_9_details.json + outputs/amazon_sgo_health_care/cluster_0/micro_9/blind_run_i2.json",
@@ -90,8 +94,10 @@
         "friction": 0,
         "goals": 3
       },
-      "meanSimilarityScore": 0.8947,
-      "meanSapiensBaselineGap": 0.2487
+      "meanSimilarityScore": 0.8902,
+      "meanSapiensBaselineGap": 0.2403,
+      "highPriorityCount": 1,
+      "maxHighPriorityGap": 0.1629
     },
     {
       "id": "cluster_4-micro_1",

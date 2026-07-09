@@ -77,28 +77,8 @@ UI_CATALOG_EXCLUDED_REVIEW_KEYS = frozenset(
         "AHQJQJF7YTJEJEHNQKHUAKUM72HA_review_3",
         "AE6D6CNUTBDHMTPEWPHJHTQDPJZA_review_0",
         "AE6D6CNUTBDHMTPEWPHJHTQDPJZA_review_1",
+        "AGG5VFUD4XK5TBLA4B724XEEV26Q_review_3",
     }
-)
-# Display-only catalog text (UI/Excel). Benchmark prompts keep product_description unchanged.
-UI_CATALOG_DISPLAY_OVERRIDES: dict[str, str] = {
-    "AEB5R4AU3242FXZFI6LJWQMYHKXA_review_0": (
-        "Meta Quest 2 — Advanced All-In-One Virtual Reality Headset (128GB). "
-        "Standalone VR with no PC required; includes headset, Touch controllers, and charging cable. "
-        "Qualifying purchases include a Beat Saber digital download (promotional offer terms apply)."
-    ),
-    "AHBZSLUFTC5A7MFVMPX544P75QNQ_review_3": (
-        "Game of Thrones — RPG adventure set in the world of HBO's Game of Thrones. "
-        "Original story supervised by George R. R. Martin; navigate war, betrayal, and survival "
-        "in Westeros with choices that shape outcomes."
-    ),
-    "AGKNH4FDTQTQS5M7BU6ZYMZ4QTGA_review_2": (
-        "Super Mario Land - 3DS [Digital Code] — Classic side-scrolling Mario platformer "
-        "for Nintendo 3DS/2DS Virtual Console. Journey through four worlds across land, air, "
-        "and underwater to rescue the Princess."
-    ),
-}
-UI_PLACEHOLDER_DESCRIPTIONS = frozenset(
-    {"brand new", "new", "used", "renewed", "like new", "open box"}
 )
 VIDEO_GAMES_SOFTWARE_DETAILS_DIR = CLUSTERING / "micro_cluster_details_video_games_software"
 VIDEO_GAMES_SOFTWARE_MAINS = frozenset({VIDEO_GAMES_MAIN, SOFTWARE_MAIN})
@@ -118,8 +98,8 @@ TRIBE_BENCHMARK_CONFIGS: dict[tuple[str, str], dict[str, Any]] = {
         "filter_mode": "baseline_gap",
         "min_baseline_gap": MIN_UI_SAPIENS_BASELINE_GAP,
         "min_overall_similarity": MIN_UI_OVERALL_SIMILARITY,
-        "sort_by": "baseline_gap",
-        "catalog_sort_by": "baseline_gap",
+        "sort_by": "priority_tier_gap",
+        "catalog_sort_by": "priority_tier_gap",
         "sapiens_prompt_mode": "blind_deploy_i2",
         "deploy_checkpoint": "blind_i2",
         "deploy_iteration": 2,
@@ -136,8 +116,8 @@ TRIBE_BENCHMARK_CONFIGS: dict[tuple[str, str], dict[str, Any]] = {
         "filter_mode": "baseline_gap",
         "min_baseline_gap": MIN_UI_SAPIENS_BASELINE_GAP,
         "min_overall_similarity": MIN_UI_OVERALL_SIMILARITY,
-        "sort_by": "baseline_gap",
-        "catalog_sort_by": "baseline_gap",
+        "sort_by": "priority_tier_gap",
+        "catalog_sort_by": "priority_tier_gap",
         "sapiens_prompt_mode": "blind_deploy_i2",
         "deploy_checkpoint": "blind_i2",
         "deploy_iteration": 2,
@@ -154,8 +134,8 @@ TRIBE_BENCHMARK_CONFIGS: dict[tuple[str, str], dict[str, Any]] = {
         "filter_mode": "baseline_gap",
         "min_baseline_gap": MIN_UI_SAPIENS_BASELINE_GAP,
         "min_overall_similarity": MIN_UI_OVERALL_SIMILARITY,
-        "sort_by": "baseline_gap",
-        "catalog_sort_by": "baseline_gap",
+        "sort_by": "priority_tier_gap",
+        "catalog_sort_by": "priority_tier_gap",
         "sapiens_prompt_mode": "blind_deploy_i2",
         "deploy_checkpoint": "blind_i2",
         "deploy_iteration": 2,
@@ -524,69 +504,6 @@ def enrich_product_description_from_details(row: dict, details_desc: dict[str, s
     return row
 
 
-def enrich_main_product_description_from_details(
-    row: dict, main_details_desc: dict[str, str]
-) -> dict:
-    review_key = str(row.get("review_key") or "").strip()
-    fallback = main_details_desc.get(review_key, "")
-    if not fallback:
-        return row
-    enriched = dict(row)
-    enriched["main_product_description"] = fallback
-    return enriched
-
-
-def _truncate_display_text(text: str, max_len: int = 360) -> str:
-    text = " ".join(str(text or "").split())
-    if len(text) <= max_len:
-        return text
-    cut = text[:max_len]
-    last_period = cut.rfind(". ")
-    if last_period >= 80:
-        return cut[: last_period + 1]
-    return cut.rstrip() + "…"
-
-
-def _is_placeholder_product_description(desc: str) -> bool:
-    normalized = " ".join(str(desc or "").split()).strip().lower()
-    if not normalized:
-        return True
-    if normalized in UI_PLACEHOLDER_DESCRIPTIONS:
-        return True
-    return len(normalized) < 25
-
-
-def build_ui_display_description(
-    review_key: str,
-    product_description: str,
-    details_main_desc: str = "",
-) -> str:
-    """Human-readable catalog label; does not replace benchmark product_description."""
-    if review_key in UI_CATALOG_DISPLAY_OVERRIDES:
-        return UI_CATALOG_DISPLAY_OVERRIDES[review_key]
-
-    desc = str(product_description or "").strip()
-    main = str(details_main_desc or "").strip()
-    lower = desc.lower()
-
-    if _is_placeholder_product_description(desc) and main and not _is_placeholder_product_description(main):
-        return _truncate_display_text(main)
-
-    if "meta quest 2" in lower and "beat saber" in lower and lower.startswith("for ages"):
-        return (
-            "Meta Quest 2 — Advanced All-In-One Virtual Reality Headset. "
-            "Standalone VR system with Touch controllers; Beat Saber download included with qualifying purchase."
-        )
-
-    if lower.startswith("product description "):
-        return _truncate_display_text(desc[len("Product Description ") :])
-
-    if main and main != desc and len(main) > len(desc) + 40:
-        return _truncate_display_text(main)
-
-    return desc
-
-
 def format_i0_user_gap_section(gap_context: str) -> str:
     text = (gap_context or "").strip()
     if not text:
@@ -898,6 +815,107 @@ def sort_products_by_sapiens_gap(products: list[dict]) -> list[dict]:
     )
 
 
+PRIORITY_TIER_ORDER = {"high": 0, "medium": 1, "low": 2}
+
+
+def load_catalog_priority_tiers(domain: str) -> dict[str, str]:
+    path = OUT_DIR / f"{domain}_priority_tiers.json"
+    if not path.is_file():
+        return {}
+    data = load_json(path)
+    raw = data.get("tiers") if isinstance(data, dict) else data
+    if not isinstance(raw, dict):
+        return {}
+    return {str(k): str(v).strip().lower() for k, v in raw.items()}
+
+
+def load_video_games_priority_tiers() -> dict[str, str]:
+    return load_catalog_priority_tiers("video_games")
+
+
+def infer_priority_tier(product: dict, tier_map: dict[str, str]) -> str:
+    review_key = str(product.get("review_key") or "").strip()
+    if review_key in tier_map:
+        return tier_map[review_key]
+    gap = float(product.get("sapiens_baseline_gap") or 0)
+    if gap >= 0.42:
+        return "high"
+    if gap >= 0.15:
+        return "medium"
+    return "low"
+
+
+def apply_catalog_priority_tier(product: dict, tier_map: dict[str, str]) -> dict:
+    out = dict(product)
+    out["catalog_priority_tier"] = infer_priority_tier(out, tier_map)
+    return out
+
+
+def sort_products_by_priority_tier_and_gap(products: list[dict]) -> list[dict]:
+    return sorted(
+        products,
+        key=lambda p: (
+            PRIORITY_TIER_ORDER.get(str(p.get("catalog_priority_tier") or "medium").lower(), 1),
+            -float(p.get("sapiens_baseline_gap") or 0),
+            str(p.get("review_key") or ""),
+        ),
+    )
+
+
+def tribe_priority_stats(products: list[dict]) -> tuple[int, float]:
+    high_gaps = [
+        float(p.get("sapiens_baseline_gap") or 0)
+        for p in products
+        if str(p.get("catalog_priority_tier") or "").lower() == "high"
+    ]
+    return len(high_gaps), max(high_gaps) if high_gaps else 0.0
+
+
+def sort_users_by_priority_tier_and_gap(users: list[dict]) -> list[dict]:
+    def user_stats(user: dict) -> tuple[int, float, float]:
+        products = user.get("products") or []
+        high = [
+            p for p in products if str(p.get("catalog_priority_tier") or "").lower() == "high"
+        ]
+        high_count = len(high)
+        max_high_gap = max(
+            (float(p.get("sapiens_baseline_gap") or 0) for p in high),
+            default=0.0,
+        )
+        max_gap = max(
+            (float(p.get("sapiens_baseline_gap") or 0) for p in products),
+            default=0.0,
+        )
+        return high_count, max_high_gap, max_gap
+
+    return sorted(
+        users,
+        key=lambda u: (
+            -user_stats(u)[0],
+            -user_stats(u)[1],
+            -user_stats(u)[2],
+            str(u.get("user_id") or ""),
+        ),
+    )
+
+
+def sort_products_for_catalog(products: list[dict], sort_by: str, tier_map: dict[str, str]) -> list[dict]:
+    tagged = [apply_catalog_priority_tier(p, tier_map) for p in products]
+    if sort_by == "priority_tier_gap":
+        return sort_products_by_priority_tier_and_gap(tagged)
+    if sort_by == "overall_similarity":
+        return sort_products_by_overall_similarity(tagged)
+    return sort_products_by_sapiens_gap(tagged)
+
+
+def sort_users_for_catalog(users: list[dict], sort_by: str) -> list[dict]:
+    if sort_by == "priority_tier_gap":
+        return sort_users_by_priority_tier_and_gap(users)
+    if sort_by == "overall_similarity":
+        return sort_users_by_overall_similarity(users)
+    return sort_users_by_sapiens_gap(users)
+
+
 def sort_users_by_sapiens_gap(users: list[dict]) -> list[dict]:
     def user_gap(user: dict) -> float:
         product_gaps = [
@@ -1039,9 +1057,6 @@ def video_games_benchmark_product_from_row(
     product: dict[str, Any] = {
         "review_key": review_key,
         "product_description": row.get("product_description", ""),
-        # Benchmark GT is paired with blind_run product_description; do not use details
-        # main_product_description (review_key indices differ across sources).
-        "main_product_description": str(row.get("product_description") or "").strip(),
         "review_text": actual.get("review_text") or actual.get("review") or "",
         "rating": actual.get("rating"),
         "category": row.get("category", VIDEO_GAMES_MAIN),
@@ -1677,8 +1692,6 @@ def apply_product_ordering(
             continue
         existing = by_key.get(canonical_key)
         product = healthcare_product_from_entry(entry, review_key=canonical_key)
-        if existing and str(existing.get("main_product_description") or "").strip():
-            product["main_product_description"] = existing["main_product_description"]
         product["healthcare_benchmark"] = True
         by_key[canonical_key] = product
 
@@ -1935,7 +1948,6 @@ def build_video_games_software_benchmark_tribe(
     tribe_desc = tribe_persona_description(tribe_def, tribe_name)
 
     details_desc = product_descriptions_by_review_key(details)
-    main_details_desc = main_product_descriptions_by_review_key(details)
     by_user: dict[str, list[dict]] = {}
     for row in load_blind_run_reviews(blind_run_path):
         review_key = str(row.get("review_key") or "").strip()
@@ -1955,6 +1967,7 @@ def build_video_games_software_benchmark_tribe(
 
     sort_by = str(benchmark_config.get("sort_by") or "baseline_gap")
     catalog_sort_by = str(benchmark_config.get("catalog_sort_by") or sort_by)
+    tier_map = load_video_games_priority_tiers() if sort_by == "priority_tier_gap" else {}
     users_out: list[dict] = []
     for uid, rows in by_user.items():
         products: list[dict] = []
@@ -1987,23 +2000,26 @@ def build_video_games_software_benchmark_tribe(
                 product["overall_similarity_score"] = round(
                     float(i2_by_key[review_key]["overall_similarity"]), 4
                 )
-            display_desc = build_ui_display_description(
-                review_key,
-                str(product.get("product_description") or ""),
-                main_details_desc.get(review_key, ""),
-            )
-            product["main_product_description"] = display_desc
             products.append(product)
 
         if sort_by == "overall_similarity":
-            products = sort_products_by_overall_similarity(products)
+            products = sort_products_for_catalog(products, "overall_similarity", tier_map)
         else:
-            products = sort_products_by_sapiens_gap(products)
+            products = sort_products_for_catalog(products, sort_by, tier_map)
         if not products:
             continue
 
         if sort_by == "overall_similarity":
             user_score = max(float(p.get("overall_similarity_score") or 0) for p in products)
+        elif sort_by == "priority_tier_gap":
+            high_gaps = [
+                float(p.get("sapiens_baseline_gap") or 0)
+                for p in products
+                if str(p.get("catalog_priority_tier") or "").lower() == "high"
+            ]
+            user_score = max(high_gaps) if high_gaps else max(
+                float(p.get("sapiens_baseline_gap") or 0) for p in products
+            )
         else:
             user_score = max(float(p.get("sapiens_baseline_gap") or 0) for p in products)
 
@@ -2033,9 +2049,9 @@ def build_video_games_software_benchmark_tribe(
         return None
 
     if sort_by == "overall_similarity":
-        users_out = sort_users_by_overall_similarity(users_out)
+        users_out = sort_users_for_catalog(users_out, "overall_similarity")
     else:
-        users_out = sort_users_by_sapiens_gap(users_out)
+        users_out = sort_users_for_catalog(users_out, sort_by)
 
     product_count = sum(len(u["products"]) for u in users_out)
     best_prediction_count = sum(
@@ -2202,9 +2218,6 @@ def build_tribe(
                 {
                     "review_key": r["review_key"],
                     "product_description": r["product_description"],
-                    "main_product_description": str(
-                        r.get("main_product_description") or r.get("product_description") or ""
-                    ),
                     "review_text": r["review_text"],
                     "rating": r["rating"],
                     "category": r["category"],
@@ -2275,9 +2288,6 @@ def build_tribe(
             for r in reviews:
                 product = {
                     "product_description": r.get("product_description", ""),
-                    "main_product_description": str(
-                        r.get("main_product_description") or r.get("product_description") or ""
-                    ),
                     "review_text": r.get("review_text", ""),
                     "rating": r.get("rating"),
                     "category": r.get("category", "Health & Personal Care"),
@@ -2525,6 +2535,12 @@ def main() -> None:
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(tribe, f, ensure_ascii=False)
         built_ids.add(tribe["id"])
+        tribe_products = [
+            product
+            for products in (tribe.get("members_grouped_by_user") or {}).values()
+            for product in products
+        ]
+        high_count, max_high_gap = tribe_priority_stats(tribe_products)
         index.append({
             "id": tribe["id"],
             "name": tribe["tribe_name"],
@@ -2548,6 +2564,8 @@ def main() -> None:
             },
             "meanSimilarityScore": tribe.get("mean_similarity_score", 0.0),
             "meanSapiensBaselineGap": tribe.get("mean_sapiens_baseline_gap", 0.0),
+            "highPriorityCount": high_count,
+            "maxHighPriorityGap": max_high_gap,
         })
         built += 1
         print(
@@ -2564,10 +2582,10 @@ def main() -> None:
     index.sort(
         key=lambda t: (
             0 if t.get("domain") == "video_games" else 1,
-            -float(
+            -int(t.get("highPriorityCount") or 0) if t.get("domain") == "video_games" else 0,
+            -float(t.get("maxHighPriorityGap") or 0) if t.get("domain") == "video_games" else 0,
+            -float(t.get("meanSimilarityScore") or 0) if t.get("domain") == "healthcare" else -float(
                 t.get("meanSapiensBaselineGap") or 0
-                if t.get("domain") in {"healthcare", "video_games"}
-                else t.get("meanSimilarityScore") or 0
             ),
             -int(t.get("reviewCount") or 0),
         )

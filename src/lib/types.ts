@@ -12,6 +12,7 @@ export type Qualitative = {
 
 export type CatalogProduct = {
   reviewKey: string;
+  productTitle?: string;
   productDescription: string;
   mainProductDescription?: string;
   category: string;
@@ -21,6 +22,7 @@ export type CatalogProduct = {
   videoGamesBenchmark?: boolean;
   sapiensBaselineGap?: number;
   overallSimilarityScore?: number;
+  catalogPriorityTier?: "high" | "medium" | "low";
 };
 
 export type CatalogUserHistoryReview = {
@@ -66,6 +68,8 @@ export type CatalogTribeIndex = {
   };
   meanSimilarityScore?: number;
   meanSapiensBaselineGap?: number;
+  highPriorityCount?: number;
+  maxHighPriorityGap?: number;
   deployCheckpoint?: string;
   deployIteration?: number;
   sapiensPromptMode?: string;

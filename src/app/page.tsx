@@ -77,13 +77,13 @@ function defaultReviewKeyForUser(user: CatalogTribe["users"][number] | null | un
   return user.products[0]?.reviewKey ?? null;
 }
 
-/** Prompt/scoring product text — product_description only (never main_product_description). */
+/** Prompt/scoring product text — product_description only. */
 function catalogProductDescription(product: { productDescription: string }): string {
   return product.productDescription.trim();
 }
 
-/** UI catalog label — prefers display-friendly main_product_description when set. */
-function catalogProductDisplayText(product: {
+/** Healthcare UI label — prefers main_product_description when set. */
+function catalogHealthcareDisplayText(product: {
   productDescription: string;
   mainProductDescription?: string;
 }): string {
@@ -154,7 +154,7 @@ export default function Home() {
       return;
     }
     if (product) setCustomProductDesc(catalogProductDescription(product));
-  }, [product?.reviewKey, product?.mainProductDescription, product?.productDescription]);
+  }, [product?.reviewKey, product?.productDescription]);
 
   useEffect(() => {
     if (skipPopulationDefSyncRef.current) {
@@ -529,6 +529,7 @@ export default function Home() {
         <SelectedProductBanner
           product={product}
           description={effectiveProductDesc}
+          domain={tribe?.domain}
           editOpen={editDescOpen}
           onEdit={() => setEditDescOpen((v) => !v)}
           onDescriptionChange={(value) => {
@@ -634,9 +635,20 @@ export default function Home() {
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-[11px] font-mono font-normal text-foreground/50">#{i + 1}</span>
                       </div>
-                      <p className="text-[13px] font-normal text-foreground leading-snug line-clamp-3">
-                        {catalogProductDisplayText(p)}
-                      </p>
+                      {tribe?.domain === "video_games" ? (
+                        <>
+                          <p className="text-[13px] font-semibold text-foreground leading-snug line-clamp-3">
+                            {p.productTitle}
+                          </p>
+                          <p className="text-[12px] font-normal text-foreground/65 leading-relaxed mt-1.5 line-clamp-4">
+                            {p.productDescription}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-[13px] font-normal text-foreground leading-snug line-clamp-3">
+                          {catalogHealthcareDisplayText(p)}
+                        </p>
+                      )}
                       <p className="text-[11px] font-normal text-foreground/60 mt-1.5">
                         {p.category}
                       </p>
@@ -949,17 +961,19 @@ function Header({ connected }: { connected: boolean }) {
 function SelectedProductBanner({
   product,
   description,
+  domain,
   editOpen,
   onEdit,
   onDescriptionChange,
 }: {
   product: CatalogTribe["users"][number]["products"][number];
   description: string;
+  domain?: "healthcare" | "video_games";
   editOpen: boolean;
   onEdit: () => void;
   onDescriptionChange: (value: string) => void;
 }) {
-  const preview = description.trim();
+  const isVideoGames = domain === "video_games";
   return (
     <div className="mb-6 rounded-2xl border border-border bg-surface-2/60 px-4 py-3.5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
@@ -973,9 +987,19 @@ function SelectedProductBanner({
               {product.category}
             </span>
           </div>
-          <p className="text-[13px] font-normal text-foreground/70 leading-relaxed line-clamp-2">
-            {preview || product.mainProductDescription || product.productDescription}
+          <p className="text-[14px] font-semibold text-foreground leading-snug">
+            {isVideoGames ? product.productTitle : catalogHealthcareDisplayText(product)}
           </p>
+          {isVideoGames && (
+            <p className="text-[12px] font-normal text-foreground/65 leading-relaxed mt-2 whitespace-pre-wrap">
+              {description.trim() || product.productDescription}
+            </p>
+          )}
+          {!isVideoGames && (
+            <p className="text-[13px] font-normal text-foreground/70 leading-relaxed mt-1.5 line-clamp-2">
+              {description.trim() || catalogHealthcareDisplayText(product)}
+            </p>
+          )}
         </div>
         <button
           type="button"
@@ -990,7 +1014,7 @@ function SelectedProductBanner({
           value={description}
           onChange={(e) => onDescriptionChange(e.target.value)}
           rows={4}
-          placeholder="Write or edit the main product description..."
+          placeholder="Write or edit the product description used for prompts..."
           className="mt-3 w-full rounded-xl border border-accent/40 bg-surface px-4 py-3 text-[13px] font-normal text-foreground leading-relaxed resize-y focus:outline-none focus:border-accent"
         />
       )}
@@ -1343,12 +1367,9 @@ function BaselinePromptInspector({
             <ul className="mt-3 space-y-2 max-h-56 overflow-y-auto">
               {userHistoryReviews.map((item, index) => (
                 <li
-                  key={`${item.reviewKey ?? index}-${item.mainCategory}`}
+                  key={item.reviewKey ?? index}
                   className="rounded-lg border border-border bg-surface-2/50 px-3 py-2.5"
                 >
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 mb-1">
-                    {item.mainCategory || item.category}
-                  </p>
                   <p className="text-[12px] text-foreground/70 leading-relaxed">
                     {item.reviewText}
                   </p>
