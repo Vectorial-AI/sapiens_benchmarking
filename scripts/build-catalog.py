@@ -67,8 +67,39 @@ HISTORY_WORST_FALLBACK_REVIEWS = 3
 # Rank history · gpt-5 fallback candidates (worst = lowest score).
 HISTORY_RANK_WEIGHT_TEXT = 0.3
 HISTORY_RANK_WEIGHT_THEME = 0.7
-# UI catalog: only healthcare reviews where Sapiens beats best baseline by >10pp.
+# UI catalog: Sapiens must beat best baseline by >10pp and score ≥65% overall.
 MIN_UI_SAPIENS_BASELINE_GAP = 0.10
+MIN_UI_OVERALL_SIMILARITY = 0.65
+# Manually excluded from UI catalog (review_key).
+UI_CATALOG_EXCLUDED_REVIEW_KEYS = frozenset(
+    {
+        "AHBE5K5BHU5M6AHV6OY3PQ6OYWDA_review_1",
+        "AHQJQJF7YTJEJEHNQKHUAKUM72HA_review_3",
+        "AE6D6CNUTBDHMTPEWPHJHTQDPJZA_review_0",
+        "AE6D6CNUTBDHMTPEWPHJHTQDPJZA_review_1",
+    }
+)
+# Display-only catalog text (UI/Excel). Benchmark prompts keep product_description unchanged.
+UI_CATALOG_DISPLAY_OVERRIDES: dict[str, str] = {
+    "AEB5R4AU3242FXZFI6LJWQMYHKXA_review_0": (
+        "Meta Quest 2 — Advanced All-In-One Virtual Reality Headset (128GB). "
+        "Standalone VR with no PC required; includes headset, Touch controllers, and charging cable. "
+        "Qualifying purchases include a Beat Saber digital download (promotional offer terms apply)."
+    ),
+    "AHBZSLUFTC5A7MFVMPX544P75QNQ_review_3": (
+        "Game of Thrones — RPG adventure set in the world of HBO's Game of Thrones. "
+        "Original story supervised by George R. R. Martin; navigate war, betrayal, and survival "
+        "in Westeros with choices that shape outcomes."
+    ),
+    "AGKNH4FDTQTQS5M7BU6ZYMZ4QTGA_review_2": (
+        "Super Mario Land - 3DS [Digital Code] — Classic side-scrolling Mario platformer "
+        "for Nintendo 3DS/2DS Virtual Console. Journey through four worlds across land, air, "
+        "and underwater to rescue the Princess."
+    ),
+}
+UI_PLACEHOLDER_DESCRIPTIONS = frozenset(
+    {"brand new", "new", "used", "renewed", "like new", "open box"}
+)
 VIDEO_GAMES_SOFTWARE_DETAILS_DIR = CLUSTERING / "micro_cluster_details_video_games_software"
 VIDEO_GAMES_SOFTWARE_MAINS = frozenset({VIDEO_GAMES_MAIN, SOFTWARE_MAIN})
 MAX_SAME_CATEGORY_HISTORY_REVIEWS = 3
@@ -86,7 +117,7 @@ TRIBE_BENCHMARK_CONFIGS: dict[tuple[str, str], dict[str, Any]] = {
         / "amazon_sgo_health_care/cluster_0/micro_0/evolution/state_history/000006_refine_after_iteration_2_batch_22.json",
         "filter_mode": "baseline_gap",
         "min_baseline_gap": MIN_UI_SAPIENS_BASELINE_GAP,
-        "min_overall_similarity": 0.0,
+        "min_overall_similarity": MIN_UI_OVERALL_SIMILARITY,
         "sort_by": "baseline_gap",
         "catalog_sort_by": "baseline_gap",
         "sapiens_prompt_mode": "blind_deploy_i2",
@@ -103,8 +134,8 @@ TRIBE_BENCHMARK_CONFIGS: dict[tuple[str, str], dict[str, Any]] = {
         "evolution_i2": OUTPUTS
         / "amazon_sgo_health_care/cluster_0/micro_9/evolution/state_history/000008_refine_after_iteration_2_batch_31.json",
         "filter_mode": "baseline_gap",
-        "min_baseline_gap": 0.05,
-        "min_overall_similarity": 0.0,
+        "min_baseline_gap": MIN_UI_SAPIENS_BASELINE_GAP,
+        "min_overall_similarity": MIN_UI_OVERALL_SIMILARITY,
         "sort_by": "baseline_gap",
         "catalog_sort_by": "baseline_gap",
         "sapiens_prompt_mode": "blind_deploy_i2",
@@ -121,8 +152,8 @@ TRIBE_BENCHMARK_CONFIGS: dict[tuple[str, str], dict[str, Any]] = {
         "evolution_i2": OUTPUTS
         / "amazon_sgo_health_care/cluster_0/micro_11/evolution/state_history/000006_refine_after_iteration_2_batch_19.json",
         "filter_mode": "baseline_gap",
-        "min_baseline_gap": 0.05,
-        "min_overall_similarity": 0.0,
+        "min_baseline_gap": MIN_UI_SAPIENS_BASELINE_GAP,
+        "min_overall_similarity": MIN_UI_OVERALL_SIMILARITY,
         "sort_by": "baseline_gap",
         "catalog_sort_by": "baseline_gap",
         "sapiens_prompt_mode": "blind_deploy_i2",
@@ -396,14 +427,21 @@ def filter_healthcare_benchmark_by_gap(
     hc_gaps: dict[str, float],
     *,
     min_gap: float = MIN_UI_SAPIENS_BASELINE_GAP,
+    min_sim: float = MIN_UI_OVERALL_SIMILARITY,
 ) -> tuple[
     dict[tuple[str, str], dict[str, list[dict]]],
     dict[str, float],
     dict[str, dict],
     dict[str, float],
 ]:
-    """Keep only reviews where Sapiens ui score exceeds best baseline by more than min_gap."""
-    allowed = {review_key for review_key, gap in hc_gaps.items() if gap > min_gap}
+    """Keep only reviews where Sapiens beats best baseline by >min_gap and scores ≥min_sim."""
+    allowed = {
+        review_key
+        for review_key, gap in hc_gaps.items()
+        if gap > min_gap
+        and float(hc_scores.get(review_key, 0)) >= min_sim
+        and review_key not in UI_CATALOG_EXCLUDED_REVIEW_KEYS
+    }
     filtered_entries = {k: v for k, v in hc_entries.items() if k in allowed}
     filtered_scores = {k: v for k, v in hc_scores.items() if k in allowed}
     filtered_gaps = {k: v for k, v in hc_gaps.items() if k in allowed}
@@ -496,6 +534,57 @@ def enrich_main_product_description_from_details(
     enriched = dict(row)
     enriched["main_product_description"] = fallback
     return enriched
+
+
+def _truncate_display_text(text: str, max_len: int = 360) -> str:
+    text = " ".join(str(text or "").split())
+    if len(text) <= max_len:
+        return text
+    cut = text[:max_len]
+    last_period = cut.rfind(". ")
+    if last_period >= 80:
+        return cut[: last_period + 1]
+    return cut.rstrip() + "…"
+
+
+def _is_placeholder_product_description(desc: str) -> bool:
+    normalized = " ".join(str(desc or "").split()).strip().lower()
+    if not normalized:
+        return True
+    if normalized in UI_PLACEHOLDER_DESCRIPTIONS:
+        return True
+    return len(normalized) < 25
+
+
+def build_ui_display_description(
+    review_key: str,
+    product_description: str,
+    details_main_desc: str = "",
+) -> str:
+    """Human-readable catalog label; does not replace benchmark product_description."""
+    if review_key in UI_CATALOG_DISPLAY_OVERRIDES:
+        return UI_CATALOG_DISPLAY_OVERRIDES[review_key]
+
+    desc = str(product_description or "").strip()
+    main = str(details_main_desc or "").strip()
+    lower = desc.lower()
+
+    if _is_placeholder_product_description(desc) and main and not _is_placeholder_product_description(main):
+        return _truncate_display_text(main)
+
+    if "meta quest 2" in lower and "beat saber" in lower and lower.startswith("for ages"):
+        return (
+            "Meta Quest 2 — Advanced All-In-One Virtual Reality Headset. "
+            "Standalone VR system with Touch controllers; Beat Saber download included with qualifying purchase."
+        )
+
+    if lower.startswith("product description "):
+        return _truncate_display_text(desc[len("Product Description ") :])
+
+    if main and main != desc and len(main) > len(desc) + 40:
+        return _truncate_display_text(main)
+
+    return desc
 
 
 def format_i0_user_gap_section(gap_context: str) -> str:
@@ -663,10 +752,18 @@ def filter_benchmark_reviews(
             continue
         if filter_mode == "baseline_gap":
             gap = gaps.get(review_key)
-            if gap is not None and gap > min_baseline_gap:
+            if (
+                gap is not None
+                and gap > min_baseline_gap
+                and float(sim) >= min_overall_similarity
+                and review_key not in UI_CATALOG_EXCLUDED_REVIEW_KEYS
+            ):
                 allowed.add(review_key)
         elif filter_mode == "overall_similarity":
-            if float(sim) >= min_overall_similarity:
+            if (
+                float(sim) >= min_overall_similarity
+                and review_key not in UI_CATALOG_EXCLUDED_REVIEW_KEYS
+            ):
                 allowed.add(review_key)
     return allowed
 
@@ -1838,6 +1935,7 @@ def build_video_games_software_benchmark_tribe(
     tribe_desc = tribe_persona_description(tribe_def, tribe_name)
 
     details_desc = product_descriptions_by_review_key(details)
+    main_details_desc = main_product_descriptions_by_review_key(details)
     by_user: dict[str, list[dict]] = {}
     for row in load_blind_run_reviews(blind_run_path):
         review_key = str(row.get("review_key") or "").strip()
@@ -1889,6 +1987,12 @@ def build_video_games_software_benchmark_tribe(
                 product["overall_similarity_score"] = round(
                     float(i2_by_key[review_key]["overall_similarity"]), 4
                 )
+            display_desc = build_ui_display_description(
+                review_key,
+                str(product.get("product_description") or ""),
+                main_details_desc.get(review_key, ""),
+            )
+            product["main_product_description"] = display_desc
             products.append(product)
 
         if sort_by == "overall_similarity":
@@ -2343,7 +2447,8 @@ def main() -> None:
         tribe_review_counts[(domain, cluster, micro)] = len(allowed)
     print(f"Loaded category characteristics for {len(user_cat_chars)} users")
     print(
-        f"Healthcare UI filter (>10pp Sapiens vs best baseline): "
+        f"Healthcare UI filter (>{MIN_UI_SAPIENS_BASELINE_GAP * 100:.0f}pp gap, "
+        f"≥{MIN_UI_OVERALL_SIMILARITY * 100:.0f}% sim): "
         f"{len(hc_entries)}/{total_hc_reviews} reviews across {len(hc_by_tribe_user)} tribes"
     )
     for tribe_key, cfg in TRIBE_BENCHMARK_CONFIGS.items():
@@ -2360,7 +2465,8 @@ def main() -> None:
             gaps=gaps,
         )
         label = (
-            f">{cfg.get('min_baseline_gap', 0) * 100:.0f}pp baseline gap"
+            f">{cfg.get('min_baseline_gap', 0) * 100:.0f}pp gap, "
+            f"≥{cfg.get('min_overall_similarity', 0) * 100:.0f}% sim"
             if cfg.get("filter_mode") == "baseline_gap"
             else f">={cfg.get('min_overall_similarity', 0):.2f} overall sim"
         )

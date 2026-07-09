@@ -29,10 +29,12 @@ import type {
   CatalogTribe,
   CatalogTribeIndex,
   EngineResult,
+  InferredTraitInfluence,
   PipelineMetrics,
   ReviewSentiment,
   SapiensRunResponse,
 } from "@/lib/types";
+import { INFERRED_TRAIT_UI_MIN_CONFIDENCE } from "@/lib/inferred-traits-explanation";
 import {
   clearWizardRestoreFlag,
   loadWizardSession,
@@ -73,6 +75,17 @@ function defaultReviewKeyForUser(user: CatalogTribe["users"][number] | null | un
 /** Prompt/scoring product text — product_description only (never main_product_description). */
 function catalogProductDescription(product: { productDescription: string }): string {
   return product.productDescription.trim();
+}
+
+/** UI catalog label — prefers display-friendly main_product_description when set. */
+function catalogProductDisplayText(product: {
+  productDescription: string;
+  mainProductDescription?: string;
+}): string {
+  const main = product.mainProductDescription?.trim() || "";
+  const desc = product.productDescription.trim();
+  if (main && main !== desc) return main;
+  return desc;
 }
 
 export default function Home() {
@@ -514,14 +527,8 @@ export default function Home() {
                         <span className="text-[11px] font-mono font-normal text-foreground/50">#{i + 1}</span>
                       </div>
                       <p className="text-[13px] font-normal text-foreground leading-snug line-clamp-3">
-                        {catalogProductDescription(p)}
+                        {catalogProductDisplayText(p)}
                       </p>
-                      {p.mainProductDescription &&
-                        p.mainProductDescription.trim() !== p.productDescription.trim() && (
-                          <p className="text-[11px] font-normal text-foreground/60 mt-1 line-clamp-1">
-                            {p.mainProductDescription}
-                          </p>
-                        )}
                       <p className="text-[11px] font-normal text-foreground/60 mt-1.5">
                         {p.category}
                       </p>
@@ -593,6 +600,8 @@ export default function Home() {
                     themeTopK={themeTopK}
                     sapiensThemeDisplay
                     themeDisplayGroundTruth={groundTruthThemes}
+                    inferredTraitSummary={sapiens?.inferredTraitSummary}
+                    inferredTraitInfluences={sapiens?.inferredTraitInfluences}
                   />
                 </div>
               </div>
@@ -742,6 +751,8 @@ export default function Home() {
                     sapiensThemeDisplay
                     themeDisplayGroundTruth={groundTruthThemes}
                     similarityExplanation={sapiens?.similarityExplanation}
+                    inferredTraitSummary={sapiens?.inferredTraitSummary}
+                    inferredTraitInfluences={sapiens?.inferredTraitInfluences}
                   />
                   {baselines.map((b) => (
                     <ResultCard
@@ -1134,6 +1145,8 @@ function ResultCard({
   sapiensThemeDisplay,
   themeDisplayGroundTruth,
   similarityExplanation,
+  inferredTraitSummary,
+  inferredTraitInfluences,
   onRemove,
 }: {
   tone: Tone;
@@ -1151,9 +1164,10 @@ function ResultCard({
   sapiensThemeDisplay?: boolean;
   themeDisplayGroundTruth?: string[];
   similarityExplanation?: string | null;
+  inferredTraitSummary?: string | null;
+  inferredTraitInfluences?: InferredTraitInfluence[] | null;
   onRemove?: () => void;
 }) {
-  const [detailsOpen, setDetailsOpen] = useState(false);
   const isGenerated = tone !== "real";
   const showSkeleton = loading && isGenerated && !text;
   const themeEntries = sapiensThemeDisplay
@@ -1164,6 +1178,10 @@ function ResultCard({
       )
     : topKThemeEntries(predictedThemes, themeTopK);
   const hasDetails = themeEntries.length > 0 || sentiment;
+  const visibleTraitInfluences =
+    inferredTraitInfluences?.filter(
+      (item) => item.confidence >= INFERRED_TRAIT_UI_MIN_CONFIDENCE,
+    ) ?? [];
 
   return (
     <div className="rounded-2xl border border-border bg-surface flex flex-col overflow-hidden">
@@ -1244,51 +1262,90 @@ function ResultCard({
         )}
       </div>
 
+      {tone === "sapiens" &&
+        (inferredTraitSummary || visibleTraitInfluences.length > 0) && (
+        <div className="px-6 py-5 border-t border-border bg-surface-2/30">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 block mb-3">
+            Inferred trait influences
+          </span>
+          {inferredTraitSummary && (
+            <p className="text-[13px] font-normal text-foreground leading-relaxed mb-4">
+              {inferredTraitSummary}
+            </p>
+          )}
+          {visibleTraitInfluences.length > 0 && (
+            <>
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 block mb-2.5">
+            Proofs
+          </span>
+          <ul className="space-y-3">
+            {visibleTraitInfluences.map((item) => (
+              <li key={`${item.source}-${item.trait}`} className="rounded-xl border border-border bg-surface px-3.5 py-3">
+                <div className="flex items-start justify-between gap-3 mb-1.5">
+                  <p className="text-[12px] font-semibold text-foreground leading-snug">{item.trait}</p>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tabular-nums ${
+                      item.confidence >= 0.85
+                        ? "bg-real/15 text-real"
+                        : item.confidence >= 0.65
+                          ? "bg-accent/10 text-accent"
+                          : "bg-surface-3 text-foreground/60"
+                    }`}>
+                      {Math.round(item.confidence * 100)}%
+                    </span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-accent/10 text-accent">
+                      {item.source === "user" ? "user traits" : "tribe traits"}
+                    </span>
+                  </div>
+                </div>
+                {item.traitGroup && (
+                  <p className="text-[10px] font-medium uppercase tracking-widest text-foreground/40 mb-1.5">
+                    {item.traitGroup}
+                  </p>
+                )}
+                <p className="text-[12px] font-normal text-foreground/70 leading-relaxed">
+                  {item.evidence}
+                </p>
+              </li>
+            ))}
+          </ul>
+            </>
+          )}
+        </div>
+      )}
+
       {/* ── Themes & sentiment footer ── */}
       {hasDetails && text && (
-        <div className="border-t border-border">
-          <button
-            type="button"
-            onClick={() => setDetailsOpen((v) => !v)}
-            className="flex items-center justify-between w-full px-6 py-3 text-left hover:bg-surface-2/50 transition group"
-          >
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-foreground/40 group-hover:text-foreground/70 transition">
-              <PiTag size={16} className="text-accent" />Themes &amp; sentiment
-            </span>
-            <span className={`transition-all text-[9px] text-foreground/30 group-hover:text-foreground/50 ${detailsOpen ? "rotate-180" : ""}`}>▼</span>
-          </button>
-          {detailsOpen && (
-            <div className="px-6 pb-6 pt-4 border-t border-border/50 space-y-4">
+        <div className="border-t border-border px-6 py-5 space-y-4">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-foreground/40">
+            <PiTag size={16} className="text-accent" />Themes &amp; sentiment
+          </span>
 
-              {/* Sentiment pill */}
-              {sentiment && (
-                <div className="flex items-center gap-2.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 w-16 shrink-0">Sentiment</span>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold capitalize
-                    ${sentiment === "Positive" ? "bg-real/15 text-real" :
-                      sentiment === "Negative" ? "bg-red-500/10 text-red-500" :
-                      "bg-surface-3 text-foreground/60"}`}>
-                    {sentiment}
-                  </span>
-                </div>
-              )}
+          {sentiment && (
+            <div className="flex items-center gap-2.5">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 w-16 shrink-0">Sentiment</span>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold capitalize
+                ${sentiment === "Positive" ? "bg-real/15 text-real" :
+                  sentiment === "Negative" ? "bg-red-500/10 text-red-500" :
+                  "bg-surface-3 text-foreground/60"}`}>
+                {sentiment}
+              </span>
+            </div>
+          )}
 
-              {/* Theme chips with score bars */}
-              {themeEntries.length > 0 && (
-                <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 block mb-2.5">Themes</span>
-                  <ul className="space-y-2">
-                    {themeEntries.map(([theme, value]) => (
-                      <li key={theme} className="flex items-center gap-3">
-                        <span className="text-[12px] font-normal text-foreground truncate flex-1" title={theme}>{theme}</span>
-                        {value !== 1 && (
-                          <span className="text-[12px] font-bold text-foreground tabular-nums shrink-0">{value.toFixed(2)}</span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+          {themeEntries.length > 0 && (
+            <div>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 block mb-2.5">Themes</span>
+              <ul className="space-y-2">
+                {themeEntries.map(([theme, value]) => (
+                  <li key={theme} className="flex items-center gap-3">
+                    <span className="text-[12px] font-normal text-foreground truncate flex-1" title={theme}>{theme}</span>
+                    {value !== 1 && (
+                      <span className="text-[12px] font-bold text-foreground tabular-nums shrink-0">{value.toFixed(2)}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>

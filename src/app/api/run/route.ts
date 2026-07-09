@@ -16,6 +16,7 @@ import {
   REVIEW_SYSTEM,
 } from "@/lib/prompts";
 import { hasGatewayKey, mockPrediction, runModel } from "@/lib/ai";
+import { generateInferredTraitInfluences } from "@/lib/inferred-traits-explanation";
 import { generateSimilarityExplanation } from "@/lib/similarity-explanation";
 import {
   BASELINE_PIPELINE_WEIGHTS,
@@ -196,7 +197,22 @@ export async function POST(req: Request) {
       sapiens = await runEngine("sapiens", sapiensPrompt, SAPIENS_MODEL, sapiensTemperature);
     }
 
+    const inferredTraits = sapiens.reviewText.trim()
+      ? await generateInferredTraitInfluences({
+          sapiensReview: sapiens.reviewText,
+          tribe,
+          user,
+          category,
+        })
+      : null;
+
     if (scoringGroundTruth) sapiens = await attachMetrics(sapiens, scoringGroundTruth, "SAPIENS");
+
+    sapiens = {
+      ...sapiens,
+      inferredTraitSummary: inferredTraits?.summary ?? null,
+      inferredTraitInfluences: inferredTraits?.influences ?? null,
+    };
 
     return NextResponse.json({
       groundTruth,

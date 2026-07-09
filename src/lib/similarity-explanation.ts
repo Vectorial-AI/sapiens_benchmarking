@@ -3,6 +3,8 @@ import { MATCH_THRESHOLD, topKThemeEntries } from "./scoring";
 import type { PipelineMetrics, ReviewSentiment } from "./types";
 
 export const SIMILARITY_EXPLAINER_MODEL = "openai/gpt-4o-mini";
+/** SAPIENS uses the strict match-only explainer at or above this overall similarity score. */
+export const SAPIENS_NEAR_MATCH_THRESHOLD = 0.9;
 
 type ExplanationEngine = "sapiens" | "baseline";
 
@@ -57,13 +59,26 @@ function openingGuide(bucket: ScoreBucket, engine: ExplanationEngine): string {
   }
 }
 
-function systemPrompt(engine: ExplanationEngine): string {
+function isSapiensNearPerfectMatch(score: number): boolean {
+  return score >= SAPIENS_NEAR_MATCH_THRESHOLD;
+}
+
+function systemPrompt(engine: ExplanationEngine, sapiensPartialMatch = false): string {
   if (engine === "baseline") {
     return (
       "You explain baseline AI review predictions for non-technical clients. " +
       "Baselines are weaker models — when similarity is low, emphasize how the baseline differs, " +
       "what it invents, and what the real reviewer cared about that it skipped. " +
       "One short sentence. Plain English. No percentages or scores."
+    );
+  }
+  if (sapiensPartialMatch) {
+    return (
+      "You explain Sapiens review predictions for non-technical clients. " +
+      "Sapiens still aligns strongly with the real review on the same product points and priorities — lead with that. " +
+      "You may briefly note one small difference in wording or emphasis, framed as a minor variation rather than a miss. " +
+      "Do not say Sapiens failed, missed the point, or got it wrong. " +
+      "One or two short sentences in plain English. No percentages or scores."
     );
   }
   return (
@@ -86,6 +101,7 @@ function comparisonPrompt(args: {
   label?: string;
   engine: ExplanationEngine;
   bucket: ScoreBucket;
+  sapiensPartialMatch?: boolean;
 }): string {
   const themeK = Math.max(1, args.groundTruthThemes?.length ?? 3);
   const score = args.metrics?.overallSimilarityScore ?? 0;
@@ -94,7 +110,23 @@ function comparisonPrompt(args: {
       ? score < MATCH_THRESHOLD
         ? "This baseline is a poor match — prioritize differences and misses over any shared detail."
         : "Note both overlap and gaps."
-      : "This is Sapiens: focus only on what matches the real review. Do not mention misses, additions, or differences.";
+      : args.sapiensPartialMatch
+        ? "This is Sapiens with strong but not perfect alignment: emphasize the shared topics and priorities first, then note one slight difference in wording or emphasis."
+        : "This is Sapiens: focus only on what matches the real review. Do not mention misses, additions, or differences.";
+
+  const partialMatchRules = args.sapiensPartialMatch
+    ? `
+Partial-match rules (similarity below 90%):
+- Sentence 1: Lead with what SAPIENS got right — same product points, themes, and overall take as the real review.
+- Sentence 2 (optional, brief): Note one slight difference — wording, tone, or a minor detail — framed as "slightly different" or "a bit different", not as a failure.
+- Keep selling the match: same things discussed, same priorities, strong alignment overall.
+- Do NOT say SAPIENS missed, failed, or got it wrong.
+- Max 2 sentences, max 55 words total.`
+    : "";
+
+  const lengthRule = args.sapiensPartialMatch
+    ? "Write one or two sentences (max 55 words total). Output only those sentences."
+    : "Write exactly one sentence (max 45 words). Output only that sentence.";
 
   return `Compare the GENERATED review to the REAL human review.
 
@@ -102,6 +134,7 @@ ${biasNote}
 
 Focus on specific product points (setup, family use, value, fun, hardware, etc.) — not vague wording.
 ${openingGuide(args.bucket, args.engine)}
+${partialMatchRules}
 
 REAL REVIEW:
 ${args.groundTruthReview}
@@ -114,7 +147,7 @@ Generated top themes: ${predictedThemeList(args.predictedThemes, themeK)}
 Real review tone: ${args.groundTruthSentiment ?? "unknown"}
 Generated tone: ${args.predictedSentiment ?? "unknown"}
 
-Write exactly one sentence (max 45 words). Output only that sentence.`;
+${lengthRule}`;
 }
 
 const SOFT_OPENING =
@@ -122,17 +155,37 @@ const SOFT_OPENING =
 const HARD_OPENING =
   /^(mostly misses|different from|different focus|misses what|far from)/i;
 
+function sapiensPartialMatchLine(line: string): string {
+  let cleaned = line.trim();
+  if (!cleaned) return cleaned;
+
+  const negativeOpening =
+    /^(mostly misses|different from|different focus|misses what|far from|failed to|got it wrong)/i;
+  if (negativeOpening.test(cleaned)) {
+    cleaned = cleaned.replace(negativeOpening, "Close to the real review").replace(/^[,:\s—-]+/, "");
+  }
+
+  if (!/^close to the real review/i.test(cleaned)) {
+    cleaned = `Close to the real review — ${cleaned.replace(/^[,:\s—-]+/, "")}`;
+  }
+  if (!/[.!?]$/.test(cleaned)) cleaned += ".";
+  return cleaned;
+}
+
 /** Fix LLM openings that contradict the similarity bucket. */
 function enforceOpening(
   line: string,
   bucket: ScoreBucket,
   engine: ExplanationEngine,
+  sapiensPartialMatch = false,
 ): string {
   const trimmed = line.trim();
   if (!trimmed) return trimmed;
 
   if (engine === "sapiens") {
-    return similarityOnlySapiensLine(trimmed);
+    return sapiensPartialMatch
+      ? sapiensPartialMatchLine(trimmed)
+      : similarityOnlySapiensLine(trimmed);
   }
 
   if (bucket === "very_low" && SOFT_OPENING.test(trimmed)) {
@@ -182,8 +235,9 @@ function fallbackExplanation(args: {
   groundTruthThemes?: string[];
   metrics?: PipelineMetrics;
   engine?: ExplanationEngine;
+  sapiensPartialMatch?: boolean;
 }): string | null {
-  const { metrics, groundTruthThemes, engine = "sapiens" } = args;
+  const { metrics, groundTruthThemes, engine = "sapiens", sapiensPartialMatch = false } = args;
   if (metrics?.overallSimilarityScore === null || metrics?.overallSimilarityScore === undefined) {
     return null;
   }
@@ -192,6 +246,10 @@ function fallbackExplanation(args: {
   const themes = groundTruthThemes?.length
     ? groundTruthThemes.slice(0, 2).join(" and ")
     : "what the real reviewer cared about";
+
+  if (engine === "sapiens" && sapiensPartialMatch) {
+    return `Close to the real review — both focus on ${themes}, with slightly different wording on tone or emphasis.`;
+  }
 
   if (bucket === "high") {
     return `Close to the real review — both focus on ${themes}.`;
@@ -230,16 +288,18 @@ export async function generateSimilarityExplanation(args: {
   const engine = args.engine ?? "sapiens";
   const score = args.metrics?.overallSimilarityScore ?? 0;
   const bucket = scoreBucket(score, engine);
+  const sapiensPartialMatch =
+    engine === "sapiens" && !isSapiensNearPerfectMatch(score);
 
   if (!hasGatewayKey()) {
-    return fallbackExplanation({ ...args, engine });
+    return fallbackExplanation({ ...args, engine, sapiensPartialMatch });
   }
 
   try {
     const raw = await runModel({
       model: SIMILARITY_EXPLAINER_MODEL,
-      system: systemPrompt(engine),
-      prompt: comparisonPrompt({ ...args, engine, bucket }),
+      system: systemPrompt(engine, sapiensPartialMatch),
+      prompt: comparisonPrompt({ ...args, engine, bucket, sapiensPartialMatch }),
       temperature: 0.2,
     });
     const line = raw
@@ -247,10 +307,11 @@ export async function generateSimilarityExplanation(args: {
       .replace(/^["']|["']$/g, "")
       .split("\n")
       .map((s) => s.trim())
-      .find(Boolean);
-    if (!line) return fallbackExplanation({ ...args, engine });
-    return enforceOpening(line, bucket, engine);
+      .filter(Boolean)
+      .join(" ");
+    if (!line) return fallbackExplanation({ ...args, engine, sapiensPartialMatch });
+    return enforceOpening(line, bucket, engine, sapiensPartialMatch);
   } catch {
-    return fallbackExplanation({ ...args, engine });
+    return fallbackExplanation({ ...args, engine, sapiensPartialMatch });
   }
 }

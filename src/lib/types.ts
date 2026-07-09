@@ -88,6 +88,19 @@ export type PipelineMetrics = {
   isMatch: boolean | null;
 };
 
+export type InferredTraitInfluence = {
+  trait: string;
+  source: "tribe" | "user";
+  traitGroup?: string;
+  evidence: string;
+  confidence: number;
+};
+
+export type InferredTraitInfluencesResult = {
+  summary: string;
+  influences: InferredTraitInfluence[];
+};
+
 export type EngineResult = {
   engine: "baseline" | "sapiens";
   reviewText: string;
@@ -96,6 +109,10 @@ export type EngineResult = {
   metrics?: PipelineMetrics;
   /** Plain-language LLM summary of what overlaps or differs vs ground truth. */
   similarityExplanation?: string | null;
+  /** Narrative explaining how tribe/user traits shaped the SAPIENS review. */
+  inferredTraitSummary?: string | null;
+  /** Traits from user/tribe profiles that plausibly shaped the SAPIENS review. */
+  inferredTraitInfluences?: InferredTraitInfluence[] | null;
   model: string;
   latencyMs: number;
   error?: string;
