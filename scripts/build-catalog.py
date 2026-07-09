@@ -49,6 +49,10 @@ BASELINE_MODELS = ["claude-sonnet-4-6", "claude-opus-4-8", "gpt-5", "gpt-5.2", "
 APP_WEIGHT_TEXT = 0.25
 APP_WEIGHT_THEME = 0.7
 APP_WEIGHT_SENTIMENT = 0.05
+# Baseline composite — matches scoring.ts BASELINE_PIPELINE_WEIGHTS
+BASELINE_WEIGHT_TEXT = 0.55
+BASELINE_WEIGHT_THEME = 0.4
+BASELINE_WEIGHT_SENTIMENT = 0.05
 
 MIN_TRIBE_REVIEWS = 12
 MIN_VG_TRIBE_REVIEWS = 25
@@ -339,9 +343,9 @@ def _baseline_overall_similarity(
     if text_delta is None or recall_k is None:
         return None
     text_sim = max(0.0, 1.0 - float(text_delta))
-    parts = [APP_WEIGHT_TEXT * text_sim, APP_WEIGHT_THEME * float(recall_k)]
+    parts = [BASELINE_WEIGHT_TEXT * text_sim, BASELINE_WEIGHT_THEME * float(recall_k)]
     if sent_score is not None:
-        parts.append(float(sent_score) * APP_WEIGHT_SENTIMENT)
+        parts.append(float(sent_score) * BASELINE_WEIGHT_SENTIMENT)
     return round(sum(parts), 4)
 
 

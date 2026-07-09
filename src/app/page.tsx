@@ -1339,7 +1339,7 @@ function BaselinePromptInspector({
         />
       )}
 
-      {method === "history" && userHistoryReviews.length > 0 && (
+      {method === "history" && (
         <div className="rounded-xl border border-border bg-surface px-3.5 py-3">
           <button
             type="button"
@@ -1348,12 +1348,12 @@ function BaselinePromptInspector({
           >
             <span className="inline-flex items-center gap-2">
               <PiFileText size={15} className="text-accent" />
-              <span className="text-[12px] font-semibold text-foreground">
-                user_history variable
-              </span>
-              <span className="text-[11px] font-normal text-foreground/50">
-                ({userHistoryReviews.length} reviews)
-              </span>
+              <span className="text-[12px] font-semibold text-foreground">user-history</span>
+              {userHistoryReviews.length > 0 && (
+                <span className="text-[11px] font-normal text-foreground/50">
+                  ({userHistoryReviews.length} reviews)
+                </span>
+              )}
             </span>
             <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground/50 group-hover:text-foreground/70">
               {historyOpen ? "Hide" : "Show"}
@@ -1363,20 +1363,25 @@ function BaselinePromptInspector({
               />
             </span>
           </button>
-          {historyOpen && (
-            <ul className="mt-3 space-y-2 max-h-56 overflow-y-auto">
-              {userHistoryReviews.map((item, index) => (
-                <li
-                  key={item.reviewKey ?? index}
-                  className="rounded-lg border border-border bg-surface-2/50 px-3 py-2.5"
-                >
-                  <p className="text-[12px] text-foreground/70 leading-relaxed">
-                    {item.reviewText}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
+          {historyOpen &&
+            (userHistoryReviews.length > 0 ? (
+              <ul className="mt-3 space-y-2 max-h-56 overflow-y-auto">
+                {userHistoryReviews.map((item, index) => (
+                  <li
+                    key={item.reviewKey ?? index}
+                    className="rounded-lg border border-border bg-surface-2/50 px-3 py-2.5"
+                  >
+                    <p className="text-[12px] text-foreground/70 leading-relaxed">
+                      {item.reviewText}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-3 text-[12px] text-foreground/50 italic">
+                User history unavailable
+              </p>
+            ))}
         </div>
       )}
     </div>

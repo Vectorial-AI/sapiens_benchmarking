@@ -10,8 +10,8 @@ export const SAPIENS_PIPELINE_WEIGHTS = {
 
 /** Baseline composite weights — higher text weight, lower theme weight. */
 export const BASELINE_PIPELINE_WEIGHTS = {
-  text: 0.45,
-  theme: 0.5,
+  text: 0.55,
+  theme: 0.4,
   sentiment: 0.05,
 } as const;
 
