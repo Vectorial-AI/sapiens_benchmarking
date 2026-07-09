@@ -74,7 +74,7 @@ function BenchmarkContent() {
       </header>
 
       <h1 className="text-[22px] font-semibold tracking-tight mb-1">
-        Aggregated scores: Sapiens vs baselines
+        Aggregated scores: SAPIENS vs baselines
       </h1>
       <p className="text-[14px] text-muted mb-2">
         Mean metrics over {data?.canonicalReviews ?? 252} canonical reviews · match threshold{" "}
@@ -95,7 +95,7 @@ function BenchmarkContent() {
           {data.sapiensMode && (
             <section>
               <h2 className="text-[15px] font-semibold mb-3 flex items-center gap-2">
-                <Dot tone="sapiens" /> Sapiens
+                <Dot tone="sapiens" /> SAPIENS
               </h2>
               <MetricsTable modes={[data.sapiensMode]} highlight threshold={threshold} />
             </section>

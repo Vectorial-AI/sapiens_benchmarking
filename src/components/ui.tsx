@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 export function Label({ children }: { children: ReactNode }) {
   return (
-    <label className="block text-[13px] font-medium text-muted mb-2">
+    <label className="block text-[11px] font-semibold uppercase tracking-wider text-accent mb-2">
       {children}
     </label>
   );
@@ -61,7 +61,7 @@ export function Stars({ rating }: { rating: number | null }) {
         {"★".repeat(full)}
         <span className="text-border-strong">{"★".repeat(5 - full)}</span>
       </span>
-      <span className="text-xs text-muted">{rating.toFixed(1)}</span>
+      <span className="text-xs font-normal text-foreground/50">{rating.toFixed(1)}</span>
     </span>
   );
 }

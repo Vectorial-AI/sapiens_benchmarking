@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none">
+  <!-- Solid white disc for contrast on orange card bg -->
+  <circle cx="20" cy="20" r="18.5" fill="#ffffff" stroke="#f2863f" stroke-width="1.6"/>
+
+  <!-- Diamond frame -->
+  <path
+    d="M20 8 L32 20 L20 32 L8 20 Z"
+    stroke="#f2863f"
+    stroke-width="1.4"
+    fill="rgba(242,134,63,0.08)"
+  />
+
+  <!-- Cross-axis links -->
+  <line x1="20" y1="10.5" x2="20" y2="29.5" stroke="#f2863f" stroke-width="1.1" stroke-opacity="0.7"/>
+  <line x1="10.5" y1="20" x2="29.5" y2="20" stroke="#f2863f" stroke-width="1.1" stroke-opacity="0.7"/>
+
+  <!-- Corner nodes -->
+  <circle cx="20" cy="8" r="2.2" fill="#f2863f"/>
+  <circle cx="32" cy="20" r="2.2" fill="#f2863f"/>
+  <circle cx="20" cy="32" r="2.2" fill="#f2863f"/>
+  <circle cx="8" cy="20" r="2.2" fill="#f2863f"/>
+
+  <!-- Mid-edge nodes -->
+  <circle cx="26" cy="14" r="1.6" fill="#e06a20"/>
+  <circle cx="26" cy="26" r="1.6" fill="#e06a20"/>
+  <circle cx="14" cy="26" r="1.6" fill="#e06a20"/>
+  <circle cx="14" cy="14" r="1.6" fill="#e06a20"/>
+
+  <!-- Links to center -->
+  <line x1="26" y1="14" x2="20" y2="20" stroke="#f2863f" stroke-width="1.15"/>
+  <line x1="26" y1="26" x2="20" y2="20" stroke="#f2863f" stroke-width="1.15"/>
+  <line x1="14" y1="26" x2="20" y2="20" stroke="#f2863f" stroke-width="1.15"/>
+  <line x1="14" y1="14" x2="20" y2="20" stroke="#f2863f" stroke-width="1.15"/>
+
+  <!-- Core hub -->
+  <circle cx="20" cy="20" r="4.4" fill="#fff4eb" stroke="#f2863f" stroke-width="1.4"/>
+  <circle cx="20" cy="20" r="2.1" fill="#f2863f"/>
+</svg>

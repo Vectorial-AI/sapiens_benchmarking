@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { PiHeadCircuit } from "react-icons/pi";
 import { Dot, Label, Spinner, TONE_BG, type Tone } from "@/components/ui";
 import {
   BASELINE_METHOD_META,
@@ -34,12 +35,24 @@ const DOMAIN_SECTIONS = [
   { id: "healthcare" as const, label: "Healthcare & Wellness" },
 ];
 
+/** Shared type scale — keep labels/titles/body consistent across the wizard. */
+const TYPE = {
+  pageTitle: "text-[22px] font-semibold tracking-tight text-foreground",
+  subtitle: "text-[14px] font-normal text-foreground",
+  sectionLabel: "text-[11px] font-semibold uppercase tracking-wider text-accent",
+  cardTitle: "text-[13px] font-semibold text-foreground leading-snug",
+  body: "text-[13px] font-normal text-foreground leading-relaxed",
+  bodyMuted: "text-[13px] font-normal text-foreground leading-relaxed",
+  meta: "text-[13px] font-normal text-foreground",
+  link: "text-[13px] font-medium text-accent hover:underline",
+} as const;
+
 const STEPS = [
-  { id: "tribe", label: "Tribe", title: "Pick a modelled tribe", hint: "Select a behavioral tribe to model." },
-  { id: "user", label: "User", title: "Pick a modelled user", hint: "" },
+  { id: "tribe", label: "Tribe", title: "SAPIENS Modeled Tribe", hint: "Select a behavioral tribe to model." },
+  { id: "user", label: "User", title: "Pick a modeled user", hint: "" },
   { id: "product", label: "Product", title: "Pick a product", hint: "Choose a product from this user." },
-  { id: "sapiens", label: "Sapiens", title: "Sapiens prediction", hint: "What Sapiens generates vs the real review." },
-  { id: "compare", label: "Compare", title: "Compare baselines", hint: "Run baselines and compare scores against Sapiens." },
+  { id: "sapiens", label: "SAPIENS", title: "SAPIENS prediction", hint: "What SAPIENS generates vs the real review." },
+  { id: "compare", label: "Compare", title: "Compare baselines", hint: "Run baselines and compare scores against SAPIENS." },
 ];
 
 function defaultReviewKeyForUser(user: CatalogTribe["users"][number] | null | undefined): string | null {
@@ -64,7 +77,6 @@ export default function Home() {
   const [tribeId, setTribeId] = useState("");
   const [tribe, setTribe] = useState<CatalogTribe | null>(null);
   const [tribeLoading, setTribeLoading] = useState(false);
-  const [traitsOpen, setTraitsOpen] = useState(false);
 
   const [userId, setUserId] = useState("");
   const [reviewKey, setReviewKey] = useState<string | null>(null);
@@ -82,6 +94,8 @@ export default function Home() {
   const [baselines, setBaselines] = useState<BaselineResult[]>([]);
 
   const [runningSapiens, setRunningSapiens] = useState(false);
+  const [editDescOpen, setEditDescOpen] = useState(false);
+  const [editPopulationOpen, setEditPopulationOpen] = useState(false);
   const [runningBaselineKey, setRunningBaselineKey] = useState<string | null>(null);
   const [runningBaselineMethod, setRunningBaselineMethod] = useState<BaselineMethod | null>(null);
   const [runningBaselineModel, setRunningBaselineModel] = useState<BaselineModel | null>(null);
@@ -130,6 +144,18 @@ export default function Home() {
       .then((d) => setTribeIndex(d.tribes ?? []))
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!tribeIndex?.length || tribeId || restoredRef.current) return;
+    const saved = loadWizardSession();
+    if (saved?.tribeId) return;
+
+    const ordered = DOMAIN_SECTIONS.flatMap(({ id: domain }) =>
+      tribeIndex.filter((t) => t.domain === domain),
+    );
+    const first = ordered[0] ?? tribeIndex[0];
+    if (first) void loadTribe(first.id);
+  }, [tribeIndex, tribeId]);
 
   useEffect(() => {
     if (restoredRef.current) return;
@@ -197,7 +223,6 @@ export default function Home() {
       const t: CatalogTribe = data.tribe;
       setTribe(t);
       setTribeId(id);
-      setTraitsOpen(true);
       const firstUser = t.users[0];
       setUserId(firstUser?.id ?? "");
       setReviewKey(defaultReviewKeyForUser(firstUser));
@@ -349,104 +374,108 @@ export default function Home() {
       <div className="mt-8 mb-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            {tribe && (
-              <div className="mb-2">
-                <div className="flex items-center gap-2">
-                  <Dot tone="sapiens" />
-                  <span className="text-[13px] font-semibold text-foreground">{tribe.name}</span>
-                </div>
-                {tribe.tribeDefinition && (
-                  <p className="text-[12px] text-muted mt-2 ml-4 leading-relaxed">
-                    {tribe.tribeDefinition}
+            <h1 className={TYPE.pageTitle}>{STEPS[step].title}</h1>
+            {step === 0 && tribe ? (
+              <div className="mt-1.5 space-y-1">
+                <p className="text-[15px] font-medium text-foreground">{tribe.name}</p>
+                {tribe.populationDefinition?.trim() ? (
+                  <p className="text-[14px] font-normal text-foreground leading-relaxed max-w-3xl">
+                    {tribe.populationDefinition.trim()}
                   </p>
-                )}
+                ) : null}
               </div>
-            )}
-            <h1 className="text-[22px] font-semibold tracking-tight">{STEPS[step].title}</h1>
-            {STEPS[step].hint ? (
-              <p className="text-[14px] text-muted mt-1">{STEPS[step].hint}</p>
+            ) : step === 1 && tribe ? (
+              <div className="mt-1.5 space-y-1">
+                <p className="text-[15px] font-medium text-foreground">{tribe.name}</p>
+                {tribe.populationDefinition?.trim() ? (
+                  <p className="text-[14px] font-normal text-foreground leading-relaxed max-w-3xl">
+                    {tribe.populationDefinition.trim()}
+                  </p>
+                ) : null}
+              </div>
+            ) : STEPS[step].hint ? (
+              <p className={`${TYPE.subtitle} mt-1`}>{STEPS[step].hint}</p>
+            ) : null}
+            {step > 1 && tribe ? (
+              <p className="text-[15px] font-medium text-foreground mt-1.5">{tribe.name}</p>
             ) : null}
           </div>
           {tribeId && (
-            <button
-              type="button"
-              onClick={openBenchmarking}
-              className="shrink-0 text-[13px] font-medium text-accent hover:underline"
-            >
+            <button type="button" onClick={openBenchmarking} className={`shrink-0 ${TYPE.link}`}>
               View benchmarking →
             </button>
           )}
         </div>
       </div>
 
+      {step === 0 && tribeIndex ? (
+        <div
+          className={`grid gap-5 lg:gap-6 animate-in ${
+            tribe && !tribeLoading
+              ? "lg:grid-cols-[minmax(0,1fr)_min(24rem,38%)] lg:items-stretch"
+              : "lg:grid-cols-1"
+          }`}
+          key="tribe-step"
+        >
+          <section
+            className={`card p-6 sm:p-7 min-w-0 flex flex-col ${
+              tribe && !tribeLoading ? "lg:h-[min(36rem,70vh)]" : ""
+            }`}
+          >
+            <div className="min-h-0 flex-1 overflow-y-auto pr-1 space-y-6">
+              {DOMAIN_SECTIONS.map(({ id: domain, label }) => {
+                const domainTribes = tribeIndex.filter((t) => t.domain === domain);
+                if (domainTribes.length === 0) return null;
+                return (
+                  <div key={domain} className="space-y-2.5">
+                    <h3 className="text-[11px] font-semibold uppercase tracking-wider text-accent px-0.5">
+                      {label}
+                    </h3>
+                    <div className="grid gap-2.5 sm:grid-cols-2">
+                      {domainTribes.map((t) => (
+                        <TribeSelectCard
+                          key={t.id}
+                          tribe={t}
+                          selected={tribeId === t.id}
+                          onSelect={() => void loadTribe(t.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {tribeLoading && (
+                <div className={`flex items-center gap-2 ${TYPE.meta} px-0.5`}>
+                  <Spinner /> Loading tribe…
+                </div>
+              )}
+            </div>
+          </section>
+
+          {tribe && !tribeLoading && (
+            <aside className="min-w-0 lg:h-[min(36rem,70vh)]">
+              <LearnedTribePanel tribe={tribe} />
+            </aside>
+          )}
+        </div>
+      ) : (
       <section className="card p-6 sm:p-7 animate-in" key={step}>
         {!tribeIndex ? (
           <LoadingBlock />
         ) : (
           <>
-            {step === 0 && (
-              <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_min(20rem,32%)] lg:gap-8 lg:items-start">
-                <div className="min-w-0 max-h-[min(32rem,72vh)] overflow-y-auto pr-1 space-y-6">
-                  {DOMAIN_SECTIONS.map(({ id: domain, label }) => {
-                    const domainTribes = tribeIndex.filter((t) => t.domain === domain);
-                    if (domainTribes.length === 0) return null;
-                    return (
-                      <div key={domain} className="space-y-2.5">
-                        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-2 px-0.5">
-                          {label}
-                        </h3>
-                        <div className="grid gap-2.5 sm:grid-cols-2">
-                          {domainTribes.map((t) => (
-                            <TribeSelectCard
-                              key={t.id}
-                              tribe={t}
-                              selected={tribeId === t.id}
-                              onSelect={() => void loadTribe(t.id)}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  {tribeLoading && (
-                    <div className="flex items-center gap-2 text-[13px] text-muted px-0.5">
-                      <Spinner /> Loading tribe…
-                    </div>
-                  )}
-                </div>
-
-                <aside className="min-w-0 lg:sticky lg:top-4 lg:max-h-[min(32rem,72vh)] lg:overflow-y-auto">
-                  {tribe && !tribeLoading ? (
-                    <LearnedTribePanel
-                      tribe={tribe}
-                      open={traitsOpen}
-                      onToggle={() => setTraitsOpen((v) => !v)}
-                    />
-                  ) : (
-                    <div className="rounded-xl border border-dashed border-border bg-surface-2/20 px-4 py-10 text-center h-full min-h-[12rem] flex items-center justify-center">
-                      <p className="text-[13px] text-muted leading-relaxed max-w-[16rem]">
-                        Select a tribe to view population and learned traits.
-                      </p>
-                    </div>
-                  )}
-                </aside>
-              </div>
-            )}
-
             {step === 1 && tribe && (
-              <div className="space-y-3">
-                <div className="space-y-2 max-h-[26rem] overflow-y-auto pr-1">
-                  {tribe.users.map((u, i) => (
-                    <UserSelectCard
-                      key={u.id}
-                      index={i}
-                      user={u}
-                      selected={u.id === userId}
-                      onSelect={() => selectUser(u.id)}
-                    />
-                  ))}
-                </div>
+              <div className="space-y-2.5 max-h-[min(36rem,70vh)] overflow-y-auto pr-1">
+                {tribe.users.map((u, i) => (
+                  <UserSelectCard
+                    key={u.id}
+                    index={i}
+                    user={u}
+                    selected={u.id === userId}
+                    onSelect={() => selectUser(u.id)}
+                  />
+                ))}
               </div>
             )}
 
@@ -457,70 +486,76 @@ export default function Home() {
                     <button
                       key={p.reviewKey}
                       onClick={() => selectProduct(p.reviewKey)}
-                      className={`w-full text-left rounded-xl border p-3.5 transition ${
+                      className={`w-full text-left rounded-xl border-2 p-3.5 transition ${
                         p.reviewKey === reviewKey
-                          ? "border-accent bg-accent/[0.04]"
-                          : "border-border hover:border-border-strong"
+                          ? "border-accent bg-accent/15"
+                          : "border-transparent hover:border-border-strong bg-surface border border-border"
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[11px] font-mono text-muted-2">#{i + 1}</span>
+                        <span className="text-[11px] font-mono font-normal text-foreground/50">#{i + 1}</span>
                       </div>
-                      <p className="text-[13px] text-foreground leading-snug line-clamp-3">
+                      <p className="text-[13px] font-normal text-foreground leading-snug line-clamp-3">
                         {catalogProductDescription(p)}
                       </p>
                       {p.mainProductDescription &&
                         p.mainProductDescription.trim() !== p.productDescription.trim() && (
-                          <p className="text-[11px] text-muted-2 mt-1 line-clamp-1">
+                          <p className="text-[11px] font-normal text-foreground/60 mt-1 line-clamp-1">
                             {p.mainProductDescription}
                           </p>
                         )}
-                      <p className="text-[11px] text-muted-2 mt-1.5">
+                      <p className="text-[11px] font-normal text-foreground/60 mt-1.5">
                         {p.category}
                       </p>
                     </button>
                   ))}
                 </div>
-                {product && (
-                  <>
-                    <ProductDescriptionEditor
-                    value={customProductDesc}
-                    onChange={(v) => {
-                      setCustomProductDesc(v);
-                      resetOutputs();
-                    }}
-                    category={effectiveCategory}
-                  />
-                  </>
-                )}
               </div>
             )}
 
             {step === 3 && (
-              <div>
-                <ProductDescriptionEditor
-                  value={customProductDesc}
-                  onChange={(v) => {
-                    setCustomProductDesc(v);
-                    resetOutputs();
-                  }}
-                  category={effectiveCategory}
-                  compact
-                />
+              <div className="space-y-4">
+                {runningSapiens && (
+                  <span className="text-[13px] font-normal text-foreground/60 flex items-center gap-1.5">
+                    <Spinner /> Running SAPIENS…
+                  </span>
+                )}
 
-                <div className="flex flex-wrap items-center gap-3 mb-4 mt-4">
-                  {runningSapiens && (
-                    <span className="text-[13px] text-muted flex items-center gap-1.5">
-                      <Spinner /> Running Sapiens…
-                    </span>
-                  )}
-                </div>
+                {/* ── Overall similarity banner ── */}
+                {sapiens?.metrics?.overallSimilarityScore !== null &&
+                  sapiens?.metrics?.overallSimilarityScore !== undefined && (
+                  <div className="rounded-2xl border border-accent/30 bg-accent/15 px-6 py-5">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground">Overall similarity</span>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-[22px] font-bold text-foreground tabular-nums leading-none">
+                          {fmtPct(sapiens.metrics.overallSimilarityScore)}
+                        </span>
+                        {sapiens.metrics.isMatch !== null && (
+                          <span className={`text-[12px] font-semibold ${sapiens.metrics.isMatch ? "text-real" : "text-foreground/40"}`}>
+                            {sapiens.metrics.isMatch ? "· match" : "· no match"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="h-2 rounded-full bg-surface-3 overflow-hidden border border-accent/30">
+                      <div
+                        className="h-full rounded-full bg-accent transition-all"
+                        style={{ width: `${Math.min(100, Math.max(0, sapiens.metrics.overallSimilarityScore * 100))}%` }}
+                      />
+                    </div>
+                    {sapiens.similarityExplanation && (
+                      <p className="text-[13px] font-normal text-foreground leading-relaxed mt-2.5">
+                        {sapiens.similarityExplanation}
+                      </p>
+                    )}
+                  </div>
+                )}
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2 items-stretch">
                   <ResultCard
                     tone="real"
-                    title="Real review"
-                    subtitle="ground truth"
+                    title="Real Review (Ground Truth)"
                     text={groundTruth ?? undefined}
                     predictedThemes={gtThemeRecord}
                     sentiment={groundTruthSentiment}
@@ -528,18 +563,16 @@ export default function Home() {
                   />
                   <ResultCard
                     tone="sapiens"
-                    title="Sapiens"
+                    title="SAPIENS"
                     loading={runningSapiens}
                     text={sapiens?.reviewText}
                     predictedThemes={sapiens?.predictedThemes}
                     sentiment={sapiens?.sentiment}
-                    metrics={sapiens?.metrics}
                     error={sapiens?.error}
                     latencyMs={sapiens?.latencyMs}
                     themeTopK={themeTopK}
                     sapiensThemeDisplay
                     themeDisplayGroundTruth={groundTruthThemes}
-                    similarityExplanation={sapiens?.similarityExplanation}
                   />
                 </div>
               </div>
@@ -547,15 +580,28 @@ export default function Home() {
 
             {step === 4 && (
               <div>
-                <ProductDescriptionEditor
-                  value={customProductDesc}
-                  onChange={(v) => {
-                    setCustomProductDesc(v);
-                    resetOutputs();
-                  }}
-                  category={effectiveCategory}
-                  compact
-                />
+                {/* ── Product description ── */}
+                <div className="mb-5">
+                  <button
+                    type="button"
+                    onClick={() => setEditDescOpen((v) => !v)}
+                    className="inline-flex items-center gap-2 text-[13px] font-semibold text-accent bg-accent/10 hover:bg-accent/20 border border-accent/30 rounded-lg px-3.5 py-2 transition"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+                      <path d="M11.8536 1.14645C11.6583 0.951184 11.3417 0.951184 11.1465 1.14645L3.71455 8.57836C3.62459 8.66832 3.55263 8.77461 3.50251 8.89155L2.04044 12.303C1.9599 12.491 2.00189 12.709 2.14646 12.8536C2.29103 12.9981 2.50905 13.0401 2.69697 12.9596L6.10847 11.4975C6.2254 11.4474 6.3317 11.3754 6.42166 11.2855L13.8536 3.85355C14.0488 3.65829 14.0488 3.34171 13.8536 3.14645L11.8536 1.14645ZM4.42166 9.28547L11.5 2.20711L12.7929 3.5L5.71455 10.5784L4.21924 11.2192L3.78081 10.7808L4.42166 9.28547Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"/>
+                    </svg>
+                    {editDescOpen ? "Done editing" : "Edit Product Description"}
+                  </button>
+                  {editDescOpen && (
+                    <textarea
+                      value={customProductDesc}
+                      onChange={(e) => { setCustomProductDesc(e.target.value); resetOutputs(); }}
+                      rows={6}
+                      placeholder="Write or edit the main product description…"
+                      className="mt-3 w-full rounded-xl border-2 border-accent/40 bg-surface px-4 py-3 text-[13px] font-normal text-foreground leading-relaxed resize-y focus:outline-none focus:border-accent"
+                    />
+                  )}
+                </div>
 
                 <div className="space-y-5 mb-6 mt-4">
                   <div>
@@ -565,10 +611,10 @@ export default function Home() {
                         <button
                           key={m}
                           onClick={() => selectBaselineMethod(m)}
-                          className={`text-left rounded-xl border p-3 transition ${
+                          className={`text-left rounded-xl border-2 p-3 transition ${
                             baselineMethod === m
-                              ? "border-accent bg-accent/[0.04]"
-                              : "border-border hover:border-border-strong"
+                              ? "border-accent bg-accent/15"
+                              : "border-transparent hover:border-border-strong bg-surface border border-border"
                           }`}
                         >
                           <div className="flex items-center gap-2">
@@ -583,26 +629,38 @@ export default function Home() {
                   </div>
 
                   {baselineMethod === "population_persona" && (
-                    <div className="rounded-xl border border-border bg-surface-2/40 p-4 space-y-3">
-                      <label className="flex items-center gap-2 text-[13px] cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={useCustomPopulationDef}
-                          onChange={(e) => setUseCustomPopulationDef(e.target.checked)}
-                          className="rounded border-border"
-                        />
-                        <span>Use custom population definition</span>
-                      </label>
+                    <div className="space-y-3">
+                      <button
+                        type="button"
+                        onClick={() => setUseCustomPopulationDef((v) => !v)}
+                        className={`inline-flex items-center gap-2 text-[13px] font-semibold rounded-lg px-3.5 py-2 border transition ${
+                          useCustomPopulationDef
+                            ? "bg-accent/10 text-accent border-accent/30 hover:bg-accent/20"
+                            : "bg-surface border-border text-foreground hover:bg-surface-3"
+                        }`}
+                      >
+                        <span className={`inline-flex h-4 w-4 items-center justify-center rounded-full border-2 shrink-0 transition ${
+                          useCustomPopulationDef ? "bg-accent border-accent" : "border-foreground/20"
+                        }`}>
+                          {useCustomPopulationDef && (
+                            <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                              <path d="M1.5 4L3 5.5L6.5 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          )}
+                        </span>
+                        {useCustomPopulationDef ? "Using custom definition" : "Use custom definition"}
+                      </button>
+
                       {useCustomPopulationDef ? (
                         <textarea
                           value={customPopulationDef}
                           onChange={(e) => setCustomPopulationDef(e.target.value)}
-                          rows={5}
+                          rows={4}
                           placeholder="Describe the population persona to send as context…"
-                          className="w-full rounded-lg border border-border bg-surface-1 px-3 py-2.5 text-[13px] text-foreground leading-relaxed resize-y min-h-[6rem]"
+                          className="w-full rounded-xl border-2 border-accent/40 bg-surface px-4 py-3 text-[13px] font-normal text-foreground leading-relaxed resize-y min-h-[5rem] focus:outline-none focus:border-accent"
                         />
                       ) : (
-                        <p className="text-[12px] text-muted leading-relaxed line-clamp-4">
+                        <p className="text-[13px] font-normal text-foreground/60 leading-relaxed">
                           {tribe?.populationDefinition || "Default population definition for this tribe."}
                         </p>
                       )}
@@ -633,18 +691,17 @@ export default function Home() {
                       })}
                     </div>
                     {runningBaselineKey && (
-                      <p className="text-[12px] text-muted mt-2 flex items-center gap-1.5">
+                      <p className="text-[12px] font-normal text-foreground/60 mt-2 flex items-center gap-1.5">
                         <Spinner /> Running…
                       </p>
                     )}
                   </div>
                   </div>
 
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-5 sm:grid-cols-2 items-stretch">
                   <ResultCard
                     tone="real"
-                    title="Real review"
-                    subtitle="ground truth"
+                    title="Real Review (Ground Truth)"
                     text={groundTruth ?? undefined}
                     predictedThemes={gtThemeRecord}
                     sentiment={groundTruthSentiment}
@@ -652,7 +709,7 @@ export default function Home() {
                   />
                   <ResultCard
                     tone="sapiens"
-                    title="Sapiens"
+                    title="SAPIENS"
                     text={sapiens?.reviewText}
                     predictedThemes={sapiens?.predictedThemes}
                     sentiment={sapiens?.sentiment}
@@ -703,6 +760,7 @@ export default function Home() {
           </>
         )}
       </section>
+      )}
 
       <div className="flex items-center justify-between mt-6">
         <button
@@ -728,9 +786,9 @@ export default function Home() {
         )}
       </div>
 
-      <footer className="text-center text-xs text-muted-2 mt-12">
-        Sapiens Benchmark ·{" "}
-        <a href="https://runvectorial.com" className="hover:text-muted transition" target="_blank" rel="noreferrer">
+      <footer className="text-center text-xs font-normal text-foreground/40 mt-12">
+        SAPIENS Benchmark ·{" "}
+        <a href="https://runvectorial.com" className="hover:text-foreground transition" target="_blank" rel="noreferrer">
           Vectorial
         </a>
       </footer>
@@ -744,9 +802,9 @@ function Header({ connected }: { connected: boolean }) {
       <div className="flex items-center gap-3">
         <Image src="/vectorial-logo.png" alt="Vectorial" width={163} height={22} className="h-[22px] w-auto" priority />
         <span className="h-4 w-px bg-border-strong" />
-        <span className="text-[13px] text-muted">Sapiens Benchmark</span>
+        <span className="text-[13px] font-normal text-foreground/50">SAPIENS Benchmark</span>
       </div>
-      <span className="inline-flex items-center gap-1.5 text-xs text-muted">
+      <span className="inline-flex items-center gap-1.5 text-xs font-normal text-foreground/50">
         <span className={`h-1.5 w-1.5 rounded-full ${connected ? "bg-real" : "bg-accent"}`} />
         {connected ? "Gateway" : "Mock mode"}
       </span>
@@ -765,16 +823,16 @@ function Stepper({ step, onStep }: { step: number; onStep: (n: number) => void }
             <button onClick={() => onStep(i)} className="flex items-center gap-2 group shrink-0">
               <span
                 className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-semibold transition ${
-                  active ? "bg-accent text-white" : done ? "bg-accent/15 text-accent" : "bg-surface-3 text-muted-2"
+                  active ? "bg-accent text-white" : done ? "bg-accent text-white" : "bg-surface-3 text-foreground/40"
                 }`}
               >
                 {done ? "✓" : i + 1}
               </span>
-              <span className={`text-[12px] font-medium hidden md:inline ${active ? "text-foreground" : "text-muted-2"}`}>
+              <span className={`text-[12px] font-medium hidden md:inline ${active || done ? "text-foreground" : "text-foreground/40"}`}>
                 {s.label}
               </span>
             </button>
-            {i < STEPS.length - 1 && <span className={`h-px flex-1 mx-2 min-w-[12px] ${done ? "bg-accent/30" : "bg-border"}`} />}
+            {i < STEPS.length - 1 && <span className={`h-px flex-1 mx-2 min-w-[12px] ${done ? "bg-accent" : "bg-border"}`} />}
           </div>
         );
       })}
@@ -782,15 +840,7 @@ function Stepper({ step, onStep }: { step: number; onStep: (n: number) => void }
   );
 }
 
-function LearnedTribePanel({
-  tribe,
-  open,
-  onToggle,
-}: {
-  tribe: CatalogTribe;
-  open: boolean;
-  onToggle: () => void;
-}) {
+function LearnedTribePanel({ tribe }: { tribe: CatalogTribe }) {
   const q = tribe.qualitative;
   const groups: { key: keyof typeof q; label: string; items: string[] }[] = [
     { key: "inherentBehavioralTraits", label: "Inherent behavioral traits", items: q.inherentBehavioralTraits },
@@ -800,65 +850,71 @@ function LearnedTribePanel({
     { key: "implicitGoals", label: "Implicit goals", items: q.implicitGoals },
   ];
   const traitCount = groups.reduce((n, g) => n + g.items.length, 0);
+  const groupCount = groups.filter((g) => g.items.length).length;
 
   return (
-    <div className="rounded-xl border border-border bg-surface-2/30 p-4 sm:p-5 h-full">
-      <div className="space-y-4">
-        <div className="space-y-2 min-w-0 pb-4 border-b border-border">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-2">
-            Tribe population
-          </p>
-          <p className="text-[13px] text-foreground/90 leading-relaxed">
-            {tribe.populationDefinition?.trim() || "No population definition available."}
-          </p>
+      <div className="h-full flex flex-col overflow-hidden rounded-[20px] border border-accent/30 bg-accent/15 ring-1 ring-accent/30 shadow-lg shadow-accent/15">
+      <div className="shrink-0 px-4 sm:px-5 pt-4 sm:pt-5 pb-3">
+        <div className="flex items-start gap-2.5">
+          <PiHeadCircuit
+            className="shrink-0 mt-px text-accent"
+            size={28}
+            aria-hidden
+          />
+          <div className="min-w-0 flex-1">
+            <h2 className={TYPE.cardTitle}>SAPIENS Modeled Latent Traits of the Tribe</h2>
+            <p className={`${TYPE.meta} mt-0.5`}>
+              {traitCount} traits · {groupCount} groups
+            </p>
+          </div>
         </div>
+      </div>
 
-        <div className="min-w-0">
-          <button
-            type="button"
-            onClick={onToggle}
-            className="flex items-center justify-between gap-3 w-full text-left rounded-lg border border-border bg-surface-1 px-3 py-2.5 hover:border-border-strong transition"
-          >
-            <span className="flex items-center gap-2 text-[13px] font-medium text-foreground">
-              <span className={`transition-transform text-[10px] text-muted-2 ${open ? "rotate-90" : ""}`}>▶</span>
-              Learned tribe from Sapiens
-            </span>
-            <span className="text-[11px] text-muted-2 shrink-0 tabular-nums">{traitCount} traits</span>
-          </button>
-          {open && (
-            <div className="mt-3 space-y-2">
-              {groups.map((g) => (
-                <TraitGroupDrawer key={g.key} label={g.label} items={g.items} />
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 sm:px-5 pb-4 sm:pb-5 space-y-2">
+        {groups.map((g) => (
+          <TraitGroupDrawer
+            key={g.key}
+            label={g.label}
+            items={g.items}
+            defaultOpen={g.key !== "inherentBehavioralTraits"}
+          />
+        ))}
       </div>
     </div>
   );
 }
 
-function TraitGroupDrawer({ label, items }: { label: string; items: string[] }) {
-  const [open, setOpen] = useState(false);
+function TraitGroupDrawer({
+  label,
+  items,
+  defaultOpen = false,
+}: {
+  label: string;
+  items: string[];
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
   if (!items.length) return null;
   return (
-    <div className="rounded-lg border border-border bg-surface-1/60 overflow-hidden">
+    <div className="rounded-xl border border-accent/15 bg-white/80 overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center justify-between w-full px-3 py-2 text-left hover:bg-surface-2/40 transition"
+        className="flex items-center justify-between w-full px-3.5 py-2.5 text-left hover:bg-white transition"
       >
-        <span className="flex items-center gap-1.5 text-[12px] font-medium text-foreground/90">
-          <span className={`transition-transform text-[9px] text-muted-2 ${open ? "rotate-90" : ""}`}>▶</span>
-          {label}
+        <span className="flex items-center gap-2">
+          <span className={`transition-transform text-[10px] text-foreground/40 ${open ? "rotate-90" : ""}`}>▶</span>
+          <span className={TYPE.cardTitle}>{label}</span>
         </span>
-        <span className="text-[10px] text-muted-2 uppercase tracking-wide">{items.length}</span>
+        <span className="text-[13px] font-normal text-foreground/50 tabular-nums">{items.length}</span>
       </button>
       {open && (
-        <ul className="px-3 pb-3 pt-1 space-y-2 border-t border-border/60">
+        <ul className="px-3.5 pb-3 pt-1 space-y-2 border-t border-accent/25">
           {items.map((it, i) => (
-            <li key={i} className="text-[12px] text-muted leading-relaxed flex gap-2">
-              <span className="text-accent-soft mt-0.5 shrink-0">•</span>
+            <li key={i} className="text-[13px] font-normal text-foreground leading-relaxed flex gap-2">
+              <span className="text-foreground/40 shrink-0 select-none" aria-hidden>
+                •
+              </span>
               <span>{it}</span>
             </li>
           ))}
@@ -884,20 +940,15 @@ function TribeSelectCard({
       type="button"
       onClick={onSelect}
       className={`w-full text-left rounded-xl border p-3.5 transition ${
-        selected ? "border-accent bg-accent/[0.04] ring-1 ring-accent/20" : "border-border hover:border-border-strong bg-surface-1"
+        selected
+          ? "border-2 border-accent bg-accent/15"
+          : "border-border hover:border-border-strong bg-surface-1"
       }`}
     >
-      <div className="flex items-start gap-2.5">
-        <span className="mt-1.5 shrink-0">
-          <Dot tone="sapiens" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-semibold leading-snug text-foreground">{tribe.name}</p>
-          {description ? (
-            <p className="text-[12px] text-muted leading-relaxed mt-1.5 line-clamp-4">{description}</p>
-          ) : null}
-        </div>
-      </div>
+      <p className="text-[13px] font-semibold text-foreground leading-snug">{tribe.name}</p>
+      {description ? (
+        <p className="text-[13px] font-normal text-foreground leading-relaxed mt-1.5 line-clamp-4">{description}</p>
+      ) : null}
     </button>
   );
 }
@@ -913,61 +964,49 @@ function UserSelectCard({
   selected: boolean;
   onSelect: () => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
   const summary = user.characteristicSummary?.trim();
   const categoryEntry = Object.entries(user.categoryCharacteristics ?? {})[0];
   const categoryLabel = categoryEntry?.[0];
   const categoryText = categoryEntry?.[1]?.trim() ?? "";
-  const combined = [summary, categoryText ? `${categoryLabel}: ${categoryText}` : ""]
-    .filter(Boolean)
-    .join("\n\n");
-  const canExpand = combined.length > 160;
 
   return (
-    <div
-      className={`rounded-xl border p-3.5 transition ${
-        selected ? "border-accent bg-accent/[0.04]" : "border-border hover:border-border-strong"
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`w-full text-left rounded-2xl border transition-all duration-150 overflow-hidden ${
+        selected
+          ? "border-2 border-accent bg-accent/15"
+          : "border-border hover:border-border-strong bg-surface"
       }`}
     >
-      <button type="button" onClick={onSelect} className="w-full text-left">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-[11px] font-mono text-muted-2">#{index + 1}</span>
-          <span className="text-[12.5px] font-medium text-foreground">Modelled user</span>
-        </div>
-        {summary && (
-          <p
-            className={`text-[12.5px] text-muted leading-relaxed ${
-              expanded ? "" : "line-clamp-3"
-            }`}
-          >
-            {summary}
-          </p>
-        )}
-        {categoryText && (
-          <div className={summary ? "mt-2.5 pt-2.5 border-t border-border/60" : ""}>
-            <p className="text-[10px] uppercase tracking-wide text-muted-2 mb-1">
+      {/* Header row */}
+      <div className="flex items-center gap-2 px-4 pt-3.5 pb-2 flex-wrap">
+        <span className={`text-[12px] font-bold tabular-nums shrink-0 ${selected ? "text-accent" : "text-foreground/50"}`}>
+          #{index + 1}
+        </span>
+        <span className="text-[12px] font-semibold text-foreground">
+          Modeled User after Real User ID:
+        </span>
+        <span className="text-[11px] font-mono font-normal text-foreground/60 truncate" title={user.id}>
+          {user.id}
+        </span>
+      </div>
+
+      {/* Body */}
+      <div className="px-4 pb-3.5 space-y-2">
+        {summary ? (
+          <p className="text-[13px] font-normal text-foreground leading-relaxed">{summary}</p>
+        ) : null}
+        {categoryText ? (
+          <div className={`pt-2 border-t ${selected ? "border-accent/50" : "border-border"}`}>
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-foreground">
               {categoryLabel}
-            </p>
-            <p
-              className={`text-[12.5px] text-muted leading-relaxed ${
-                expanded ? "" : "line-clamp-3"
-              }`}
-            >
-              {categoryText}
-            </p>
+            </span>
+            <p className="text-[13px] font-normal text-foreground leading-relaxed mt-1">{categoryText}</p>
           </div>
-        )}
-      </button>
-      {canExpand && (
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="text-[11px] text-accent hover:underline mt-2"
-        >
-          {expanded ? "Show less" : "Show full characteristics"}
-        </button>
-      )}
-    </div>
+        ) : null}
+      </div>
+    </button>
   );
 }
 
@@ -991,7 +1030,7 @@ function ProductDescriptionEditor({
     <div className={`rounded-xl border border-border bg-surface-2/40 ${compact ? "p-3" : "p-4"}`}>
       <Label>Main product description</Label>
       {category && (
-        <p className="text-[11px] text-muted-2 mb-2">{category}</p>
+        <p className="text-[11px] font-normal text-foreground/60 mb-2">{category}</p>
       )}
       <textarea
         value={value}
@@ -1017,7 +1056,7 @@ function ScoreboardTable({
   baselines: BaselineResult[];
 }) {
   const rows = [
-    { label: "Sapiens", metrics: sapiens.metrics, highlight: true },
+    { label: "SAPIENS", metrics: sapiens.metrics, highlight: true },
     ...baselines.map((b) => ({
       label: baselineDisplayLabel(b),
       metrics: b.metrics,
@@ -1034,7 +1073,7 @@ function ScoreboardTable({
     <div className="mt-6 overflow-x-auto rounded-xl border border-border">
       <table className="w-full text-[13px]">
         <thead>
-          <tr className="border-b border-border bg-surface-2 text-left text-muted-2">
+          <tr className="border-b border-border bg-surface-2 text-left text-foreground/60">
             <th className="px-4 py-2.5 font-medium">Mode</th>
             <th className="px-4 py-2.5 font-medium">Overall</th>
           </tr>
@@ -1100,22 +1139,30 @@ function ResultCard({
       )
     : topKThemeEntries(predictedThemes, themeTopK);
   const hasDetails = themeEntries.length > 0 || sentiment;
+
   return (
-    <div className="rounded-xl border border-border p-4 flex flex-col">
-      <div className="flex items-center justify-between mb-2.5">
-        <div className="flex items-center gap-2">
+    <div className="rounded-2xl border border-border bg-surface flex flex-col overflow-hidden">
+
+      {/* ── Card header ── */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-surface-2/50">
+        <div className="flex items-center gap-2.5 min-w-0">
           <Dot tone={tone} />
-          <span className="text-[13px] font-medium">{title}</span>
+          <span className="text-[14px] font-semibold text-foreground leading-none">{title}</span>
+          {subtitle && (
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 ml-1">
+              {subtitle}
+            </span>
+          )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0 ml-3">
           {latencyMs ? (
-            <span className="text-[11px] text-muted-2">{(latencyMs / 1000).toFixed(1)}s</span>
+            <span className="text-[11px] font-normal text-foreground/40 tabular-nums">{(latencyMs / 1000).toFixed(1)}s</span>
           ) : null}
           {onRemove && (
             <button
               type="button"
               onClick={onRemove}
-              className="text-[11px] text-muted-2 hover:text-foreground"
+              className="text-[11px] text-foreground/40 hover:text-foreground transition"
               aria-label="Remove"
             >
               ✕
@@ -1123,77 +1170,98 @@ function ResultCard({
           )}
         </div>
       </div>
-      {subtitle && <p className="text-[11px] text-muted-2 -mt-1.5 mb-2.5">{subtitle}</p>}
+
+      {/* ── Similarity block (generated cards only) ── */}
       {metrics?.overallSimilarityScore !== null && metrics?.overallSimilarityScore !== undefined && (
-        <div className="mb-2.5">
-          <div className="flex items-center justify-between text-[11px] text-muted mb-1">
-            <span>Overall similarity</span>
-            <span className="font-medium text-foreground">
+        <div className="px-6 py-5 border-b border-border bg-accent/15">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground">Overall similarity</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[20px] font-bold text-foreground tabular-nums leading-none">
               {fmtPct(metrics.overallSimilarityScore)}
+            </span>
               {metrics.isMatch !== null && (
-                <span className={`ml-1.5 ${metrics.isMatch ? "text-real" : "text-muted-2"}`}>
-                  {metrics.isMatch ? "· match" : "· no match"}
+                <span className={`text-[11px] font-medium ${metrics.isMatch ? "text-real" : "text-foreground/40"}`}>
+                  {metrics.isMatch ? "match" : "no match"}
                 </span>
               )}
-            </span>
+            </div>
           </div>
-          <div className="h-1 rounded-full bg-surface-3 overflow-hidden">
+          <div className="h-1.5 rounded-full bg-surface-3 overflow-hidden border border-accent/30">
             <div
-              className={`h-full rounded-full ${TONE_BG[tone]}`}
+              className={`h-full rounded-full transition-all ${TONE_BG[tone]}`}
               style={{ width: `${Math.min(100, Math.max(0, metrics.overallSimilarityScore * 100))}%` }}
             />
           </div>
           {similarityExplanation && (
-            <p className="text-[11px] text-muted leading-snug mt-1.5">{similarityExplanation}</p>
+            <p className="text-[12px] font-normal text-foreground leading-relaxed mt-2.5">{similarityExplanation}</p>
           )}
         </div>
       )}
-      {showSkeleton ? (
-        <div className="space-y-2 mt-1">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="shimmer h-3 rounded" style={{ width: `${96 - i * 18}%` }} />
-          ))}
-        </div>
-      ) : error ? (
-        <p className="text-[12.5px] text-red-500/90">{error}</p>
-      ) : text ? (
-        <p className="prose-review text-[13px] text-foreground/90 flex-1 whitespace-pre-wrap">
-          {text.replace(/<br\s*\/?>/gi, "\n")}
-        </p>
-      ) : (
-        <p className="text-[12.5px] text-muted-2">{loading ? "Generating…" : "No review yet."}</p>
-      )}
+
+      {/* ── Review body ── */}
+      <div className="px-6 py-5 flex-1 flex flex-col">
+        {showSkeleton ? (
+          <div className="space-y-2.5">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="shimmer h-3 rounded" style={{ width: `${96 - i * 18}%` }} />
+            ))}
+          </div>
+        ) : error ? (
+          <p className="text-[13px] text-red-500/90">{error}</p>
+        ) : text ? (
+          <p className="prose-review text-[13px] font-normal text-foreground leading-relaxed flex-1 whitespace-pre-wrap">
+            {text.replace(/<br\s*\/?>/gi, "\n")}
+          </p>
+        ) : (
+          <p className="text-[13px] font-normal text-foreground/40 italic">{loading ? "Generating…" : "No review yet."}</p>
+        )}
+      </div>
+
+      {/* ── Themes & sentiment footer ── */}
       {hasDetails && text && (
-        <div className="mt-3 pt-3 border-t border-border">
+        <div className="border-t border-border">
           <button
             type="button"
             onClick={() => setDetailsOpen((v) => !v)}
-            className="flex items-center gap-1.5 text-[11px] text-muted-2 hover:text-muted transition w-full text-left"
+            className="flex items-center justify-between w-full px-6 py-3 text-left hover:bg-surface-2/50 transition group"
           >
-            <span className={`transition-transform text-[10px] ${detailsOpen ? "rotate-90" : ""}`}>▶</span>
-            Themes &amp; sentiment
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground/40 group-hover:text-foreground/70 transition">
+              Themes &amp; sentiment
+            </span>
+            <span className={`transition-all text-[9px] text-foreground/30 group-hover:text-foreground/50 ${detailsOpen ? "rotate-180" : ""}`}>▼</span>
           </button>
           {detailsOpen && (
-            <div className="mt-2 space-y-2">
+            <div className="px-6 pb-6 pt-4 border-t border-border/50 space-y-4">
+
+              {/* Sentiment pill */}
               {sentiment && (
-                <p className="text-[11px] text-muted">
-                  <span className="text-muted-2">Sentiment:</span>{" "}
-                  <span className="text-foreground/80">{sentiment}</span>
-                </p>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 w-16 shrink-0">Sentiment</span>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold capitalize
+                    ${sentiment === "Positive" ? "bg-real/15 text-real" :
+                      sentiment === "Negative" ? "bg-red-500/10 text-red-500" :
+                      "bg-surface-3 text-foreground/60"}`}>
+                    {sentiment}
+                  </span>
+                </div>
               )}
+
+              {/* Theme chips with score bars */}
               {themeEntries.length > 0 && (
-                <ul className="space-y-1">
-                  {themeEntries.map(([theme, value]) => (
-                    <li key={theme} className="flex items-center gap-2 text-[11px]">
-                      <span className="text-muted truncate flex-1" title={theme}>
-                        {theme}
-                      </span>
-                      {value !== 1 && (
-                        <span className="text-muted-2 tabular-nums w-8 text-right">{value.toFixed(2)}</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+                <div>
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 block mb-2.5">Themes</span>
+                  <ul className="space-y-2">
+                    {themeEntries.map(([theme, value]) => (
+                      <li key={theme} className="flex items-center gap-3">
+                        <span className="text-[12px] font-normal text-foreground truncate flex-1" title={theme}>{theme}</span>
+                        {value !== 1 && (
+                          <span className="text-[12px] font-bold text-foreground tabular-nums shrink-0">{value.toFixed(2)}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
           )}

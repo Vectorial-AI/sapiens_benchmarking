@@ -6,7 +6,7 @@ export const maxDuration = 60;
 
 const LABELS: Record<string, string> = {
   baseline: "Selected baseline",
-  sapiens: "Sapiens",
+  sapiens: "SAPIENS",
 };
 
 function overlap(a: string, b: string): number {

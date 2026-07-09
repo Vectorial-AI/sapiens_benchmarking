@@ -196,7 +196,7 @@ export async function POST(req: Request) {
       sapiens = await runEngine("sapiens", sapiensPrompt, SAPIENS_MODEL, sapiensTemperature);
     }
 
-    if (scoringGroundTruth) sapiens = await attachMetrics(sapiens, scoringGroundTruth, "Sapiens");
+    if (scoringGroundTruth) sapiens = await attachMetrics(sapiens, scoringGroundTruth, "SAPIENS");
 
     return NextResponse.json({
       groundTruth,
