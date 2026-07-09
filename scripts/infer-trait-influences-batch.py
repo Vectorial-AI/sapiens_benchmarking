@@ -221,20 +221,20 @@ def build_trait_catalog(
 
     main = map_category_to_main(category, sub_to_main)
     category_trait = str(category_characteristics.get(main) or "").strip()
+    if user_summary.strip():
+        catalog.append(
+            TraitCatalogEntry(
+                trait=first_sentence(user_summary, 160),
+                source="user",
+                trait_group="User traits (general)",
+            )
+        )
     if category_trait:
         catalog.append(
             TraitCatalogEntry(
                 trait=first_sentence(category_trait, 180),
                 source="user",
-                trait_group="User traits",
-            )
-        )
-    elif user_summary.strip():
-        catalog.append(
-            TraitCatalogEntry(
-                trait=first_sentence(user_summary, 160),
-                source="user",
-                trait_group="User traits",
+                trait_group="User traits (category)",
             )
         )
     return format_tribe_trait_catalog(traits), user_block, catalog
@@ -422,7 +422,7 @@ Return JSON exactly:
     {{
       "trait": "<exact trait text from the lists above>",
       "source": "tribe" | "user",
-      "traitGroup": "<tribe group label if tribe trait, otherwise User traits>",
+      "traitGroup": "<tribe group label if tribe trait; User traits (general) or User traits (category) if user trait>",
       "evidence": "<short explanation of how this trait shows up in the review — what the review emphasizes and why that reflects the trait>",
       "confidence": <number 0.0-1.0>
     }}
@@ -449,6 +449,7 @@ Influence + confidence rules:
   - 0.65-0.84 = trait strongly visible in tone or focus
   - below 0.65 = do not include
 - Prefer a mix of tribe traits + user traits when both clearly contributed.
+- User traits may include both general (cross-category) and category-specific entries — pick the one that best matches the review.
 - Skip traits with no support in the review."""
     return system, prompt
 

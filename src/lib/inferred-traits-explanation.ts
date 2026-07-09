@@ -70,17 +70,18 @@ function buildTraitCatalog(
   const categoryTrait = user.categoryCharacteristics?.[main]?.trim();
   const userSummary = user.characteristicSummary?.trim();
 
+  if (userSummary) {
+    catalog.push({
+      trait: firstSentence(userSummary, 160),
+      source: "user",
+      traitGroup: "User traits (general)",
+    });
+  }
   if (categoryTrait) {
     catalog.push({
       trait: firstSentence(categoryTrait, 180),
       source: "user",
-      traitGroup: "User traits",
-    });
-  } else if (userSummary) {
-    catalog.push({
-      trait: firstSentence(userSummary, 160),
-      source: "user",
-      traitGroup: "User traits",
+      traitGroup: "User traits (category)",
     });
   }
 
@@ -291,7 +292,7 @@ Return JSON exactly:
     {
       "trait": "<exact trait text from the lists above>",
       "source": "tribe" | "user",
-      "traitGroup": "<tribe group label if tribe trait, otherwise User traits>",
+      "traitGroup": "<tribe group label if tribe trait; User traits (general) or User traits (category) if user trait>",
       "evidence": "<short explanation of how this trait shows up in the review — what the review emphasizes and why that reflects the trait>",
       "confidence": <number 0.0-1.0>
     }
@@ -318,6 +319,7 @@ Influence + confidence rules:
   - 0.65-0.84 = trait strongly visible in tone or focus
   - below 0.65 = do not include
 - Prefer a mix of tribe traits + user traits when both clearly contributed.
+- User traits may include both general (cross-category) and category-specific entries — pick the one that best matches the review.
 - Skip traits with no support in the review.`;
 
   return { system, prompt };

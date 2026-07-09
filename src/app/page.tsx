@@ -14,6 +14,9 @@ import {
   PiArrowRight,
   PiFileText,
   PiInfo,
+  PiCaretDown,
+  PiQuotes,
+  PiSparkle,
 } from "react-icons/pi";
 import { Dot, Label, Spinner, TONE_BG, type Tone } from "@/components/ui";
 import {
@@ -1376,6 +1379,13 @@ function ScoreboardTable({
   );
 }
 
+function traitSourceBadge(item: InferredTraitInfluence): string {
+  if (item.source === "tribe") return "tribe traits";
+  if (item.traitGroup?.includes("(category)")) return "user traits · category";
+  if (item.traitGroup?.includes("(general)")) return "user traits · general";
+  return "user traits";
+}
+
 function ResultCard({
   tone,
   title,
@@ -1498,6 +1508,12 @@ function ResultCard({
 
       {/* ── Review body ── */}
       <div className="px-6 py-5 flex-1 flex flex-col">
+        {tone === "sapiens" && text && !showSkeleton && !error && (
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-foreground/40 mb-2.5">
+            <PiFileText size={14} className="text-accent" />
+            Generated review
+          </span>
+        )}
         {showSkeleton ? (
           <div className="space-y-2.5">
             {[0, 1, 2, 3].map((i) => (
@@ -1517,62 +1533,78 @@ function ResultCard({
 
       {tone === "sapiens" &&
         (inferredTraitSummary || visibleTraitInfluences.length > 0) && (
-        <div className="px-6 py-5 border-t border-border bg-surface-2/30">
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 block mb-3">
-            Inferred trait influences
-          </span>
-          {inferredTraitSummary && (
-            <p className="text-[13px] font-normal text-foreground leading-relaxed">
-              {inferredTraitSummary}
-            </p>
-          )}
-          {visibleTraitInfluences.length > 0 && (
-            <div className={inferredTraitSummary ? "mt-4" : undefined}>
-              <button
-                type="button"
-                onClick={() => setEvidenceOpen((v) => !v)}
-                className="flex items-center justify-between w-full text-left group"
-              >
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 group-hover:text-foreground/60 transition">
-                  Grounded in evidence
-                </span>
-                <span className={`text-[9px] text-foreground/30 group-hover:text-foreground/50 transition ${evidenceOpen ? "rotate-180" : ""}`}>▼</span>
-              </button>
-              {evidenceOpen && (
-                <ul className="space-y-3 mt-2.5">
-            {visibleTraitInfluences.map((item) => (
-              <li key={`${item.source}-${item.trait}`} className="rounded-xl border border-border bg-surface px-3.5 py-3">
-                <div className="flex items-start justify-between gap-3 mb-1.5">
-                  <p className="text-[12px] font-semibold text-foreground leading-snug">{item.trait}</p>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tabular-nums ${
-                      item.confidence >= 0.85
-                        ? "bg-real/15 text-real"
-                        : item.confidence >= 0.65
-                          ? "bg-accent/10 text-accent"
-                          : "bg-surface-3 text-foreground/60"
-                    }`}>
-                      {Math.round(item.confidence * 100)}%
-                    </span>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-accent/10 text-accent">
-                      {item.source === "user" ? "user traits" : "tribe traits"}
-                    </span>
-                  </div>
-                </div>
-                {item.traitGroup && (
-                  <p className="text-[10px] font-medium uppercase tracking-widest text-foreground/40 mb-1.5">
-                    {item.traitGroup}
+        <div className="px-6 pb-5">
+          <div className="rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/[0.07] to-surface overflow-hidden shadow-sm">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-accent/15 bg-accent/[0.06]">
+              <PiSparkle size={16} className="text-accent shrink-0" />
+              <span className="text-[13px] font-semibold text-foreground">
+                Trait influence analysis
+              </span>
+            </div>
+            <div className="px-4 py-4 space-y-4">
+              {inferredTraitSummary && (
+                <div className="rounded-xl border border-border bg-surface px-4 py-3.5">
+                  <p className="text-[13px] font-normal text-foreground leading-relaxed">
+                    {inferredTraitSummary}
                   </p>
-                )}
-                <p className="text-[12px] font-normal text-foreground/70 leading-relaxed">
-                  {item.evidence}
-                </p>
-              </li>
-            ))}
-                </ul>
+                </div>
+              )}
+              {visibleTraitInfluences.length > 0 && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setEvidenceOpen((v) => !v)}
+                    aria-expanded={evidenceOpen}
+                    className="flex items-center justify-between w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-left hover:bg-surface-2/80 hover:border-border-strong transition group"
+                  >
+                    <span className="inline-flex items-center gap-2 min-w-0">
+                      <PiQuotes size={16} className="text-accent shrink-0" />
+                      <span className="text-[12px] font-semibold text-foreground">
+                        Grounded in evidence
+                      </span>
+                      <span className="text-[11px] font-normal text-foreground/50">
+                        ({visibleTraitInfluences.length})
+                      </span>
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 shrink-0 ml-3 text-[11px] font-medium text-foreground/50 group-hover:text-foreground/70">
+                      {evidenceOpen ? "Hide" : "Show"}
+                      <PiCaretDown
+                        size={14}
+                        className={`transition-transform ${evidenceOpen ? "rotate-180" : ""}`}
+                      />
+                    </span>
+                  </button>
+                  {evidenceOpen && (
+                    <ul className="space-y-3 mt-3">
+                      {visibleTraitInfluences.map((item) => (
+                        <li
+                          key={`${item.source}-${item.trait}`}
+                          className="rounded-xl border border-border bg-surface px-3.5 py-3"
+                        >
+                          <div className="flex items-start justify-between gap-3 mb-1.5">
+                            <p className="text-[12px] font-semibold text-foreground leading-snug">
+                              {item.trait}
+                            </p>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-accent/10 text-accent shrink-0">
+                              {traitSourceBadge(item)}
+                            </span>
+                          </div>
+                          {item.traitGroup && (
+                            <p className="text-[10px] font-medium uppercase tracking-widest text-foreground/40 mb-1.5">
+                              {item.traitGroup}
+                            </p>
+                          )}
+                          <p className="text-[12px] font-normal text-foreground/70 leading-relaxed">
+                            {item.evidence}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               )}
             </div>
-          )}
+          </div>
         </div>
       )}
 
