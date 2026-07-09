@@ -65,6 +65,7 @@ export async function POST(req: Request) {
     groundTruthThemes,
     populationDefinition: populationDefinition?.trim() || undefined,
     tribeDefinition: tribeDefinition?.trim() || undefined,
+    useHistoryPlaceholder: baselineMethod === "history",
   });
 
   const historyContext =

@@ -34,7 +34,6 @@ import type {
   CatalogTribeIndex,
   CatalogUserHistoryReview,
   EngineResult,
-  HistoryContextItem,
   InferredTraitInfluence,
   PipelineMetrics,
   ReviewSentiment,
@@ -132,7 +131,6 @@ export default function Home() {
 
   const [runningSapiens, setRunningSapiens] = useState(false);
   const [editDescOpen, setEditDescOpen] = useState(false);
-  const [editPopulationOpen, setEditPopulationOpen] = useState(false);
   const [runningBaselineKey, setRunningBaselineKey] = useState<string | null>(null);
   const [runningBaselineMethod, setRunningBaselineMethod] = useState<BaselineMethod | null>(null);
   const [runningBaselineModel, setRunningBaselineModel] = useState<BaselineModel | null>(null);
@@ -177,6 +175,23 @@ export default function Home() {
       setCustomTribeDef(tribe.tribeDefinition);
     }
   }, [tribe?.id, tribe?.tribeDefinition]);
+
+  useEffect(() => {
+    if (!baselinePromptOpen || !canRun) return;
+    void refreshBaselinePrompt(baselinePromptOpen, true);
+  }, [
+    baselinePromptOpen,
+    canRun,
+    tribeId,
+    userId,
+    reviewKey,
+    effectiveProductDesc,
+    effectiveCategory,
+    useCustomPopulationDef,
+    customPopulationDef,
+    useCustomTribeDef,
+    customTribeDef,
+  ]);
 
   useEffect(() => {
     fetch("/api/models")
@@ -283,11 +298,13 @@ export default function Home() {
     const u = tribe?.users.find((x) => x.id === id);
     setUserId(id);
     setReviewKey(defaultReviewKeyForUser(u));
+    setBaselinePromptDrafts({});
     resetOutputs();
   }
 
   function selectProduct(key: string) {
     setReviewKey(key);
+    setBaselinePromptDrafts({});
     resetOutputs();
   }
 
@@ -459,6 +476,8 @@ export default function Home() {
 
   function selectBaselineMethod(m: BaselineMethod) {
     setBaselineMethod(m);
+    setBaselinePromptOpen(m);
+    void refreshBaselinePrompt(m, true);
   }
 
   const userHistoryReviews = user?.userHistoryReviews ?? [];
@@ -505,6 +524,20 @@ export default function Home() {
           )}
         </div>
       </div>
+
+      {product && step >= 2 && (
+        <SelectedProductBanner
+          product={product}
+          description={effectiveProductDesc}
+          editOpen={editDescOpen}
+          onEdit={() => setEditDescOpen((v) => !v)}
+          onDescriptionChange={(value) => {
+            setCustomProductDesc(value);
+            setBaselinePromptDrafts({});
+            resetOutputs();
+          }}
+        />
+      )}
 
       {step === 0 && tribeIndex ? (
         <div
@@ -684,29 +717,6 @@ export default function Home() {
 
             {step === 4 && (
               <div>
-                {/* ── Product description ── */}
-                <div className="mb-5">
-                  <button
-                    type="button"
-                    onClick={() => setEditDescOpen((v) => !v)}
-                    className="inline-flex items-center gap-2 text-[13px] font-semibold text-accent bg-accent/10 hover:bg-accent/20 border border-accent/30 rounded-lg px-3.5 py-2 transition"
-                  >
-                    <svg width="17" height="17" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
-                      <path d="M11.8536 1.14645C11.6583 0.951184 11.3417 0.951184 11.1465 1.14645L3.71455 8.57836C3.62459 8.66832 3.55263 8.77461 3.50251 8.89155L2.04044 12.303C1.9599 12.491 2.00189 12.709 2.14646 12.8536C2.29103 12.9981 2.50905 13.0401 2.69697 12.9596L6.10847 11.4975C6.2254 11.4474 6.3317 11.3754 6.42166 11.2855L13.8536 3.85355C14.0488 3.65829 14.0488 3.34171 13.8536 3.14645L11.8536 1.14645ZM4.42166 9.28547L11.5 2.20711L12.7929 3.5L5.71455 10.5784L4.21924 11.2192L3.78081 10.7808L4.42166 9.28547Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"/>
-                    </svg>
-                    {editDescOpen ? "Done editing" : "Edit Product Description"}
-                  </button>
-                  {editDescOpen && (
-                    <textarea
-                      value={customProductDesc}
-                      onChange={(e) => { setCustomProductDesc(e.target.value); resetOutputs(); }}
-                      rows={6}
-                      placeholder="Write or edit the main product description…"
-                      className="mt-3 w-full rounded-xl border-2 border-accent/40 bg-surface px-4 py-3 text-[13px] font-normal text-foreground leading-relaxed resize-y focus:outline-none focus:border-accent"
-                    />
-                  )}
-                </div>
-
                 <div className="space-y-5 mb-6 mt-4">
                   <div>
                     <Label>Baseline method</Label>
@@ -714,37 +724,38 @@ export default function Home() {
                       {BASELINE_METHODS.map((m) => (
                         <div
                           key={m}
-                          className={`rounded-xl border-2 p-3 transition ${
+                          className={`rounded-xl border-2 p-3 transition space-y-3 ${
                             baselineMethod === m
                               ? "border-accent bg-accent/15"
                               : "border-transparent hover:border-border-strong bg-surface border border-border"
                           }`}
                         >
-                          <div className="flex items-start justify-between gap-2">
-                            <button
-                              type="button"
-                              onClick={() => selectBaselineMethod(m)}
-                              className="flex items-center gap-2 text-left flex-1 min-w-0"
-                            >
-                              <Dot tone={BASELINE_METHOD_META[m].tone} />
-                              <span className="text-[13px] font-medium leading-snug">
-                                {BASELINE_METHOD_META[m].label}
-                              </span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openBaselinePrompt(m)}
-                              className={`shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-lg border transition ${
-                                baselinePromptOpen === m
-                                  ? "border-accent bg-accent/15 text-accent"
-                                  : "border-border text-foreground/40 hover:text-foreground hover:border-border-strong"
-                              }`}
-                              aria-label={`View ${BASELINE_METHOD_META[m].label} prompt`}
-                              title="View / edit prompt"
-                            >
-                              <PiInfo size={16} />
-                            </button>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => selectBaselineMethod(m)}
+                            className="flex items-center gap-2 text-left w-full min-w-0"
+                          >
+                            <Dot tone={BASELINE_METHOD_META[m].tone} />
+                            <span className="text-[13px] font-medium leading-snug">
+                              {BASELINE_METHOD_META[m].label}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setBaselineMethod(m);
+                              openBaselinePrompt(m);
+                            }}
+                            className={`inline-flex w-full items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-[12px] font-semibold transition ${
+                              baselinePromptOpen === m
+                                ? "border-accent bg-accent/15 text-accent"
+                                : "border-accent/30 bg-accent/10 text-accent hover:bg-accent/20"
+                            }`}
+                            aria-label={`View and edit ${BASELINE_METHOD_META[m].label} prompt`}
+                          >
+                            <PiInfo size={15} />
+                            {baselinePromptOpen === m ? "Editing prompt" : "View / edit prompt"}
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -855,8 +866,6 @@ export default function Home() {
                       latencyMs={b.latencyMs}
                       themeTopK={themeTopK}
                       similarityExplanation={b.similarityExplanation}
-                      baselinePrompt={b.baselinePrompt}
-                      historyContext={b.historyContext}
                       onRemove={() => removeBaseline(b.key)}
                     />
                   ))}
@@ -937,6 +946,58 @@ function Header({ connected }: { connected: boolean }) {
   );
 }
 
+function SelectedProductBanner({
+  product,
+  description,
+  editOpen,
+  onEdit,
+  onDescriptionChange,
+}: {
+  product: CatalogTribe["users"][number]["products"][number];
+  description: string;
+  editOpen: boolean;
+  onEdit: () => void;
+  onDescriptionChange: (value: string) => void;
+}) {
+  const preview = description.trim();
+  return (
+    <div className="mb-6 rounded-2xl border border-border bg-surface-2/60 px-4 py-3.5 shadow-sm">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-1.5">
+            <PiShoppingBag size={16} className="text-accent shrink-0" />
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40">
+              Selected product
+            </span>
+            <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent">
+              {product.category}
+            </span>
+          </div>
+          <p className="text-[13px] font-normal text-foreground/70 leading-relaxed line-clamp-2">
+            {preview || product.mainProductDescription || product.productDescription}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onEdit}
+          className="shrink-0 rounded-lg border border-border bg-surface px-3 py-1.5 text-[12px] font-semibold text-foreground/70 hover:border-accent/50 hover:text-accent transition"
+        >
+          {editOpen ? "Done" : "Edit"}
+        </button>
+      </div>
+      {editOpen && (
+        <textarea
+          value={description}
+          onChange={(e) => onDescriptionChange(e.target.value)}
+          rows={4}
+          placeholder="Write or edit the main product description..."
+          className="mt-3 w-full rounded-xl border border-accent/40 bg-surface px-4 py-3 text-[13px] font-normal text-foreground leading-relaxed resize-y focus:outline-none focus:border-accent"
+        />
+      )}
+    </div>
+  );
+}
+
 const STEP_ICONS = [PiUsersThree, PiUser, PiShoppingBag, PiHeadCircuit, PiChartBar];
 
 function Stepper({ step, onStep }: { step: number; onStep: (n: number) => void }) {
@@ -1004,7 +1065,6 @@ function LearnedTribePanel({ tribe }: { tribe: CatalogTribe }) {
             key={g.key}
             label={g.label}
             items={g.items}
-            defaultOpen={g.key !== "inherentBehavioralTraits"}
           />
         ))}
       </div>
@@ -1015,39 +1075,29 @@ function LearnedTribePanel({ tribe }: { tribe: CatalogTribe }) {
 function TraitGroupDrawer({
   label,
   items,
-  defaultOpen = false,
 }: {
   label: string;
   items: string[];
-  defaultOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
   if (!items.length) return null;
   return (
     <div className="rounded-xl border border-accent/15 bg-white/80 overflow-hidden">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center justify-between w-full px-3.5 py-2.5 text-left hover:bg-white transition"
-      >
+      <div className="flex items-center justify-between w-full px-3.5 py-2.5 text-left bg-white">
         <span className="flex items-center gap-2">
-          <span className={`transition-transform text-[10px] text-foreground/40 ${open ? "rotate-90" : ""}`}>▶</span>
           <span className={TYPE.cardTitle}>{label}</span>
         </span>
         <span className="text-[13px] font-normal text-foreground/50 tabular-nums">{items.length}</span>
-      </button>
-      {open && (
-        <ul className="px-3.5 pb-3 pt-1 space-y-2 border-t border-accent/25">
-          {items.map((it, i) => (
-            <li key={i} className="text-[13px] font-normal text-foreground leading-relaxed flex gap-2">
-              <span className="text-foreground/40 shrink-0 select-none" aria-hidden>
-                •
-              </span>
-              <span>{it}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      </div>
+      <ul className="px-3.5 pb-3 pt-1 space-y-2 border-t border-accent/25">
+        {items.map((it, i) => (
+          <li key={i} className="text-[13px] font-normal text-foreground leading-relaxed flex gap-2">
+            <span className="text-accent/70 shrink-0 select-none" aria-hidden>
+              •
+            </span>
+            <span>{it}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -1249,38 +1299,6 @@ function BaselinePromptInspector({
         </div>
       )}
 
-      {method === "history" && userHistoryReviews.length > 0 && (
-        <div>
-          <button
-            type="button"
-            onClick={() => setHistoryOpen((v) => !v)}
-            className="flex items-center justify-between w-full text-left group"
-          >
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 group-hover:text-foreground/60 transition">
-              User history ({userHistoryReviews.length} reviews)
-            </span>
-            <span className={`text-[9px] text-foreground/30 group-hover:text-foreground/50 transition ${historyOpen ? "rotate-180" : ""}`}>▼</span>
-          </button>
-          {historyOpen && (
-            <ul className="mt-2.5 space-y-2 max-h-56 overflow-y-auto">
-              {userHistoryReviews.map((item, index) => (
-                <li
-                  key={`${item.reviewKey ?? index}-${item.mainCategory}`}
-                  className="rounded-lg border border-border bg-surface px-3 py-2.5"
-                >
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 mb-1">
-                    {item.mainCategory}
-                  </p>
-                  <p className="text-[12px] text-foreground/70 leading-relaxed line-clamp-4">
-                    {item.reviewText}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
-
       {loading ? (
         <div className="space-y-2">
           {[0, 1, 2, 3].map((i) => (
@@ -1296,34 +1314,50 @@ function BaselinePromptInspector({
           placeholder="Baseline prompt sent to the model…"
         />
       )}
-    </div>
-  );
-}
 
-function ProductDescriptionEditor({
-  value,
-  onChange,
-  category,
-  compact,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  category?: string;
-  compact?: boolean;
-}) {
-  return (
-    <div className={`rounded-xl border border-border bg-surface-2/40 ${compact ? "p-3" : "p-4"}`}>
-      <Label>Main product description</Label>
-      {category && (
-        <p className="text-[11px] font-normal text-foreground/60 mb-2">{category}</p>
+      {method === "history" && userHistoryReviews.length > 0 && (
+        <div className="rounded-xl border border-border bg-surface px-3.5 py-3">
+          <button
+            type="button"
+            onClick={() => setHistoryOpen((v) => !v)}
+            className="flex items-center justify-between w-full text-left group"
+          >
+            <span className="inline-flex items-center gap-2">
+              <PiFileText size={15} className="text-accent" />
+              <span className="text-[12px] font-semibold text-foreground">
+                user_history variable
+              </span>
+              <span className="text-[11px] font-normal text-foreground/50">
+                ({userHistoryReviews.length} reviews)
+              </span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground/50 group-hover:text-foreground/70">
+              {historyOpen ? "Hide" : "Show"}
+              <PiCaretDown
+                size={14}
+                className={`transition-transform ${historyOpen ? "rotate-180" : ""}`}
+              />
+            </span>
+          </button>
+          {historyOpen && (
+            <ul className="mt-3 space-y-2 max-h-56 overflow-y-auto">
+              {userHistoryReviews.map((item, index) => (
+                <li
+                  key={`${item.reviewKey ?? index}-${item.mainCategory}`}
+                  className="rounded-lg border border-border bg-surface-2/50 px-3 py-2.5"
+                >
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 mb-1">
+                    {item.mainCategory || item.category}
+                  </p>
+                  <p className="text-[12px] text-foreground/70 leading-relaxed">
+                    {item.reviewText}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        rows={compact ? 3 : 4}
-        placeholder="Write or edit the main product description used for predictions…"
-        className="w-full rounded-lg border border-border bg-surface-1 px-3 py-2.5 text-[13px] text-foreground leading-relaxed resize-y min-h-[4.5rem]"
-      />
     </div>
   );
 }
@@ -1341,7 +1375,7 @@ function ScoreboardTable({
   baselines: BaselineResult[];
 }) {
   const rows = [
-    { label: "SAPIENS", metrics: sapiens.metrics, highlight: true },
+    { label: "Vectorial Sapiens", metrics: sapiens.metrics, highlight: true },
     ...baselines.map((b) => ({
       label: baselineDisplayLabel(b),
       metrics: b.metrics,
@@ -1359,7 +1393,7 @@ function ScoreboardTable({
       <table className="w-full text-[13px]">
         <thead>
           <tr className="border-b border-border bg-surface-2 text-left text-foreground/60">
-            <th className="px-4 py-2.5 font-medium">Mode</th>
+            <th className="px-4 py-2.5 font-medium">Model</th>
             <th className="px-4 py-2.5 font-medium">Overall</th>
           </tr>
         </thead>
@@ -1403,8 +1437,6 @@ function ResultCard({
   similarityExplanation,
   inferredTraitSummary,
   inferredTraitInfluences,
-  baselinePrompt,
-  historyContext,
   onRemove,
 }: {
   tone: Tone;
@@ -1424,8 +1456,6 @@ function ResultCard({
   similarityExplanation?: string | null;
   inferredTraitSummary?: string | null;
   inferredTraitInfluences?: InferredTraitInfluence[] | null;
-  baselinePrompt?: string | null;
-  historyContext?: HistoryContextItem[] | null;
   onRemove?: () => void;
 }) {
   const isGenerated = tone !== "real";
@@ -1438,9 +1468,6 @@ function ResultCard({
       )
     : topKThemeEntries(predictedThemes, themeTopK);
   const hasDetails = themeEntries.length > 0 || sentiment;
-  const [evidenceOpen, setEvidenceOpen] = useState(false);
-  const [baselinePromptOpen, setBaselinePromptOpen] = useState(false);
-  const [baselineHistoryOpen, setBaselineHistoryOpen] = useState(false);
   const visibleTraitInfluences =
     inferredTraitInfluences?.filter(
       (item) => item.confidence >= INFERRED_TRAIT_UI_MIN_CONFIDENCE,
@@ -1551,114 +1578,45 @@ function ResultCard({
               )}
               {visibleTraitInfluences.length > 0 && (
                 <div>
-                  <button
-                    type="button"
-                    onClick={() => setEvidenceOpen((v) => !v)}
-                    aria-expanded={evidenceOpen}
-                    className="flex items-center justify-between w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-left hover:bg-surface-2/80 hover:border-border-strong transition group"
-                  >
-                    <span className="inline-flex items-center gap-2 min-w-0">
-                      <PiQuotes size={16} className="text-accent shrink-0" />
-                      <span className="text-[12px] font-semibold text-foreground">
-                        Grounded in evidence
-                      </span>
-                      <span className="text-[11px] font-normal text-foreground/50">
-                        ({visibleTraitInfluences.length})
-                      </span>
+                  <div className="flex items-center gap-2 mb-3">
+                    <PiQuotes size={16} className="text-accent shrink-0" />
+                    <span className="text-[12px] font-semibold text-foreground">
+                      Grounded in evidence
                     </span>
-                    <span className="inline-flex items-center gap-1.5 shrink-0 ml-3 text-[11px] font-medium text-foreground/50 group-hover:text-foreground/70">
-                      {evidenceOpen ? "Hide" : "Show"}
-                      <PiCaretDown
-                        size={14}
-                        className={`transition-transform ${evidenceOpen ? "rotate-180" : ""}`}
-                      />
+                    <span className="text-[11px] font-normal text-foreground/50">
+                      ({visibleTraitInfluences.length})
                     </span>
-                  </button>
-                  {evidenceOpen && (
-                    <ul className="space-y-3 mt-3">
-                      {visibleTraitInfluences.map((item) => (
-                        <li
-                          key={`${item.source}-${item.trait}`}
-                          className="rounded-xl border border-border bg-surface px-3.5 py-3"
-                        >
-                          <div className="flex items-start justify-between gap-3 mb-1.5">
-                            <p className="text-[12px] font-semibold text-foreground leading-snug">
-                              {item.trait}
-                            </p>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-accent/10 text-accent shrink-0">
-                              {traitSourceBadge(item)}
-                            </span>
-                          </div>
-                          {item.traitGroup && (
-                            <p className="text-[10px] font-medium uppercase tracking-widest text-foreground/40 mb-1.5">
-                              {item.traitGroup}
-                            </p>
-                          )}
-                          <p className="text-[12px] font-normal text-foreground/70 leading-relaxed">
-                            {item.evidence}
-                          </p>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  </div>
+                  <ul className="space-y-3">
+                    {visibleTraitInfluences.map((item) => (
+                      <li
+                        key={`${item.source}-${item.trait}`}
+                        className="rounded-xl border border-border bg-surface px-3.5 py-3"
+                      >
+                        <div className="flex items-center justify-between gap-3 mb-2">
+                          <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40">
+                            {item.traitGroup || traitSourceBadge(item)}
+                          </span>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-accent/10 text-accent shrink-0">
+                            {traitSourceBadge(item)}
+                          </span>
+                        </div>
+                        <p className="text-[12px] font-semibold text-foreground leading-snug mb-2">
+                          {item.trait}
+                        </p>
+                        <p className="text-[11px] font-semibold uppercase tracking-widest text-foreground/35 mb-1">
+                          Evidence
+                        </p>
+                        <p className="text-[12px] font-normal text-foreground/70 leading-relaxed">
+                          {item.evidence}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>
           </div>
-        </div>
-      )}
-
-      {baselinePrompt && (
-        <div className="px-6 py-4 border-t border-border bg-surface-2/20">
-          <button
-            type="button"
-            onClick={() => setBaselinePromptOpen((v) => !v)}
-            className="flex items-center justify-between w-full text-left group"
-          >
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 group-hover:text-foreground/60 transition">
-              Prompt used
-            </span>
-            <span className={`text-[9px] text-foreground/30 group-hover:text-foreground/50 transition ${baselinePromptOpen ? "rotate-180" : ""}`}>▼</span>
-          </button>
-          {baselinePromptOpen && (
-            <pre className="mt-2.5 whitespace-pre-wrap text-[11px] font-mono text-foreground/70 leading-relaxed max-h-64 overflow-y-auto rounded-lg border border-border bg-surface px-3 py-2.5">
-              {baselinePrompt}
-            </pre>
-          )}
-        </div>
-      )}
-
-      {historyContext && historyContext.length > 0 && (
-        <div className="px-6 py-4 border-t border-border bg-surface-2/20">
-          <button
-            type="button"
-            onClick={() => setBaselineHistoryOpen((v) => !v)}
-            className="flex items-center justify-between w-full text-left group"
-          >
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 group-hover:text-foreground/60 transition">
-              User history used ({historyContext.length})
-            </span>
-            <span className={`text-[9px] text-foreground/30 group-hover:text-foreground/50 transition ${baselineHistoryOpen ? "rotate-180" : ""}`}>▼</span>
-          </button>
-          {baselineHistoryOpen && (
-            <ul className="mt-2.5 space-y-2 max-h-56 overflow-y-auto">
-              {historyContext.map((item, index) => (
-                <li
-                  key={`history-${index}`}
-                  className="rounded-lg border border-border bg-surface px-3 py-2.5"
-                >
-                  {(item.mainCategory || item.category) && (
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 mb-1">
-                      {item.mainCategory || item.category}
-                    </p>
-                  )}
-                  <p className="text-[12px] text-foreground/70 leading-relaxed">
-                    {item.reviewText}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
       )}
 

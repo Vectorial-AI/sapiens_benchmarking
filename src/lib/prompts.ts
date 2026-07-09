@@ -532,8 +532,9 @@ export function buildHistoryPrompt(args: {
   category: string;
   excludeReviewKey?: string;
   groundTruthThemes: string[];
+  useHistoryPlaceholder?: boolean;
 }): string {
-  const { user, productDescription, personaName, category, product, excludeReviewKey } = args;
+  const { user, productDescription, category, product, excludeReviewKey } = args;
   const themes = themesForCategory(category);
   const historyItems = buildUserHistoryContext(user, {
     excludeReviewKey,
@@ -544,13 +545,14 @@ export function buildHistoryPrompt(args: {
   const historyTextBlock = historyItems
     .map((h, i) => `Example ${i + 1}:\n${h.reviewText}\n`)
     .join("\n");
+  const userHistory = args.useHistoryPlaceholder
+    ? "{user_history}"
+    : historyTextBlock || "(no user history available)";
 
-  return `You are someone who belongs to ${personaName}.
-
-### Your User History
+  return `### Your User History
 To understand how to write this review, analyze the following examples of reviews you have written in the past. Each example is review text only (no product titles or descriptions). Observe the tone, length, and what details you usually focus on.
 
-${historyTextBlock || "(no user history available)"}
+${userHistory}
 ### The New Task
 You have just purchased and used a new product.
 **The New Product:** ${productDescription}
@@ -586,6 +588,7 @@ export function buildBaselinePrompt(
     groundTruthThemes: string[];
     populationDefinition?: string;
     tribeDefinition?: string;
+    useHistoryPlaceholder?: boolean;
   },
 ): string {
   switch (method) {
@@ -598,6 +601,7 @@ export function buildBaselinePrompt(
         category: args.category,
         excludeReviewKey: args.excludeReviewKey,
         groundTruthThemes: args.groundTruthThemes,
+        useHistoryPlaceholder: args.useHistoryPlaceholder,
       });
     case "tribe_persona":
       return buildTribePersonaPrompt({

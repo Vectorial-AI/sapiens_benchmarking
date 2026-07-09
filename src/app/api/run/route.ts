@@ -96,6 +96,13 @@ async function runEngine(
   }
 }
 
+function formatUserHistoryVariable(items: ReturnType<typeof buildUserHistoryContext>): string {
+  if (!items.length) return "(no user history available)";
+  return items
+    .map((item, index) => `Example ${index + 1}:\n${item.reviewText}\n`)
+    .join("\n");
+}
+
 export async function POST(req: Request) {
   const body = await req.json();
   const {
@@ -253,15 +260,17 @@ export async function POST(req: Request) {
       : undefined;
 
   let baseline: EngineResult;
-  const baselinePrompt =
-    customBaselinePrompt?.trim() ||
-    buildBaselinePrompt(method, {
+  const defaultBaselinePrompt = buildBaselinePrompt(method, {
       ...promptBase,
       populationDefinition: usingCustomPopulationDef
         ? customPopulationDefinition
         : undefined,
       tribeDefinition: usingCustomTribeDef ? customTribeDefinition : undefined,
     });
+  const baselinePrompt = (customBaselinePrompt?.trim() || defaultBaselinePrompt).replace(
+    /\{user_history\}/g,
+    formatUserHistoryVariable(historyContext ?? []),
+  );
 
   if (!hasGatewayKey()) {
     const mock = mockPrediction("baseline", productDescription, method);
