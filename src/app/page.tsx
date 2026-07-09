@@ -3,7 +3,17 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { PiHeadCircuit } from "react-icons/pi";
+import {
+  PiHeadCircuit,
+  PiUsersThree,
+  PiUser,
+  PiShoppingBag,
+  PiChartBar,
+  PiTarget,
+  PiTag,
+  PiArrowRight,
+  PiFileText,
+} from "react-icons/pi";
 import { Dot, Label, Spinner, TONE_BG, type Tone } from "@/components/ui";
 import {
   BASELINE_METHOD_META,
@@ -366,7 +376,7 @@ export default function Home() {
   }
 
   return (
-    <div className={`mx-auto w-full px-6 py-8 sm:py-12 ${step === 0 ? "max-w-6xl" : "max-w-4xl"}`}>
+    <div className="mx-auto w-full px-6 py-8 sm:py-12 max-w-6xl">
       <Header connected={gatewayConnected} />
 
       <Stepper step={step} onStep={goTo} />
@@ -534,7 +544,7 @@ export default function Home() {
                   sapiens?.metrics?.overallSimilarityScore !== undefined && (
                   <div className="rounded-2xl border border-accent/30 bg-accent/15 px-6 py-5">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground">Overall similarity</span>
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-foreground"><PiTarget size={16} className="text-accent" />Overall similarity</span>
                       <div className="flex items-baseline gap-2">
                         <span className="text-[22px] font-bold text-foreground tabular-nums leading-none">
                           {fmtPct(sapiens.metrics.overallSimilarityScore)}
@@ -597,7 +607,7 @@ export default function Home() {
                     onClick={() => setEditDescOpen((v) => !v)}
                     className="inline-flex items-center gap-2 text-[13px] font-semibold text-accent bg-accent/10 hover:bg-accent/20 border border-accent/30 rounded-lg px-3.5 py-2 transition"
                   >
-                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+                    <svg width="17" height="17" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
                       <path d="M11.8536 1.14645C11.6583 0.951184 11.3417 0.951184 11.1465 1.14645L3.71455 8.57836C3.62459 8.66832 3.55263 8.77461 3.50251 8.89155L2.04044 12.303C1.9599 12.491 2.00189 12.709 2.14646 12.8536C2.29103 12.9981 2.50905 13.0401 2.69697 12.9596L6.10847 11.4975C6.2254 11.4474 6.3317 11.3754 6.42166 11.2855L13.8536 3.85355C14.0488 3.65829 14.0488 3.34171 13.8536 3.14645L11.8536 1.14645ZM4.42166 9.28547L11.5 2.20711L12.7929 3.5L5.71455 10.5784L4.21924 11.2192L3.78081 10.7808L4.42166 9.28547Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"/>
                     </svg>
                     {editDescOpen ? "Done editing" : "Edit Product Description"}
@@ -791,9 +801,9 @@ export default function Home() {
               (step === 2 && !canRun) ||
               (step === 3 && (runningSapiens || !sapiens))
             }
-            className="btn btn-primary px-6 py-2 text-sm"
+            className="btn btn-primary px-6 py-2 text-sm inline-flex items-center gap-2"
           >
-            {step === 3 ? "Compare baselines" : "Continue"}
+            {step === 3 ? <><PiChartBar size={18} />Compare baselines</> : <>Continue <PiArrowRight size={18} /></>}
           </button>
         )}
       </div>
@@ -824,21 +834,24 @@ function Header({ connected }: { connected: boolean }) {
   );
 }
 
+const STEP_ICONS = [PiUsersThree, PiUser, PiShoppingBag, PiHeadCircuit, PiChartBar];
+
 function Stepper({ step, onStep }: { step: number; onStep: (n: number) => void }) {
   return (
     <nav className="flex items-center mt-9 overflow-x-auto">
       {STEPS.map((s, i) => {
         const done = i < step;
         const active = i === step;
+        const Icon = STEP_ICONS[i];
         return (
           <div key={s.id} className="flex items-center flex-1 last:flex-none min-w-0">
             <button onClick={() => onStep(i)} className="flex items-center gap-2 group shrink-0">
               <span
-                className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-semibold transition ${
-                  active ? "bg-accent text-white" : done ? "bg-accent text-white" : "bg-surface-3 text-foreground/40"
+                className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-[12px] font-semibold transition ${
+                  active ? "bg-accent text-white" : done ? "bg-accent text-white" : "bg-accent/10 text-accent"
                 }`}
               >
-                {done ? "✓" : i + 1}
+                {done ? "✓" : <Icon size={16} />}
               </span>
               <span className={`text-[12px] font-medium hidden md:inline ${active || done ? "text-foreground" : "text-foreground/40"}`}>
                 {s.label}
@@ -1159,6 +1172,7 @@ function ResultCard({
       <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-surface-2/50">
         <div className="flex items-center gap-2.5 min-w-0">
           <Dot tone={tone} />
+          {tone === "real" ? <PiFileText size={18} className="text-accent shrink-0" /> : tone === "sapiens" ? <PiHeadCircuit size={18} className="text-accent shrink-0" /> : null}
           <span className="text-[14px] font-semibold text-foreground leading-none">{title}</span>
           {subtitle && (
             <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 ml-1">
@@ -1187,7 +1201,7 @@ function ResultCard({
       {metrics?.overallSimilarityScore !== null && metrics?.overallSimilarityScore !== undefined && (
         <div className="px-6 py-5 border-b border-border bg-accent/15">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground">Overall similarity</span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-foreground"><PiTarget size={16} className="text-accent" />Overall similarity</span>
             <div className="flex items-baseline gap-1.5">
               <span className="text-[20px] font-bold text-foreground tabular-nums leading-none">
               {fmtPct(metrics.overallSimilarityScore)}
@@ -1238,8 +1252,8 @@ function ResultCard({
             onClick={() => setDetailsOpen((v) => !v)}
             className="flex items-center justify-between w-full px-6 py-3 text-left hover:bg-surface-2/50 transition group"
           >
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground/40 group-hover:text-foreground/70 transition">
-              Themes &amp; sentiment
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-foreground/40 group-hover:text-foreground/70 transition">
+              <PiTag size={16} className="text-accent" />Themes &amp; sentiment
             </span>
             <span className={`transition-all text-[9px] text-foreground/30 group-hover:text-foreground/50 ${detailsOpen ? "rotate-180" : ""}`}>▼</span>
           </button>
