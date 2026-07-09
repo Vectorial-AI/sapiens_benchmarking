@@ -2,12 +2,12 @@
   "tribes": [
     {
       "id": "cluster_0-micro_11",
-      "name": "Nostalgia-Fueled Fun-Seekers",
+      "name": "Classic Remaster & Story RPG Gamers",
       "cluster": "cluster_0",
       "microId": "micro_11",
       "domain": "video_games",
       "reviewCount": 12,
-      "description": "A tribe of nostalgia-fueled fun-seekers who look for products that deliver on what they care about most. They generally prioritize nostalgia and familiarity, fun and enjoyment.",
+      "description": "Gamers who revisit beloved worlds and follow long-running series across generations. They care most about story, emotional payoff, and whether a re-release or sequel honors what made the original special.",
       "userCount": 9,
       "traitSource": "outputs/amazon_sgo_health_care/cluster_0/micro_11/evolution/state_history/000006_refine_after_iteration_2_batch_19.json",
       "dataSources": {
@@ -35,12 +35,12 @@
     },
     {
       "id": "cluster_0-micro_0",
-      "name": "Pragmatic Value Advocates",
+      "name": "Mobile & Casual Game Advocates",
       "cluster": "cluster_0",
       "microId": "micro_0",
       "domain": "video_games",
       "reviewCount": 14,
-      "description": "A tribe of pragmatic value advocates who speak up for what matters to them and guide others with opinionated feedback. They generally prioritize practical results, value for money.",
+      "description": "Everyday gamers who mostly play quick mobile sessions but also buy console titles and gear. They scrutinize hidden costs, compatibility issues, and whether a product is worth the money before recommending it to others.",
       "userCount": 10,
       "traitSource": "outputs/amazon_sgo_health_care/cluster_0/micro_0/evolution/state_history/000006_refine_after_iteration_2_batch_22.json",
       "dataSources": {
@@ -68,12 +68,12 @@
     },
     {
       "id": "cluster_0-micro_9",
-      "name": "Pragmatic Value Gamers",
+      "name": "Gaming Peripherals & VR Evaluators",
       "cluster": "cluster_0",
       "microId": "micro_9",
       "domain": "video_games",
       "reviewCount": 6,
-      "description": "A tribe of pragmatic value gamers who judge products through a gaming and entertainment lens. They generally prioritize practical results, value for money.",
+      "description": "Buyers who invest in their gaming environment - headsets, controllers, creative tools, and immersive experiences. They test gear hands-on, compare it against trusted benchmarks, and share practical setup advice.",
       "userCount": 5,
       "traitSource": "outputs/amazon_sgo_health_care/cluster_0/micro_9/evolution/state_history/000008_refine_after_iteration_2_batch_31.json",
       "dataSources": {
@@ -100,14 +100,142 @@
       "maxHighPriorityGap": 0.1629
     },
     {
+      "id": "cluster_4-micro_25",
+      "name": "Practical Family Evaluators",
+      "cluster": "cluster_4",
+      "microId": "micro_25",
+      "domain": "healthcare",
+      "reviewCount": 1,
+      "description": "A tribe of practical family evaluators who weigh pros and cons carefully before passing judgment. They generally prioritize everyday usefulness, family needs.",
+      "userCount": 1,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_25_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
+      },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
+      "traitCounts": {
+        "behavioral": 8,
+        "motivations": 4,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      },
+      "meanSimilarityScore": 0.9471,
+      "meanSapiensBaselineGap": 0.1336,
+      "highPriorityCount": 0,
+      "maxHighPriorityGap": 0.0
+    },
+    {
+      "id": "cluster_0-micro_3",
+      "name": "Hands-On Gear Analysts",
+      "cluster": "cluster_0",
+      "microId": "micro_3",
+      "domain": "healthcare",
+      "reviewCount": 1,
+      "description": "A tribe of hands-on gear analysts who evaluate products based on what the label suggests. They generally prioritize hands-on use, equipment and gear.",
+      "userCount": 1,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_0/micro_3_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
+      },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
+      "traitCounts": {
+        "behavioral": 10,
+        "motivations": 6,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 6
+      },
+      "meanSimilarityScore": 0.9399,
+      "meanSapiensBaselineGap": 0.1301,
+      "highPriorityCount": 0,
+      "maxHighPriorityGap": 0.0
+    },
+    {
+      "id": "cluster_3-micro_5",
+      "name": "Pragmatic Hands-On Evaluators",
+      "cluster": "cluster_3",
+      "microId": "micro_5",
+      "domain": "healthcare",
+      "reviewCount": 2,
+      "description": "A tribe of pragmatic hands-on evaluators who weigh pros and cons carefully before passing judgment. They generally prioritize practical results, hands-on use.",
+      "userCount": 2,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_3/micro_5_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
+      },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
+      "traitCounts": {
+        "behavioral": 9,
+        "motivations": 4,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      },
+      "meanSimilarityScore": 0.9369,
+      "meanSapiensBaselineGap": 0.1868,
+      "highPriorityCount": 0,
+      "maxHighPriorityGap": 0.0
+    },
+    {
+      "id": "cluster_3-micro_40",
+      "name": "Meticulous Value Advocates",
+      "cluster": "cluster_3",
+      "microId": "micro_40",
+      "domain": "healthcare",
+      "reviewCount": 1,
+      "description": "A tribe of meticulous value advocates who speak up for what matters to them and guide others with opinionated feedback. They generally prioritize close attention to detail, value for money.",
+      "userCount": 1,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_3/micro_40_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
+      },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
+      "traitCounts": {
+        "behavioral": 9,
+        "motivations": 6,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      },
+      "meanSimilarityScore": 0.9369,
+      "meanSapiensBaselineGap": 0.1617,
+      "highPriorityCount": 0,
+      "maxHighPriorityGap": 0.0
+    },
+    {
       "id": "cluster_4-micro_21",
       "name": "Value-Seeking Self-Care Caregivers",
       "cluster": "cluster_4",
       "microId": "micro_21",
       "domain": "healthcare",
-      "reviewCount": 9,
+      "reviewCount": 12,
       "description": "A tribe of value-seeking self-care caregivers who shop with caregiving responsibilities and dependents in mind. They generally prioritize value for money, personal care, care and wellbeing.",
-      "userCount": 5,
+      "userCount": 6,
       "traitSource": "evolution_state.json",
       "dataSources": {
         "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_21_details.json",
@@ -126,8 +254,72 @@
         "friction": 0,
         "goals": 3
       },
-      "meanSimilarityScore": 0.9306,
-      "meanSapiensBaselineGap": 0.2553,
+      "meanSimilarityScore": 0.9283,
+      "meanSapiensBaselineGap": 0.2192,
+      "highPriorityCount": 0,
+      "maxHighPriorityGap": 0.0
+    },
+    {
+      "id": "cluster_0-micro_12",
+      "name": "Tech-Savvy Optimizers",
+      "cluster": "cluster_0",
+      "microId": "micro_12",
+      "domain": "healthcare",
+      "reviewCount": 3,
+      "description": "A tribe of tech-savvy optimizers who evaluate products based on what the label suggests. They generally prioritize technology, informed judgment.",
+      "userCount": 1,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_0/micro_12_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
+      },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
+      "traitCounts": {
+        "behavioral": 9,
+        "motivations": 6,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      },
+      "meanSimilarityScore": 0.925,
+      "meanSapiensBaselineGap": 0.2197,
+      "highPriorityCount": 0,
+      "maxHighPriorityGap": 0.0
+    },
+    {
+      "id": "cluster_4-micro_9",
+      "name": "Practical Beauty Enthusiasts",
+      "cluster": "cluster_4",
+      "microId": "micro_9",
+      "domain": "healthcare",
+      "reviewCount": 6,
+      "description": "A tribe of practical beauty enthusiasts who get genuinely excited about products that fit their interests. They generally prioritize everyday usefulness, beauty and personal appearance.",
+      "userCount": 3,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_9_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
+      },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
+      "traitCounts": {
+        "behavioral": 10,
+        "motivations": 7,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      },
+      "meanSimilarityScore": 0.9224,
+      "meanSapiensBaselineGap": 0.2043,
       "highPriorityCount": 0,
       "maxHighPriorityGap": 0.0
     },
@@ -159,71 +351,7 @@
         "goals": 5
       },
       "meanSimilarityScore": 0.9213,
-      "meanSapiensBaselineGap": 0.2724,
-      "highPriorityCount": 0,
-      "maxHighPriorityGap": 0.0
-    },
-    {
-      "id": "cluster_0-micro_12",
-      "name": "Tech-Savvy Optimizers",
-      "cluster": "cluster_0",
-      "microId": "micro_12",
-      "domain": "healthcare",
-      "reviewCount": 4,
-      "description": "A tribe of tech-savvy optimizers who evaluate products based on what the label suggests. They generally prioritize technology, informed judgment.",
-      "userCount": 1,
-      "traitSource": "evolution_state.json",
-      "dataSources": {
-        "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_0/micro_12_details.json",
-        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
-        "traits": "evolution_state.json",
-        "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
-      },
-      "deployCheckpoint": null,
-      "deployIteration": null,
-      "sapiensPromptMode": null,
-      "traitCounts": {
-        "behavioral": 9,
-        "motivations": 6,
-        "triggers": 0,
-        "friction": 0,
-        "goals": 3
-      },
-      "meanSimilarityScore": 0.9164,
-      "meanSapiensBaselineGap": 0.1972,
-      "highPriorityCount": 0,
-      "maxHighPriorityGap": 0.0
-    },
-    {
-      "id": "cluster_4-micro_9",
-      "name": "Practical Beauty Enthusiasts",
-      "cluster": "cluster_4",
-      "microId": "micro_9",
-      "domain": "healthcare",
-      "reviewCount": 3,
-      "description": "A tribe of practical beauty enthusiasts who get genuinely excited about products that fit their interests. They generally prioritize everyday usefulness, beauty and personal appearance.",
-      "userCount": 2,
-      "traitSource": "evolution_state.json",
-      "dataSources": {
-        "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_9_details.json",
-        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
-        "traits": "evolution_state.json",
-        "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
-      },
-      "deployCheckpoint": null,
-      "deployIteration": null,
-      "sapiensPromptMode": null,
-      "traitCounts": {
-        "behavioral": 10,
-        "motivations": 7,
-        "triggers": 0,
-        "friction": 0,
-        "goals": 3
-      },
-      "meanSimilarityScore": 0.9132,
-      "meanSapiensBaselineGap": 0.2582,
+      "meanSapiensBaselineGap": 0.2538,
       "highPriorityCount": 0,
       "maxHighPriorityGap": 0.0
     },
@@ -233,7 +361,7 @@
       "cluster": "cluster_4",
       "microId": "micro_18",
       "domain": "healthcare",
-      "reviewCount": 1,
+      "reviewCount": 2,
       "description": "A tribe of expert helper reviewers who write reviews to help others make better choices. They generally prioritize expert-level expectations, helping others decide.",
       "userCount": 1,
       "traitSource": "evolution_state.json",
@@ -254,8 +382,104 @@
         "friction": 0,
         "goals": 4
       },
-      "meanSimilarityScore": 0.8983,
-      "meanSapiensBaselineGap": 0.1922,
+      "meanSimilarityScore": 0.915,
+      "meanSapiensBaselineGap": 0.1546,
+      "highPriorityCount": 0,
+      "maxHighPriorityGap": 0.0
+    },
+    {
+      "id": "cluster_3-micro_2",
+      "name": "Practical Comfort Seekers",
+      "cluster": "cluster_3",
+      "microId": "micro_2",
+      "domain": "healthcare",
+      "reviewCount": 1,
+      "description": "A tribe of practical comfort seekers who look for products that deliver on what they care about most. They generally prioritize everyday usefulness, comfort.",
+      "userCount": 1,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_3/micro_2_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "traits": "micro_cluster_details (seed)",
+        "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
+      },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      },
+      "meanSimilarityScore": 0.913,
+      "meanSapiensBaselineGap": 0.1382,
+      "highPriorityCount": 0,
+      "maxHighPriorityGap": 0.0
+    },
+    {
+      "id": "cluster_4-micro_1",
+      "name": "Hands-On Value Advocates",
+      "cluster": "cluster_4",
+      "microId": "micro_1",
+      "domain": "healthcare",
+      "reviewCount": 6,
+      "description": "A tribe of hands-on value advocates who speak up for what matters to them and guide others with opinionated feedback. They generally prioritize hands-on use, value for money.",
+      "userCount": 4,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_1_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
+      },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
+      "traitCounts": {
+        "behavioral": 38,
+        "motivations": 4,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      },
+      "meanSimilarityScore": 0.9098,
+      "meanSapiensBaselineGap": 0.2101,
+      "highPriorityCount": 0,
+      "maxHighPriorityGap": 0.0
+    },
+    {
+      "id": "cluster_4-micro_15",
+      "name": "Hands-On Value Seekers",
+      "cluster": "cluster_4",
+      "microId": "micro_15",
+      "domain": "healthcare",
+      "reviewCount": 7,
+      "description": "A tribe of hands-on value seekers who look for products that deliver on what they care about most. They generally prioritize hands-on use, value for money.",
+      "userCount": 2,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_15_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
+      },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
+      "traitCounts": {
+        "behavioral": 10,
+        "motivations": 4,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      },
+      "meanSimilarityScore": 0.9019,
+      "meanSapiensBaselineGap": 0.191,
       "highPriorityCount": 0,
       "maxHighPriorityGap": 0.0
     },
@@ -287,39 +511,7 @@
         "goals": 4
       },
       "meanSimilarityScore": 0.8966,
-      "meanSapiensBaselineGap": 0.1888,
-      "highPriorityCount": 0,
-      "maxHighPriorityGap": 0.0
-    },
-    {
-      "id": "cluster_4-micro_1",
-      "name": "Hands-On Value Advocates",
-      "cluster": "cluster_4",
-      "microId": "micro_1",
-      "domain": "healthcare",
-      "reviewCount": 2,
-      "description": "A tribe of hands-on value advocates who speak up for what matters to them and guide others with opinionated feedback. They generally prioritize hands-on use, value for money.",
-      "userCount": 2,
-      "traitSource": "evolution_state.json",
-      "dataSources": {
-        "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_1_details.json",
-        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
-        "traits": "evolution_state.json",
-        "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
-      },
-      "deployCheckpoint": null,
-      "deployIteration": null,
-      "sapiensPromptMode": null,
-      "traitCounts": {
-        "behavioral": 38,
-        "motivations": 4,
-        "triggers": 0,
-        "friction": 0,
-        "goals": 3
-      },
-      "meanSimilarityScore": 0.8798,
-      "meanSapiensBaselineGap": 0.3839,
+      "meanSapiensBaselineGap": 0.1753,
       "highPriorityCount": 0,
       "maxHighPriorityGap": 0.0
     },
@@ -329,9 +521,9 @@
       "cluster": "cluster_4",
       "microId": "micro_6",
       "domain": "healthcare",
-      "reviewCount": 1,
+      "reviewCount": 4,
       "description": "A tribe of sensory-savvy pragmatists who take a practical, no-nonsense approach to buying and reviewing. They generally prioritize feel, scent, and sensory experience, informed judgment.",
-      "userCount": 1,
+      "userCount": 4,
       "traitSource": "evolution_state.json",
       "dataSources": {
         "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_6_details.json",
@@ -350,8 +542,72 @@
         "friction": 0,
         "goals": 3
       },
-      "meanSimilarityScore": 0.8755,
-      "meanSapiensBaselineGap": 0.2834,
+      "meanSimilarityScore": 0.8966,
+      "meanSapiensBaselineGap": 0.1964,
+      "highPriorityCount": 0,
+      "maxHighPriorityGap": 0.0
+    },
+    {
+      "id": "cluster_0-micro_7",
+      "name": "Performance-Value Gamers",
+      "cluster": "cluster_0",
+      "microId": "micro_7",
+      "domain": "healthcare",
+      "reviewCount": 1,
+      "description": "A tribe of performance-value gamers who judge products through a gaming and entertainment lens. They generally prioritize real-world performance, value for money.",
+      "userCount": 1,
+      "traitSource": "micro_cluster_details (seed)",
+      "dataSources": {
+        "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_0/micro_7_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "traits": "micro_cluster_details (seed)",
+        "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
+      },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
+      "traitCounts": {
+        "behavioral": 7,
+        "motivations": 6,
+        "triggers": 5,
+        "friction": 5,
+        "goals": 3
+      },
+      "meanSimilarityScore": 0.8949,
+      "meanSapiensBaselineGap": 0.1821,
+      "highPriorityCount": 0,
+      "maxHighPriorityGap": 0.0
+    },
+    {
+      "id": "cluster_3-micro_6",
+      "name": "Pragmatic Quick-Checkers",
+      "cluster": "cluster_3",
+      "microId": "micro_6",
+      "domain": "healthcare",
+      "reviewCount": 1,
+      "description": "A tribe of pragmatic quick-checkers who evaluate products based on what the label suggests. They generally prioritize practical results, speed and brevity.",
+      "userCount": 1,
+      "traitSource": "evolution_state.json",
+      "dataSources": {
+        "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_3/micro_6_details.json",
+        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "similarity": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
+        "traits": "evolution_state.json",
+        "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
+      },
+      "deployCheckpoint": null,
+      "deployIteration": null,
+      "sapiensPromptMode": null,
+      "traitCounts": {
+        "behavioral": 13,
+        "motivations": 6,
+        "triggers": 0,
+        "friction": 0,
+        "goals": 3
+      },
+      "meanSimilarityScore": 0.887,
+      "meanSapiensBaselineGap": 0.1112,
       "highPriorityCount": 0,
       "maxHighPriorityGap": 0.0
     },
@@ -383,7 +639,7 @@
         "goals": 3
       },
       "meanSimilarityScore": 0.8744,
-      "meanSapiensBaselineGap": 0.2547,
+      "meanSapiensBaselineGap": 0.2711,
       "highPriorityCount": 0,
       "maxHighPriorityGap": 0.0
     },
@@ -393,9 +649,9 @@
       "cluster": "cluster_4",
       "microId": "micro_12",
       "domain": "healthcare",
-      "reviewCount": 1,
+      "reviewCount": 2,
       "description": "A tribe of safety-savvy budget parents who buy with family needs, especially children, in mind. They generally prioritize informed judgment, affordable pricing.",
-      "userCount": 1,
+      "userCount": 2,
       "traitSource": "evolution_state.json",
       "dataSources": {
         "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_12_details.json",
@@ -414,43 +670,11 @@
         "friction": 0,
         "goals": 3
       },
-      "meanSimilarityScore": 0.8708,
-      "meanSapiensBaselineGap": 0.2691,
-      "highPriorityCount": 0,
-      "maxHighPriorityGap": 0.0
-    },
-    {
-      "id": "cluster_4-micro_15",
-      "name": "Hands-On Value Seekers",
-      "cluster": "cluster_4",
-      "microId": "micro_15",
-      "domain": "healthcare",
-      "reviewCount": 3,
-      "description": "A tribe of hands-on value seekers who look for products that deliver on what they care about most. They generally prioritize hands-on use, value for money.",
-      "userCount": 2,
-      "traitSource": "evolution_state.json",
-      "dataSources": {
-        "users": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json + Clustering/micro_cluster_details/cluster_4/micro_15_details.json",
-        "products": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
-        "similarity": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json",
-        "traits": "evolution_state.json",
-        "best_predictions": "Clustering/Prediction_Accuracy_Refined/healthcare_digital_technical_accuracy.json"
-      },
-      "deployCheckpoint": null,
-      "deployIteration": null,
-      "sapiensPromptMode": null,
-      "traitCounts": {
-        "behavioral": 10,
-        "motivations": 4,
-        "triggers": 0,
-        "friction": 0,
-        "goals": 3
-      },
-      "meanSimilarityScore": 0.8605,
-      "meanSapiensBaselineGap": 0.2951,
+      "meanSimilarityScore": 0.857,
+      "meanSapiensBaselineGap": 0.2048,
       "highPriorityCount": 0,
       "maxHighPriorityGap": 0.0
     }
   ],
-  "total": 14
+  "total": 21
 }

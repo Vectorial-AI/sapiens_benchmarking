@@ -105,30 +105,6 @@ def normalize_title(raw: str) -> str:
     return title
 
 
-def description_grounded_title(raw: str, description: str) -> str:
-    """Drop title if it introduces capitalized proper-noun phrases absent from description."""
-    title = normalize_title(raw)
-    if not title:
-        return fallback_title(description)
-    desc_lower = description.lower()
-    # Flag multi-word Title Case phrases (likely invented game/product names).
-    for match in re.finditer(r"\b[A-Z][a-z]+(?:['’][A-Z][a-z]+)?(?:\s+[A-Z0-9][A-Za-z0-9'’:-]*)+\b", title):
-        phrase = match.group(0).strip()
-        if len(phrase.split()) < 2:
-            continue
-        if phrase.lower() in desc_lower:
-            continue
-        # Allow common catalog words even if capitalized in title.
-        if phrase.lower() in {
-            "video games", "video game", "digital code", "launch edition",
-            "standard edition", "limited run", "playstation 4", "playstation 5",
-            "xbox one", "xbox series", "nintendo switch", "nintendo 3ds",
-        }:
-            continue
-        return fallback_title(description)
-    return title
-
-
 def generate_title(row: dict, *, use_llm: bool) -> str:
     description = row["product_description"]
     if not use_llm:
@@ -136,17 +112,13 @@ def generate_title(row: dict, *, use_llm: bool) -> str:
 
     system = (
         "You write descriptive product titles for a benchmarking catalog UI. "
-        "Return only the title text — no quotes, labels, or extra commentary. "
-        "Never guess or infer product, brand, franchise, or game names that are not "
-        "explicitly written in the product description."
+        "Return only the title text — no quotes, labels, or extra commentary."
     )
-    prompt = f"""Write a descriptive product title (about 12–20 words, max 160 characters) based ONLY on the product description below.
+    prompt = f"""Write a descriptive product title (about 12–20 words, max 160 characters) for this product.
 
 Rules:
-- Use only names, brands, franchises, platforms, and features that appear verbatim (or obvious abbreviations) in the description.
-- Do NOT guess the product identity from vague marketing language (e.g. do not infer "Assassin's Creed" from "epic odyssey" alone).
-- If the description is generic and does not name the product clearly, write a generic catalog title using the description's own wording.
-- Include platform/format only if stated in the description.
+- Use the product description to identify the product clearly (game, app, accessory, etc.).
+- Include platform/format when stated in the description.
 - Aim for a fuller catalog-style title — not a one-liner, but still not a paragraph.
 - Do NOT paste legal text or long spec lists.
 - Do NOT start with "Product Description".
@@ -159,7 +131,7 @@ Product description:
 {description[:MAX_DESC_CHARS]}"""
 
     raw = call_openai(system, prompt)
-    title = description_grounded_title(raw, description)
+    title = normalize_title(raw)
     return title or fallback_title(description)
 
 

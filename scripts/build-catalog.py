@@ -157,6 +157,33 @@ POPULATION_DEFINITIONS = {
     ),
 }
 
+VIDEO_GAMES_TRIBE_DISPLAY_OVERRIDES: dict[tuple[str, str], dict[str, str]] = {
+    ("cluster_0", "micro_0"): {
+        "name": "Mobile & Casual Game Advocates",
+        "description": (
+            "Everyday gamers who mostly play quick mobile sessions but also buy console "
+            "titles and gear. They scrutinize hidden costs, compatibility issues, and "
+            "whether a product is worth the money before recommending it to others."
+        ),
+    },
+    ("cluster_0", "micro_9"): {
+        "name": "Gaming Peripherals & VR Evaluators",
+        "description": (
+            "Buyers who invest in their gaming environment - headsets, controllers, "
+            "creative tools, and immersive experiences. They test gear hands-on, "
+            "compare it against trusted benchmarks, and share practical setup advice."
+        ),
+    },
+    ("cluster_0", "micro_11"): {
+        "name": "Classic Remaster & Story RPG Gamers",
+        "description": (
+            "Gamers who revisit beloved worlds and follow long-running series across "
+            "generations. They care most about story, emotional payoff, and whether a "
+            "re-release or sequel honors what made the original special."
+        ),
+    },
+}
+
 # SGO review/user selection overrides (canonical benchmark sets)
 SGO_REVIEW_SOURCES: dict[tuple[str, str], Path] = {
     ("cluster_4", "micro_1"): OUTPUTS / "amazon_sgo/cluster_4/micro_1/best_delta_predictions.json",
@@ -1950,6 +1977,11 @@ def build_video_games_software_benchmark_tribe(
         }
         trait_source = "micro_cluster_details (seed)"
     tribe_desc = tribe_persona_description(tribe_def, tribe_name)
+    display_override = VIDEO_GAMES_TRIBE_DISPLAY_OVERRIDES.get((cluster, micro))
+    if display_override:
+        tribe_name = display_override["name"]
+        tribe_def = display_override["description"]
+        tribe_desc = display_override["description"]
 
     details_desc = product_descriptions_by_review_key(details)
     by_user: dict[str, list[dict]] = {}
