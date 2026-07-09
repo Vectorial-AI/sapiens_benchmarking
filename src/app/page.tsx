@@ -27,13 +27,7 @@ import {
   loadWizardSession,
   saveWizardSession,
 } from "@/lib/wizard-session";
-import {
-  groundTruthThemesMissed,
-  predictedThemeMatchesGroundTruth,
-  themeTopKFromGroundTruth,
-  topKThemeEntries,
-  topKThemeEntriesForSapiensDisplay,
-} from "@/lib/scoring";
+import { topKThemeEntries, topKThemeEntriesForSapiensDisplay, themeTopKFromGroundTruth } from "@/lib/scoring";
 
 const DOMAIN_SECTIONS = [
   { id: "video_games" as const, label: "Video Games & Software" },
@@ -1089,7 +1083,7 @@ function ResultCard({
   error?: string;
   latencyMs?: number;
   themeTopK: number;
-  /** Sapiens only: tie-aware theme list, GT match first among equal scores. */
+  /** Sapiens only: recall@k theme list (best recall among tied scores). */
   sapiensThemeDisplay?: boolean;
   themeDisplayGroundTruth?: string[];
   similarityExplanation?: string | null;
@@ -1105,11 +1099,7 @@ function ResultCard({
         themeDisplayGroundTruth,
       )
     : topKThemeEntries(predictedThemes, themeTopK);
-  const missedGtThemes =
-    sapiensThemeDisplay && themeDisplayGroundTruth?.length
-      ? groundTruthThemesMissed(predictedThemes, themeDisplayGroundTruth)
-      : [];
-  const hasDetails = themeEntries.length > 0 || missedGtThemes.length > 0 || sentiment;
+  const hasDetails = themeEntries.length > 0 || sentiment;
   return (
     <div className="rounded-xl border border-border p-4 flex flex-col">
       <div className="flex items-center justify-between mb-2.5">
@@ -1193,37 +1183,17 @@ function ResultCard({
               )}
               {themeEntries.length > 0 && (
                 <ul className="space-y-1">
-                  {themeEntries.map(([theme, value]) => {
-                    const matchesGt =
-                      sapiensThemeDisplay &&
-                      themeDisplayGroundTruth?.length &&
-                      predictedThemeMatchesGroundTruth(theme, themeDisplayGroundTruth);
-                    return (
-                      <li key={theme} className="flex items-center gap-2 text-[11px]">
-                        {sapiensThemeDisplay && themeDisplayGroundTruth?.length ? (
-                          <span
-                            className={`shrink-0 w-3 text-center ${matchesGt ? "text-real" : "text-muted-2"}`}
-                            title={matchesGt ? "Matches ground truth" : "Not in ground truth"}
-                          >
-                            {matchesGt ? "✓" : "·"}
-                          </span>
-                        ) : null}
-                        <span className="text-muted truncate flex-1" title={theme}>
-                          {theme}
-                        </span>
-                        {value !== 1 && (
-                          <span className="text-muted-2 tabular-nums w-8 text-right">{value.toFixed(2)}</span>
-                        )}
-                      </li>
-                    );
-                  })}
+                  {themeEntries.map(([theme, value]) => (
+                    <li key={theme} className="flex items-center gap-2 text-[11px]">
+                      <span className="text-muted truncate flex-1" title={theme}>
+                        {theme}
+                      </span>
+                      {value !== 1 && (
+                        <span className="text-muted-2 tabular-nums w-8 text-right">{value.toFixed(2)}</span>
+                      )}
+                    </li>
+                  ))}
                 </ul>
-              )}
-              {missedGtThemes.length > 0 && (
-                <p className="text-[11px] text-muted-2 leading-snug">
-                  <span className="text-muted">Missing vs ground truth:</span>{" "}
-                  {missedGtThemes.join(", ")}
-                </p>
               )}
             </div>
           )}

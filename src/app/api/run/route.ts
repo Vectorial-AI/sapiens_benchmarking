@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { getCategoryThemes } from "@/lib/category-themes";
 import { findContext, type Tribe, type User } from "@/lib/master";
 import {
   BASELINE_METHODS,
@@ -33,87 +32,6 @@ type ScoringGroundTruth = {
   themes: string[];
   sentiment: ReviewSentiment | null;
 } | null;
-
-function parseThemeScoreJson(raw: string, allowedThemes: string[]): Record<string, number> | null {
-  const cleaned = raw
-    .trim()
-    .replace(/^```(?:json)?/i, "")
-    .replace(/```$/i, "")
-    .trim();
-  const start = cleaned.indexOf("{");
-  const end = cleaned.lastIndexOf("}");
-  if (start === -1 || end === -1) return null;
-
-  try {
-    const obj = JSON.parse(cleaned.slice(start, end + 1)) as unknown;
-    const source =
-      obj &&
-      typeof obj === "object" &&
-      !Array.isArray(obj) &&
-      "predicted_themes" in obj
-        ? (obj as { predicted_themes?: unknown }).predicted_themes
-        : obj;
-
-    if (!source || typeof source !== "object" || Array.isArray(source)) return null;
-
-    const parsed = source as Record<string, unknown>;
-    const out: Record<string, number> = {};
-    for (const theme of allowedThemes) {
-      const rawScore = parsed[theme];
-      const score = Number(rawScore);
-      out[theme] = Number.isFinite(score) ? Math.min(1, Math.max(0, score)) : 0;
-    }
-    return out;
-  } catch {
-    return null;
-  }
-}
-
-async function rescoreThemesFromReview(args: {
-  reviewText: string;
-  category: string;
-  model: string;
-}): Promise<Record<string, number> | null> {
-  const themes = getCategoryThemes(args.category);
-  if (!themes.length || !args.reviewText.trim()) return null;
-
-  const prompt = `You are scoring Amazon review themes from review text only.
-
-Read the review and assign a confidence score from 0.0 to 1.0 for every theme listed.
-
-Scoring rules:
-- Score direct and clearly implied evidence in the review text.
-- Do not use product description, ground truth, or outside knowledge.
-- High (0.8-1.0): the review clearly emphasizes the theme.
-- Medium (0.3-0.7): the review mentions or strongly implies the theme.
-- Low (0.0-0.2): the theme is absent or only weakly implied.
-- Return valid JSON only. Theme names must match exactly.
-
-Review:
-${args.reviewText}
-
-Themes:
-${themes.map((theme) => `- ${theme}`).join("\n")}
-
-Output:
-{
-  "predicted_themes": {
-${themes.map((theme) => `    ${JSON.stringify(theme)}: 0.0`).join(",\n")}
-  }
-}`;
-
-  try {
-    const raw = await runModel({
-      model: args.model,
-      system: "You are a strict theme scorer. Return JSON only.",
-      prompt,
-      temperature: 0,
-    });
-    return parseThemeScoreJson(raw, themes);
-  } catch {
-    return null;
-  }
-}
 
 async function attachMetrics(
   result: EngineResult,
@@ -276,16 +194,6 @@ export async function POST(req: Request) {
     } else {
       const sapiensTemperature = tribe.domain === "healthcare" ? 0.2 : 0.8;
       sapiens = await runEngine("sapiens", sapiensPrompt, SAPIENS_MODEL, sapiensTemperature);
-      if (tribe.domain === "video_games" && sapiens.reviewText.trim() && !sapiens.error) {
-        const rescoredThemes = await rescoreThemesFromReview({
-          reviewText: sapiens.reviewText,
-          category,
-          model: SAPIENS_MODEL,
-        });
-        if (rescoredThemes) {
-          sapiens = { ...sapiens, predictedThemes: rescoredThemes };
-        }
-      }
     }
 
     if (scoringGroundTruth) sapiens = await attachMetrics(sapiens, scoringGroundTruth, "Sapiens");

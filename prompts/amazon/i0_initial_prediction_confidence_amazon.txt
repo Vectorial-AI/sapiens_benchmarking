@@ -83,21 +83,21 @@ HOW TO APPROACH THIS (work through these steps before you write)
   "Bottom line", pros/cons framing, or evaluator-style sections unless their prior reviews use that style.
 - Real reviewers weave concerns together in prose. They do NOT give each topic its own labeled section.
 
-**3. Consider the product**
+**3. Consider the product and themes**
 - Read the product description in Section 4.
 - Run Section 2B (if present) against this product: what would this reviewer likely care about — expressed freshly, not as copied bullets?
+- Map those evaluation priorities to themes in Section 5: which themes would this user **lead with**, **mention briefly**, or **skip** for this product?
 - What would someone with YOUR tribe traits AND YOUR personal characteristics care about for this product?
-- Which themes from Section 5 would you naturally emphasize, mention briefly, or ignore — **guided by Section 2 + 2B**, then tribe traits?
 
-**4. Write and score**
-- Write a realistic `review_text` that reflects what **this user** would ACTUALLY post — shaped by Section 2 and 2B when present, in **your own words**.
-- Then assign theme confidence scores for ALL themes in Section 5 based on that review. **Theme scores must reflect how this user evaluates** (high where they would emphasize; low where they would skip).
+**4. Write the review, then score themes in the same response**
+- Write a realistic `review_text` that reflects what **this user** would ACTUALLY post — shaped by Section 2 + 2B when present, in **your own words**.
+- In the same JSON output, assign theme confidence scores for ALL themes in Section 5. Score from **Section 2B evaluation norms first** (what this user tends to emphasize)`.
 
 ---
 Write the review in exactly **{length_constraint}** words.
 
 ---
-YOUR TASK (two steps — do them in this order)
+YOUR TASK (one response — review, themes, and sentiment together)
 
 **STEP 1 — Write a high-quality review (this is the most important part)**
 
@@ -115,16 +115,18 @@ Write like **this user** (Section 3), shaped by Section 2 + 2B (if present), you
 
 A good review reads like a person wrote it on Amazon, not like a rubric, norm checklist, or robot. Make it believable.
 
-**STEP 2 — Assign theme confidence scores (based on the review you just wrote)**
+**STEP 2 — Assign theme confidence scores (same response — no separate pass)**
 
-After you have written `review_text`, score EVERY theme in Section 5 (0.0 to 1.0) — how strongly
-**your review** reflects that theme:
-- High (0.8–1.0): you clearly emphasized this theme in the review
-- Medium (0.3–0.7): you mentioned or implied it
-- Low (0.0–0.2): not relevant to what you wrote
+Score EVERY theme in Section 5 (0.0 to 1.0) in `predicted_themes`:
 
-Scores must match the review you wrote in Step 1. Do not score themes you did not reflect in the text.
-- **If Section 2B is present:** re-check every theme against that evaluation summary before finalizing scores — a theme this reviewer would emphasize should not be scored low unless the review truly omits it.
+1. **Start from Section 2B (if present):** infer which themes this user would emphasize, mention briefly, or skip for this product based on their evaluation norms — map norm concerns to the closest Section 5 theme names.
+2. **Verify against `review_text`:** scores must match what you actually wrote. Do not score high on themes absent from the review.
+3. **Calibration:**
+   - High (0.8–1.0): this user would lead with this theme and your review clearly reflects it
+   - Medium (0.3–0.7): mentioned or implied, but not a main focus for this user
+   - Low (0.0–0.2): this user would skip it, or the review does not cover it
+
+If Section 2B says this reviewer foregrounds a concern (e.g. multiplayer fun, hardware setup, collectibles), the matching Section 5 theme should be among your **highest** scores when the review reflects it.
 
 **STEP 3 — Assign overall sentiment (based on the review you just wrote)**
 

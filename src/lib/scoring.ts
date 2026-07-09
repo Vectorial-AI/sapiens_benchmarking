@@ -160,15 +160,10 @@ function combinations<T>(items: T[], r: number): T[][] {
   ];
 }
 
-/** Min score for a GT-matching theme to enter Sapiens recall candidate pool below top-k cutoff. */
-export const GT_MATCH_CANDIDATE_MIN_SCORE = 0.25;
-
-/** Min score to show a predicted theme in the Sapiens UI theme list. */
-export const SAPIENS_DISPLAY_THEME_MIN_SCORE = 0.5;
 
 /**
- * Sapiens: pick size-k set that maximizes recall@k among top-k cutoff ties plus any
- * GT-matching theme scored >= GT_MATCH_CANDIDATE_MIN_SCORE.
+ * Sapiens recall@k: among themes tied at the k-th score cutoff, pick the size-k set
+ * with highest recall@k; break ties by GT match count, then total confidence.
  */
 export function bestRecallTopKThemeNames(
   predictedThemes: Record<string, number>,
@@ -182,39 +177,42 @@ export function bestRecallTopKThemeNames(
   if (!actualSet.size) return ranked.slice(0, k).map(([theme]) => theme);
 
   const cutoffScore = ranked[Math.min(k - 1, ranked.length - 1)][1];
-  const candidateSet = new Set(
-    ranked.filter(([, score]) => score >= cutoffScore).map(([theme]) => theme),
-  );
-  for (const [theme, score] of ranked) {
-    if (score >= GT_MATCH_CANDIDATE_MIN_SCORE && groundTruthMatchKeys(theme, actualSet).size > 0) {
-      candidateSet.add(theme);
-    }
-  }
   const candidateThemes = ranked
-    .filter(([theme]) => candidateSet.has(theme))
+    .filter(([, score]) => score >= cutoffScore)
     .map(([theme]) => theme);
 
   const pick = Math.min(k, candidateThemes.length);
   if (pick <= 0) return [];
 
+  const gtMatchesInCombo = (combo: string[]) => {
+    const matched = new Set<string>();
+    for (const theme of combo) {
+      groundTruthMatchKeys(theme, actualSet).forEach((m) => matched.add(m));
+    }
+    return matched.size;
+  };
+
   let best = candidateThemes.slice(0, pick);
   let bestRecall = recallForThemeNames(best, actualSet);
+  let bestGtMatches = gtMatchesInCombo(best);
   let bestScoreSum = best.reduce((sum, t) => sum + (predictedThemes[t] ?? 0), 0);
 
   for (const combo of combinations(candidateThemes, pick)) {
     const recall = recallForThemeNames(combo, actualSet);
+    const gtMatches = gtMatchesInCombo(combo);
     const scoreSum = combo.reduce((sum, t) => sum + (predictedThemes[t] ?? 0), 0);
     if (
       recall > bestRecall ||
-      (recall === bestRecall && scoreSum > bestScoreSum)
+      (recall === bestRecall && gtMatches > bestGtMatches) ||
+      (recall === bestRecall && gtMatches === bestGtMatches && scoreSum > bestScoreSum)
     ) {
       best = combo;
       bestRecall = recall;
+      bestGtMatches = gtMatches;
       bestScoreSum = scoreSum;
     }
   }
 
-  // Preserve display/scoring order: highest score first.
   const rankIndex = new Map(ranked.map(([theme], i) => [theme, i]));
   return [...best].sort(
     (a, b) => (rankIndex.get(a) ?? 999) - (rankIndex.get(b) ?? 999),
@@ -272,44 +270,16 @@ export function predictedThemeMatchesGroundTruth(
   return groundTruthMatchKeys(predictedTheme, actualSet).size > 0;
 }
 
-/** All predicted themes at or above min score — for Sapiens UI (full picture, not just recall@k pick). */
-export function significantThemeEntries(
-  predictedThemes: Record<string, number> | undefined | null,
-  minScore = SAPIENS_DISPLAY_THEME_MIN_SCORE,
-): Array<[string, number]> {
-  return rankThemeEntries(predictedThemes ?? {}).filter(([, score]) => score >= minScore);
-}
-
-/** GT theme names with no predicted theme match at or above minScore. */
-export function groundTruthThemesMissed(
-  predictedThemes: Record<string, number> | undefined | null,
-  groundTruthThemes: string[],
-  minScore = GT_MATCH_CANDIDATE_MIN_SCORE,
-): string[] {
-  const ranked = rankThemeEntries(predictedThemes ?? {});
-  const matchedGt = new Set<string>();
-  for (const [theme, score] of ranked) {
-    if (score < minScore) continue;
-    for (const gt of groundTruthThemes) {
-      if (predictedThemeMatchesGroundTruth(theme, [gt])) {
-        matchedGt.add(gt);
-      }
-    }
-  }
-  return groundTruthThemes.filter((gt) => !matchedGt.has(gt));
-}
-
-/** Sapiens UI: all significant scores + GT match context (scoring still uses bestRecallTopK). */
+/** Sapiens UI + scoring: recall@k set only (best recall among tied scores at cutoff). */
 export function topKThemeEntriesForSapiensDisplay(
   predictedThemes: Record<string, number> | undefined | null,
-  _k: number,
+  k: number,
   groundTruthThemes?: string[],
 ): Array<[string, number]> {
-  const entries = significantThemeEntries(predictedThemes);
-  if (entries.length > 0 || !groundTruthThemes?.length) {
-    return entries;
+  if (!groundTruthThemes?.length) {
+    return topKThemeEntries(predictedThemes, k);
   }
-  return topKThemeEntries(predictedThemes, _k);
+  return bestRecallTopKThemeEntries(predictedThemes, k, groundTruthThemes);
 }
 
 /** recall@k with fuzzy matching over top-k predicted themes. */
