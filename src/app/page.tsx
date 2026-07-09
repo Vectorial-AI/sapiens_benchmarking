@@ -554,6 +554,7 @@ export default function Home() {
 
                 <div className="grid gap-4 sm:grid-cols-2 items-stretch">
                   <ResultCard
+                    key={groundTruth ?? "real"}
                     tone="real"
                     title="Real Review (Ground Truth)"
                     text={groundTruth ?? undefined}
@@ -562,6 +563,7 @@ export default function Home() {
                     themeTopK={themeTopK}
                   />
                   <ResultCard
+                    key={sapiens?.reviewText ?? "sapiens"}
                     tone="sapiens"
                     title="SAPIENS"
                     loading={runningSapiens}
@@ -700,6 +702,7 @@ export default function Home() {
 
                 <div className="grid gap-5 sm:grid-cols-2 items-stretch">
                   <ResultCard
+                    key={groundTruth ?? "real-4"}
                     tone="real"
                     title="Real Review (Ground Truth)"
                     text={groundTruth ?? undefined}
@@ -708,6 +711,7 @@ export default function Home() {
                     themeTopK={themeTopK}
                   />
                   <ResultCard
+                    key={sapiens?.reviewText ?? "sapiens-4"}
                     tone="sapiens"
                     title="SAPIENS"
                     text={sapiens?.reviewText}
