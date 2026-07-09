@@ -23,12 +23,20 @@ export type CatalogProduct = {
   overallSimilarityScore?: number;
 };
 
+export type CatalogUserHistoryReview = {
+  reviewText: string;
+  category: string;
+  mainCategory: string;
+  reviewKey?: string;
+};
+
 export type CatalogUser = {
   id: string;
   characteristicSummary: string;
   categoryCharacteristics?: Record<string, string>;
   similarityScore: number;
   products: CatalogProduct[];
+  userHistoryReviews?: CatalogUserHistoryReview[];
 };
 
 export type DataSources = {
@@ -75,6 +83,8 @@ export type CatalogTribe = CatalogTribeIndex & {
 
 export type HistoryContextItem = {
   reviewText: string;
+  category?: string;
+  mainCategory?: string;
 };
 
 export type ReviewSentiment = "Positive" | "Negative" | "Neutral";
@@ -124,6 +134,7 @@ export type BaselineResult = EngineResult & {
   method: BaselineMethod;
   baselineModel: BaselineModel;
   historyContext?: HistoryContextItem[];
+  baselinePrompt?: string;
 };
 
 export type RunMode = "sapiens" | "baseline";

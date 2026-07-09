@@ -332,6 +332,12 @@ export function getCatalogTribe(id: string): CatalogTribe | undefined {
       characteristicSummary: u.characteristicSummary,
       categoryCharacteristics: u.categoryCharacteristics,
       similarityScore: u.similarityScore,
+      userHistoryReviews: u.userHistoryReviews.map((r) => ({
+        reviewText: r.reviewText,
+        category: r.category,
+        mainCategory: r.mainCategory,
+        reviewKey: r.reviewKey,
+      })),
       products: u.products.map((p) => ({
         reviewKey: p.reviewKey,
         productDescription: p.productDescription,

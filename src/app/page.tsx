@@ -13,6 +13,7 @@ import {
   PiTag,
   PiArrowRight,
   PiFileText,
+  PiInfo,
 } from "react-icons/pi";
 import { Dot, Label, Spinner, TONE_BG, type Tone } from "@/components/ui";
 import {
@@ -28,7 +29,9 @@ import type {
   BaselineRunResponse,
   CatalogTribe,
   CatalogTribeIndex,
+  CatalogUserHistoryReview,
   EngineResult,
+  HistoryContextItem,
   InferredTraitInfluence,
   PipelineMetrics,
   ReviewSentiment,
@@ -93,6 +96,7 @@ export default function Home() {
   const restoredRef = useRef(false);
   const skipProductDescSyncRef = useRef(false);
   const skipPopulationDefSyncRef = useRef(false);
+  const skipTribeDefSyncRef = useRef(false);
   const [step, setStep] = useState(0);
   const [gatewayConnected, setGatewayConnected] = useState(false);
 
@@ -108,6 +112,13 @@ export default function Home() {
   const [baselineMethod, setBaselineMethod] = useState<BaselineMethod>("history");
   const [useCustomPopulationDef, setUseCustomPopulationDef] = useState(false);
   const [customPopulationDef, setCustomPopulationDef] = useState("");
+  const [useCustomTribeDef, setUseCustomTribeDef] = useState(false);
+  const [customTribeDef, setCustomTribeDef] = useState("");
+  const [baselinePromptOpen, setBaselinePromptOpen] = useState<BaselineMethod | null>(null);
+  const [baselinePromptDrafts, setBaselinePromptDrafts] = useState<
+    Partial<Record<BaselineMethod, string>>
+  >({});
+  const [baselinePromptLoading, setBaselinePromptLoading] = useState(false);
 
   const [groundTruth, setGroundTruth] = useState<string | null>(null);
   const [groundTruthThemes, setGroundTruthThemes] = useState<string[]>([]);
@@ -153,6 +164,16 @@ export default function Home() {
       setCustomPopulationDef(tribe.populationDefinition);
     }
   }, [tribe?.id, tribe?.populationDefinition]);
+
+  useEffect(() => {
+    if (skipTribeDefSyncRef.current) {
+      skipTribeDefSyncRef.current = false;
+      return;
+    }
+    if (tribe?.tribeDefinition) {
+      setCustomTribeDef(tribe.tribeDefinition);
+    }
+  }, [tribe?.id, tribe?.tribeDefinition]);
 
   useEffect(() => {
     fetch("/api/models")
@@ -277,10 +298,54 @@ export default function Home() {
     };
   }
 
+  async function refreshBaselinePrompt(method: BaselineMethod, force = false) {
+    if (!canRun) return;
+    if (!force && baselinePromptDrafts[method]) return;
+    setBaselinePromptLoading(true);
+    try {
+      const res = await fetch("/api/baseline-prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...runPayload(),
+          baselineMethod: method,
+          ...(method === "population_persona" &&
+          useCustomPopulationDef &&
+          customPopulationDef.trim()
+            ? { populationDefinition: customPopulationDef.trim() }
+            : {}),
+          ...(method === "tribe_persona" && useCustomTribeDef && customTribeDef.trim()
+            ? { tribeDefinition: customTribeDef.trim() }
+            : {}),
+        }),
+      });
+      const data = await res.json();
+      if (data.prompt) {
+        setBaselinePromptDrafts((prev) => ({ ...prev, [method]: data.prompt as string }));
+      }
+    } catch {
+      /* noop */
+    } finally {
+      setBaselinePromptLoading(false);
+    }
+  }
+
+  function openBaselinePrompt(method: BaselineMethod) {
+    setBaselinePromptOpen((current) => {
+      const next = current === method ? null : method;
+      if (next) void refreshBaselinePrompt(next, true);
+      return next;
+    });
+  }
+
   function baselineKey(method: BaselineMethod, model: BaselineModel) {
     const customPop =
       method === "population_persona" && useCustomPopulationDef && customPopulationDef.trim();
-    return customPop ? `${method}:${model}:custom` : `${method}:${model}`;
+    const customTribe =
+      method === "tribe_persona" && useCustomTribeDef && customTribeDef.trim();
+    if (customPop) return `${method}:${model}:custom`;
+    if (customTribe) return `${method}:${model}:custom-tribe`;
+    return `${method}:${model}`;
   }
 
   async function doRunSapiens() {
@@ -336,6 +401,12 @@ export default function Home() {
           ...(method === "population_persona" && useCustomPopulationDef && customPopulationDef.trim()
             ? { populationDefinition: customPopulationDef.trim() }
             : {}),
+          ...(method === "tribe_persona" && useCustomTribeDef && customTribeDef.trim()
+            ? { tribeDefinition: customTribeDef.trim() }
+            : {}),
+          ...(baselinePromptDrafts[method]?.trim()
+            ? { customBaselinePrompt: baselinePromptDrafts[method]!.trim() }
+            : {}),
         }),
       });
       const data: BaselineRunResponse = await res.json();
@@ -385,8 +456,9 @@ export default function Home() {
 
   function selectBaselineMethod(m: BaselineMethod) {
     setBaselineMethod(m);
-    if (m !== "population_persona") setUseCustomPopulationDef(false);
   }
+
+  const userHistoryReviews = user?.userHistoryReviews ?? [];
 
   return (
     <div className="mx-auto w-full px-6 py-8 sm:py-12 max-w-6xl">
@@ -637,63 +709,76 @@ export default function Home() {
                     <Label>Baseline method</Label>
                     <div className="grid gap-2 sm:grid-cols-3">
                       {BASELINE_METHODS.map((m) => (
-                        <button
+                        <div
                           key={m}
-                          onClick={() => selectBaselineMethod(m)}
-                          className={`text-left rounded-xl border-2 p-3 transition ${
+                          className={`rounded-xl border-2 p-3 transition ${
                             baselineMethod === m
                               ? "border-accent bg-accent/15"
                               : "border-transparent hover:border-border-strong bg-surface border border-border"
                           }`}
                         >
-                          <div className="flex items-center gap-2">
-                            <Dot tone={BASELINE_METHOD_META[m].tone} />
-                            <span className="text-[13px] font-medium">
-                              {BASELINE_METHOD_META[m].label}
-                            </span>
+                          <div className="flex items-start justify-between gap-2">
+                            <button
+                              type="button"
+                              onClick={() => selectBaselineMethod(m)}
+                              className="flex items-center gap-2 text-left flex-1 min-w-0"
+                            >
+                              <Dot tone={BASELINE_METHOD_META[m].tone} />
+                              <span className="text-[13px] font-medium leading-snug">
+                                {BASELINE_METHOD_META[m].label}
+                              </span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => openBaselinePrompt(m)}
+                              className={`shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-lg border transition ${
+                                baselinePromptOpen === m
+                                  ? "border-accent bg-accent/15 text-accent"
+                                  : "border-border text-foreground/40 hover:text-foreground hover:border-border-strong"
+                              }`}
+                              aria-label={`View ${BASELINE_METHOD_META[m].label} prompt`}
+                              title="View / edit prompt"
+                            >
+                              <PiInfo size={16} />
+                            </button>
                           </div>
-                        </button>
+                        </div>
                       ))}
                     </div>
                   </div>
 
-                  {baselineMethod === "population_persona" && (
-                    <div className="space-y-3">
-                      <button
-                        type="button"
-                        onClick={() => setUseCustomPopulationDef((v) => !v)}
-                        className={`inline-flex items-center gap-2 text-[13px] font-semibold rounded-lg px-3.5 py-2 border transition ${
-                          useCustomPopulationDef
-                            ? "bg-accent/10 text-accent border-accent/30 hover:bg-accent/20"
-                            : "bg-surface border-border text-foreground hover:bg-surface-3"
-                        }`}
-                      >
-                        <span className={`inline-flex h-4 w-4 items-center justify-center rounded-full border-2 shrink-0 transition ${
-                          useCustomPopulationDef ? "bg-accent border-accent" : "border-foreground/20"
-                        }`}>
-                          {useCustomPopulationDef && (
-                            <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-                              <path d="M1.5 4L3 5.5L6.5 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          )}
-                        </span>
-                        {useCustomPopulationDef ? "Using custom definition" : "Use custom definition"}
-                      </button>
-
-                      {useCustomPopulationDef ? (
-                        <textarea
-                          value={customPopulationDef}
-                          onChange={(e) => setCustomPopulationDef(e.target.value)}
-                          rows={4}
-                          placeholder="Describe the population persona to send as context…"
-                          className="w-full rounded-xl border-2 border-accent/40 bg-surface px-4 py-3 text-[13px] font-normal text-foreground leading-relaxed resize-y min-h-[5rem] focus:outline-none focus:border-accent"
-                        />
-                      ) : (
-                        <p className="text-[13px] font-normal text-foreground/60 leading-relaxed">
-                          {tribe?.populationDefinition || "Default population definition for this tribe."}
-                        </p>
-                      )}
-                    </div>
+                  {baselinePromptOpen && (
+                    <BaselinePromptInspector
+                      method={baselinePromptOpen}
+                      prompt={baselinePromptDrafts[baselinePromptOpen] ?? ""}
+                      loading={baselinePromptLoading}
+                      onPromptChange={(value) =>
+                        setBaselinePromptDrafts((prev) => ({
+                          ...prev,
+                          [baselinePromptOpen]: value,
+                        }))
+                      }
+                      onReset={() => void refreshBaselinePrompt(baselinePromptOpen, true)}
+                      tribeDefinition={customTribeDef}
+                      useCustomTribeDef={useCustomTribeDef}
+                      onTribeDefinitionChange={setCustomTribeDef}
+                      onUseCustomTribeDefChange={(value) => {
+                        setUseCustomTribeDef(value);
+                        if (baselinePromptOpen === "tribe_persona") {
+                          void refreshBaselinePrompt("tribe_persona", true);
+                        }
+                      }}
+                      populationDefinition={customPopulationDef}
+                      useCustomPopulationDef={useCustomPopulationDef}
+                      onPopulationDefinitionChange={setCustomPopulationDef}
+                      onUseCustomPopulationDefChange={(value) => {
+                        setUseCustomPopulationDef(value);
+                        if (baselinePromptOpen === "population_persona") {
+                          void refreshBaselinePrompt("population_persona", true);
+                        }
+                      }}
+                      userHistoryReviews={userHistoryReviews}
+                    />
                   )}
 
                   <div>
@@ -767,6 +852,8 @@ export default function Home() {
                       latencyMs={b.latencyMs}
                       themeTopK={themeTopK}
                       similarityExplanation={b.similarityExplanation}
+                      baselinePrompt={b.baselinePrompt}
+                      historyContext={b.historyContext}
                       onRemove={() => removeBaseline(b.key)}
                     />
                   ))}
@@ -776,8 +863,10 @@ export default function Home() {
                       tone={BASELINE_METHOD_META[runningBaselineMethod].tone}
                       title={
                         runningBaselineKey.endsWith(":custom")
-                          ? `${baselineLabel(runningBaselineMethod, runningBaselineModel)} (custom def)`
-                          : baselineLabel(runningBaselineMethod, runningBaselineModel)
+                          ? `${baselineLabel(runningBaselineMethod, runningBaselineModel)} (custom population)`
+                          : runningBaselineKey.endsWith(":custom-tribe")
+                            ? `${baselineLabel(runningBaselineMethod, runningBaselineModel)} (custom tribe def)`
+                            : baselineLabel(runningBaselineMethod, runningBaselineModel)
                       }
                       loading
                       themeTopK={themeTopK}
@@ -1048,7 +1137,164 @@ function UserSelectCard({
 
 function baselineDisplayLabel(b: BaselineResult) {
   const base = baselineLabel(b.method, b.baselineModel);
-  return b.key.endsWith(":custom") ? `${base} (custom def)` : base;
+  if (b.key.endsWith(":custom")) return `${base} (custom population)`;
+  if (b.key.endsWith(":custom-tribe")) return `${base} (custom tribe def)`;
+  return base;
+}
+
+function BaselinePromptInspector({
+  method,
+  prompt,
+  loading,
+  onPromptChange,
+  onReset,
+  tribeDefinition,
+  useCustomTribeDef,
+  onTribeDefinitionChange,
+  onUseCustomTribeDefChange,
+  populationDefinition,
+  useCustomPopulationDef,
+  onPopulationDefinitionChange,
+  onUseCustomPopulationDefChange,
+  userHistoryReviews,
+}: {
+  method: BaselineMethod;
+  prompt: string;
+  loading: boolean;
+  onPromptChange: (value: string) => void;
+  onReset: () => void;
+  tribeDefinition: string;
+  useCustomTribeDef: boolean;
+  onTribeDefinitionChange: (value: string) => void;
+  onUseCustomTribeDefChange: (value: boolean) => void;
+  populationDefinition: string;
+  useCustomPopulationDef: boolean;
+  onPopulationDefinitionChange: (value: string) => void;
+  onUseCustomPopulationDefChange: (value: boolean) => void;
+  userHistoryReviews: CatalogUserHistoryReview[];
+}) {
+  const [historyOpen, setHistoryOpen] = useState(false);
+
+  return (
+    <div className="rounded-xl border border-border bg-surface-2/40 p-4 space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground/40">
+          {BASELINE_METHOD_META[method].label} — prompt
+        </span>
+        <button
+          type="button"
+          onClick={onReset}
+          className="text-[12px] font-medium text-accent hover:underline"
+        >
+          Reset to default
+        </button>
+      </div>
+
+      {method === "tribe_persona" && (
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => onUseCustomTribeDefChange(!useCustomTribeDef)}
+            className={`inline-flex items-center gap-2 text-[12px] font-semibold rounded-lg px-3 py-1.5 border transition ${
+              useCustomTribeDef
+                ? "bg-accent/10 text-accent border-accent/30"
+                : "bg-surface border-border text-foreground/70"
+            }`}
+          >
+            {useCustomTribeDef ? "Using custom tribe definition" : "Edit tribe definition"}
+          </button>
+          {useCustomTribeDef ? (
+            <textarea
+              value={tribeDefinition}
+              onChange={(e) => onTribeDefinitionChange(e.target.value)}
+              onBlur={() => onReset()}
+              rows={3}
+              className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-[12px] text-foreground leading-relaxed resize-y"
+              placeholder="Tribe definition included in the prompt…"
+            />
+          ) : (
+            <p className="text-[12px] text-foreground/60 leading-relaxed">{tribeDefinition}</p>
+          )}
+        </div>
+      )}
+
+      {method === "population_persona" && (
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => onUseCustomPopulationDefChange(!useCustomPopulationDef)}
+            className={`inline-flex items-center gap-2 text-[12px] font-semibold rounded-lg px-3 py-1.5 border transition ${
+              useCustomPopulationDef
+                ? "bg-accent/10 text-accent border-accent/30"
+                : "bg-surface border-border text-foreground/70"
+            }`}
+          >
+            {useCustomPopulationDef ? "Using custom population definition" : "Edit population definition"}
+          </button>
+          {useCustomPopulationDef ? (
+            <textarea
+              value={populationDefinition}
+              onChange={(e) => onPopulationDefinitionChange(e.target.value)}
+              onBlur={() => onReset()}
+              rows={3}
+              className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-[12px] text-foreground leading-relaxed resize-y"
+              placeholder="Population definition included in the prompt…"
+            />
+          ) : (
+            <p className="text-[12px] text-foreground/60 leading-relaxed">{populationDefinition}</p>
+          )}
+        </div>
+      )}
+
+      {method === "history" && userHistoryReviews.length > 0 && (
+        <div>
+          <button
+            type="button"
+            onClick={() => setHistoryOpen((v) => !v)}
+            className="flex items-center justify-between w-full text-left group"
+          >
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 group-hover:text-foreground/60 transition">
+              User history ({userHistoryReviews.length} reviews)
+            </span>
+            <span className={`text-[9px] text-foreground/30 group-hover:text-foreground/50 transition ${historyOpen ? "rotate-180" : ""}`}>▼</span>
+          </button>
+          {historyOpen && (
+            <ul className="mt-2.5 space-y-2 max-h-56 overflow-y-auto">
+              {userHistoryReviews.map((item, index) => (
+                <li
+                  key={`${item.reviewKey ?? index}-${item.mainCategory}`}
+                  className="rounded-lg border border-border bg-surface px-3 py-2.5"
+                >
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 mb-1">
+                    {item.mainCategory}
+                  </p>
+                  <p className="text-[12px] text-foreground/70 leading-relaxed line-clamp-4">
+                    {item.reviewText}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="space-y-2">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="shimmer h-3 rounded" style={{ width: `${96 - i * 12}%` }} />
+          ))}
+        </div>
+      ) : (
+        <textarea
+          value={prompt}
+          onChange={(e) => onPromptChange(e.target.value)}
+          rows={16}
+          className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-[12px] font-mono text-foreground leading-relaxed resize-y min-h-[12rem] focus:outline-none focus:border-accent"
+          placeholder="Baseline prompt sent to the model…"
+        />
+      )}
+    </div>
+  );
 }
 
 function ProductDescriptionEditor({
@@ -1147,6 +1393,8 @@ function ResultCard({
   similarityExplanation,
   inferredTraitSummary,
   inferredTraitInfluences,
+  baselinePrompt,
+  historyContext,
   onRemove,
 }: {
   tone: Tone;
@@ -1166,6 +1414,8 @@ function ResultCard({
   similarityExplanation?: string | null;
   inferredTraitSummary?: string | null;
   inferredTraitInfluences?: InferredTraitInfluence[] | null;
+  baselinePrompt?: string | null;
+  historyContext?: HistoryContextItem[] | null;
   onRemove?: () => void;
 }) {
   const isGenerated = tone !== "real";
@@ -1178,6 +1428,9 @@ function ResultCard({
       )
     : topKThemeEntries(predictedThemes, themeTopK);
   const hasDetails = themeEntries.length > 0 || sentiment;
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [baselinePromptOpen, setBaselinePromptOpen] = useState(false);
+  const [baselineHistoryOpen, setBaselineHistoryOpen] = useState(false);
   const visibleTraitInfluences =
     inferredTraitInfluences?.filter(
       (item) => item.confidence >= INFERRED_TRAIT_UI_MIN_CONFIDENCE,
@@ -1269,16 +1522,24 @@ function ResultCard({
             Inferred trait influences
           </span>
           {inferredTraitSummary && (
-            <p className="text-[13px] font-normal text-foreground leading-relaxed mb-4">
+            <p className="text-[13px] font-normal text-foreground leading-relaxed">
               {inferredTraitSummary}
             </p>
           )}
           {visibleTraitInfluences.length > 0 && (
-            <>
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 block mb-2.5">
-            Proofs
-          </span>
-          <ul className="space-y-3">
+            <div className={inferredTraitSummary ? "mt-4" : undefined}>
+              <button
+                type="button"
+                onClick={() => setEvidenceOpen((v) => !v)}
+                className="flex items-center justify-between w-full text-left group"
+              >
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 group-hover:text-foreground/60 transition">
+                  Grounded in evidence
+                </span>
+                <span className={`text-[9px] text-foreground/30 group-hover:text-foreground/50 transition ${evidenceOpen ? "rotate-180" : ""}`}>▼</span>
+              </button>
+              {evidenceOpen && (
+                <ul className="space-y-3 mt-2.5">
             {visibleTraitInfluences.map((item) => (
               <li key={`${item.source}-${item.trait}`} className="rounded-xl border border-border bg-surface px-3.5 py-3">
                 <div className="flex items-start justify-between gap-3 mb-1.5">
@@ -1308,8 +1569,63 @@ function ResultCard({
                 </p>
               </li>
             ))}
-          </ul>
-            </>
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {baselinePrompt && (
+        <div className="px-6 py-4 border-t border-border bg-surface-2/20">
+          <button
+            type="button"
+            onClick={() => setBaselinePromptOpen((v) => !v)}
+            className="flex items-center justify-between w-full text-left group"
+          >
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 group-hover:text-foreground/60 transition">
+              Prompt used
+            </span>
+            <span className={`text-[9px] text-foreground/30 group-hover:text-foreground/50 transition ${baselinePromptOpen ? "rotate-180" : ""}`}>▼</span>
+          </button>
+          {baselinePromptOpen && (
+            <pre className="mt-2.5 whitespace-pre-wrap text-[11px] font-mono text-foreground/70 leading-relaxed max-h-64 overflow-y-auto rounded-lg border border-border bg-surface px-3 py-2.5">
+              {baselinePrompt}
+            </pre>
+          )}
+        </div>
+      )}
+
+      {historyContext && historyContext.length > 0 && (
+        <div className="px-6 py-4 border-t border-border bg-surface-2/20">
+          <button
+            type="button"
+            onClick={() => setBaselineHistoryOpen((v) => !v)}
+            className="flex items-center justify-between w-full text-left group"
+          >
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 group-hover:text-foreground/60 transition">
+              User history used ({historyContext.length})
+            </span>
+            <span className={`text-[9px] text-foreground/30 group-hover:text-foreground/50 transition ${baselineHistoryOpen ? "rotate-180" : ""}`}>▼</span>
+          </button>
+          {baselineHistoryOpen && (
+            <ul className="mt-2.5 space-y-2 max-h-56 overflow-y-auto">
+              {historyContext.map((item, index) => (
+                <li
+                  key={`history-${index}`}
+                  className="rounded-lg border border-border bg-surface px-3 py-2.5"
+                >
+                  {(item.mainCategory || item.category) && (
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 mb-1">
+                      {item.mainCategory || item.category}
+                    </p>
+                  )}
+                  <p className="text-[12px] text-foreground/70 leading-relaxed">
+                    {item.reviewText}
+                  </p>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       )}

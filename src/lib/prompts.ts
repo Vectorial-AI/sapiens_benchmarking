@@ -352,7 +352,7 @@ export function buildSapiensPrompt(args: {
 }
 
 /**
- * TRIBE PERSONA BASELINE — intentionally weak: tribe name only (no definition or traits).
+ * TRIBE PERSONA BASELINE — tribe name + definition (no evolved traits).
  */
 export function buildTribePersonaPrompt(args: {
   tribe: Tribe;
@@ -360,12 +360,30 @@ export function buildTribePersonaPrompt(args: {
   productDescription: string;
   category: string;
   groundTruthThemes: string[];
+  tribeDefinition?: string;
 }): string {
-  const { tribe, productDescription, category, groundTruthThemes } = args;
+  const { tribe, productDescription, category } = args;
   const themes = themesForCategory(category);
+  const definition =
+    args.tribeDefinition?.trim() ||
+    tribe.tribeDefinition?.trim() ||
+    tribe.description?.trim() ||
+    "";
   return `You are someone who belongs to ${tribe.name}.
 
 Respond ONLY with valid JSON.
+
+---
+SECTION 1: Tribe Context
+
+Group Name:
+${tribe.name}
+
+Group Description:
+${definition}
+
+---
+SECTION 2: This Review
 
 Category:
 ${category}
@@ -373,6 +391,7 @@ ${category}
 Product Description:
 ${productDescription}
 
+---
 TASK
 
 1. Write review_text that you would plausibly write for this product.
@@ -488,7 +507,11 @@ export function buildUserHistoryContext(
   },
 ): HistoryContextItem[] {
   const primary = (user.userHistoryReviews ?? [])
-    .map((r) => ({ reviewText: r.reviewText.trim() }))
+    .map((r) => ({
+      reviewText: r.reviewText.trim(),
+      category: r.category,
+      mainCategory: r.mainCategory,
+    }))
     .filter((r) => r.reviewText.length > 0);
   if (primary.length > 0) return primary.slice(0, MAX_HISTORY_CONTEXT_REVIEWS);
 
@@ -562,6 +585,7 @@ export function buildBaselinePrompt(
     excludeReviewKey?: string;
     groundTruthThemes: string[];
     populationDefinition?: string;
+    tribeDefinition?: string;
   },
 ): string {
   switch (method) {
@@ -582,6 +606,7 @@ export function buildBaselinePrompt(
         productDescription: args.productDescription,
         category: args.category,
         groundTruthThemes: args.groundTruthThemes,
+        tribeDefinition: args.tribeDefinition,
       });
     case "population_persona":
       return buildPopulationPersonaPrompt({

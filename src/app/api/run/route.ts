@@ -105,6 +105,8 @@ export async function POST(req: Request) {
     productDescription: customDesc,
     category: customCategory,
     populationDefinition: customPopulationDefinition,
+    tribeDefinition: customTribeDefinition,
+    customBaselinePrompt,
     runMode = "sapiens",
     baselineMethod,
     baselineModel,
@@ -115,6 +117,8 @@ export async function POST(req: Request) {
     productDescription?: string;
     category?: string;
     populationDefinition?: string;
+    tribeDefinition?: string;
+    customBaselinePrompt?: string;
     runMode?: RunMode;
     baselineMethod?: BaselineMethod;
     baselineModel?: BaselineModel;
@@ -231,9 +235,13 @@ export async function POST(req: Request) {
   const gateway = toGatewayModel(bModel);
   const usingCustomPopulationDef =
     method === "population_persona" && Boolean(customPopulationDefinition?.trim());
+  const usingCustomTribeDef =
+    method === "tribe_persona" && Boolean(customTribeDefinition?.trim());
   const key = usingCustomPopulationDef
     ? `${method}:${bModel}:custom`
-    : `${method}:${bModel}`;
+    : usingCustomTribeDef
+      ? `${method}:${bModel}:custom-tribe`
+      : `${method}:${bModel}`;
 
   const historyContext =
     method === "history"
@@ -245,12 +253,15 @@ export async function POST(req: Request) {
       : undefined;
 
   let baseline: EngineResult;
-  const baselinePrompt = buildBaselinePrompt(method, {
-    ...promptBase,
-    populationDefinition: usingCustomPopulationDef
-      ? customPopulationDefinition
-      : undefined,
-  });
+  const baselinePrompt =
+    customBaselinePrompt?.trim() ||
+    buildBaselinePrompt(method, {
+      ...promptBase,
+      populationDefinition: usingCustomPopulationDef
+        ? customPopulationDefinition
+        : undefined,
+      tribeDefinition: usingCustomTribeDef ? customTribeDefinition : undefined,
+    });
 
   if (!hasGatewayKey()) {
     const mock = mockPrediction("baseline", productDescription, method);
@@ -281,6 +292,7 @@ export async function POST(req: Request) {
       method,
       baselineModel: bModel,
       historyContext,
+      baselinePrompt,
     },
     themeTopK,
     source: hasGatewayKey() ? "gateway" : "mock",

@@ -26,15 +26,15 @@ export const BASELINE_METHOD_META: Record<
   { label: string; tone: "history" | "persona" }
 > = {
   history: {
-    label: "History baseline",
+    label: "AI Agent with User History",
     tone: "history",
   },
   tribe_persona: {
-    label: "Tribe persona baseline",
+    label: "Tribe Persona Prompt",
     tone: "persona",
   },
   population_persona: {
-    label: "Population persona baseline",
+    label: "Population Persona Prompt",
     tone: "persona",
   },
 };
