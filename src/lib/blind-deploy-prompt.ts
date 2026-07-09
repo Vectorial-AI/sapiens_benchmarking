@@ -48,12 +48,13 @@ function formatUserGapSection(gapContext: string): string {
   if (!text) return "";
   return (
     "---\n" +
-    "SECTION 2B: How This User Tends to Evaluate (behavioral hints — not a script)\n\n" +
-    "These notes summarize patterns from this reviewer's past reviews. Use them as **hints only**:\n" +
-    "- Capture the **gist** of what they care about — do NOT copy these bullets word-for-word or mirror their phrasing.\n" +
-    "- Write in **your own voice** as this persona (Section 1 + Section 2): natural sentences, your framing, not a checklist rewrite.\n" +
-    "- Cover similar concerns when they fit this product, but produce a **fresh, better prediction** — take direction, not dictation.\n" +
-    "- What to lead with, pass/fail heuristics, theme emphasis — infer intent, then express it originally. Don't follow the same order and copy exactly!\n\n" +
+    "SECTION 2B: How This User Tends to Evaluate (review-specific guidance — paraphrase, don't copy)\n\n" +
+    "These notes are the primary guide for this prediction. Follow their intent closely:\n" +
+    "- Focus on the concerns they say this reviewer would focus on.\n" +
+    "- Omit topics they say this reviewer would skip, even if the product description or tribe traits mention them.\n" +
+    "- Write in **your own voice** as this persona (Section 1 + Section 2): same priorities and omissions, different sentences.\n" +
+    "- Use these notes to decide theme emphasis: themes matching the listed concerns should score highest; avoided topics should score low.\n" +
+    "- Do NOT copy these bullets word-for-word, mirror their order, or turn them into a checklist.\n\n" +
     `${text}\n`
   );
 }

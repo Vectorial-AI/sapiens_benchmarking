@@ -71,11 +71,11 @@ SECTION 5: Themes People Discuss in This Category
 HOW TO APPROACH THIS (work through these steps before you write)
 
 **1. Understand the persona thoroughly**
-- **Section 2B (if present) — read with Section 2.** These are **behavioral hints** from this user's past reviews: what they tend to lead with, skip, or emphasize. Take the **gist** — do NOT copy bullet wording or sentence structure verbatim.
+- **Section 2B (if present) is the primary guide for this prediction.** It tells you what this reviewer should focus on, what to skip, and how broad or narrow the review should be. Follow its intent closely, but do NOT copy bullet wording or sentence structure verbatim.
 - Section 1 — tribe summary: who you are as a group.
 - Section 1 trait subsections — **behave like this while evaluating the product** (DO, DRIVE, triggers, frictions, goals).
 - Section 2 — your user characteristics: how YOU personally differ or add on top of the tribe.
-- When Section 2B is present, it **informs** your voice — express the same priorities in **your own phrasing**, as this persona would naturally write.
+- When Section 2B is present, it should control the review's focus. Express the same priorities in **your own phrasing**, as this persona would naturally write.
 
 **2. Match this user's writing style**
 - Section 3 shows how **this person** writes — match their paragraph flow, length, and tone.
@@ -85,13 +85,14 @@ HOW TO APPROACH THIS (work through these steps before you write)
 
 **3. Consider the product and themes**
 - Read the product description in Section 4.
-- Run Section 2B (if present) against this product: what would this reviewer likely care about — expressed freshly, not as copied bullets?
-- Map those evaluation priorities to themes in Section 5: which themes would this user **lead with**, **mention briefly**, or **skip** for this product?
-- What would someone with YOUR tribe traits AND YOUR personal characteristics care about for this product?
+- Run Section 2B (if present) against this product first: what would this reviewer likely care about, and what would they explicitly avoid expanding on?
+- Use the product description only to support that focus. Do not add extra angles from the listing, tribe, or generic product knowledge if Section 2B says this reviewer would skip them.
+- Map Section 2B priorities to themes in Section 5: which themes would this user **lead with**, **mention briefly**, or **score low/ignore** for this product?
+- Use tribe traits and personal characteristics only after Section 2B has set the focus.
 
 **4. Write the review, then score themes in the same response**
-- Write a realistic `review_text` that reflects what **this user** would ACTUALLY post — shaped by Section 2 + 2B when present, in **your own words**.
-- In the same JSON output, assign theme confidence scores for ALL themes in Section 5. Score from **Section 2B evaluation norms first** (what this user tends to emphasize)`.
+- Write a realistic `review_text` that reflects what **this user** would ACTUALLY post — follow Section 2B's focus closely, but paraphrase it in the persona's own words.
+- In the same JSON output, assign theme confidence scores for ALL themes in Section 5. Score from **Section 2B evaluation norms first** (what this user tends to emphasize or omit).
 
 ---
 Write the review in exactly **{length_constraint}** words.
@@ -104,13 +105,13 @@ YOUR TASK (one response — review, themes, and sentiment together)
 Write the Amazon review YOU would actually post for this product.
 
 Write like **this user** (Section 3), shaped by Section 2 + 2B (if present), your tribe (Section 1), and personal traits (Section 2):
-- **If Section 2B is present:** absorb what matters to this reviewer, then say it **in your own voice** — same concerns, different sentences. Never paste or lightly rephrase the norm bullets.
+- **If Section 2B is present:** follow what matters to this reviewer and what they avoid. Say it **in your own voice** — same concerns and omissions, different sentences. Never paste or lightly rephrase the norm bullets.
 - First person, natural voice — not like a product evaluator or rubric.
 - Flowing paragraphs: weave effectiveness, ease of use, safety, value, etc. into normal sentences — **not** separate blocks per theme or one short clause per bullet.
 - **Never** use theme names or paraphrases as headings or bullet labels (e.g. "Effectiveness:", "Ease of use:", "Safety notes:", "Cleaning/maintenance:", "Bottom line").
 - **Never** use "What worked well / What I didn't love" checklists unless Section 3 shows this user writes that way.
 - Match the tone, length, structure, and detail density of your prior reviews in Section 3.
-- Specific and concrete: real details and opinions — not a comprehensive evaluation report.
+- Specific and concrete within the Section 2B focus: real details and opinions, but no extra topics just to sound detailed.
 - Many themes can be implied in one paragraph; score low on themes you did not naturally cover.
 
 A good review reads like a person wrote it on Amazon, not like a rubric, norm checklist, or robot. Make it believable.
@@ -120,8 +121,9 @@ A good review reads like a person wrote it on Amazon, not like a rubric, norm ch
 Score EVERY theme in Section 5 (0.0 to 1.0) in `predicted_themes`:
 
 1. **Start from Section 2B (if present):** infer which themes this user would emphasize, mention briefly, or skip for this product based on their evaluation norms — map norm concerns to the closest Section 5 theme names.
-2. **Verify against `review_text`:** scores must match what you actually wrote. Do not score high on themes absent from the review.
-3. **Calibration:**
+2. **Make `review_text` and scores agree with Section 2B:** the highest scores should belong to the themes Section 2B points toward. Themes Section 2B says to avoid expanding on should stay low unless the review clearly needs them.
+3. **Verify against `review_text`:** scores must match what you actually wrote. Do not score high on themes absent from the review.
+4. **Calibration:**
    - High (0.8–1.0): this user would lead with this theme and your review clearly reflects it
    - Medium (0.3–0.7): mentioned or implied, but not a main focus for this user
    - Low (0.0–0.2): this user would skip it, or the review does not cover it
