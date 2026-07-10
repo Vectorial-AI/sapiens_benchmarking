@@ -4,6 +4,10 @@ import catalogIndexJson from "@/data/catalog-index.json";
 import productTitlesJson from "@/data/product_titles.json";
 import type { CatalogTribe, CatalogTribeIndex, Qualitative, ReviewSentiment } from "./types";
 import { normalizeSentimentLabel } from "./scoring";
+import { wordCount } from "./review-history";
+
+/** Ground-truth reviews shorter than this stay in catalog but are demoted in sort order. */
+const MIN_GROUND_TRUTH_WORDS = 35;
 
 /** review_key -> static UI product title */
 const PRODUCT_TITLES: Record<string, string> =
@@ -34,6 +38,7 @@ type RawReview = {
   healthcare_benchmark?: boolean;
   video_games_benchmark?: boolean;
   catalog_priority_tier?: string;
+  review_word_count?: number;
   sapiens_baseline_gap?: number;
   overall_similarity_score?: number;
   user_norm_context?: string;
@@ -101,6 +106,7 @@ export type Product = {
   healthcareBenchmark?: boolean;
   videoGamesBenchmark?: boolean;
   catalogPriorityTier?: "high" | "medium" | "low";
+  reviewWordCount?: number;
   sapiensBaselineGap?: number;
   overallSimilarityScore?: number;
   userNormContext?: string;
@@ -207,6 +213,24 @@ function priorityTierOrder(tier: string | undefined): number {
   return PRIORITY_TIER_ORDER[(tier ?? "medium").toLowerCase()] ?? 1;
 }
 
+function productWordCount(product: Product): number {
+  return product.reviewWordCount ?? wordCount(product.groundTruthReview);
+}
+
+function groundTruthLengthRank(product: Product): number {
+  return productWordCount(product) >= MIN_GROUND_TRUTH_WORDS ? 0 : 1;
+}
+
+function showcaseTierRank(tier: string | undefined): number {
+  return tier === "low" ? 1 : 0;
+}
+
+function isLongShowcaseProduct(product: Product): boolean {
+  return (
+    groundTruthLengthRank(product) === 0 && showcaseTierRank(product.catalogPriorityTier) === 0
+  );
+}
+
 function productSortScore(p: Product, sortMode: string): number {
   if (sortMode === "overall_similarity") {
     return p.overallSimilarityScore ?? 0;
@@ -215,41 +239,85 @@ function productSortScore(p: Product, sortMode: string): number {
 }
 
 function compareProducts(a: Product, b: Product, sortMode: string): number {
+  const lengthDiff = groundTruthLengthRank(a) - groundTruthLengthRank(b);
+  if (lengthDiff !== 0) return lengthDiff;
+
   if (sortMode === "priority_tier_gap") {
+    const showcaseDiff = showcaseTierRank(a.catalogPriorityTier) - showcaseTierRank(b.catalogPriorityTier);
+    if (showcaseDiff !== 0) return showcaseDiff;
+
+    const gapDiff = productSortScore(b, sortMode) - productSortScore(a, sortMode);
+    if (gapDiff !== 0) return gapDiff;
+
     const tierDiff =
       priorityTierOrder(a.catalogPriorityTier) - priorityTierOrder(b.catalogPriorityTier);
     if (tierDiff !== 0) return tierDiff;
+
+    return productWordCount(b) - productWordCount(a) || a.reviewKey.localeCompare(b.reviewKey);
   }
+
   return (
     productSortScore(b, sortMode) - productSortScore(a, sortMode) ||
+    productWordCount(b) - productWordCount(a) ||
     a.reviewKey.localeCompare(b.reviewKey)
   );
 }
 
-function userHighPriorityStats(user: User): { highCount: number; maxHighGap: number; maxGap: number } {
-  const high = user.products.filter((p) => p.catalogPriorityTier === "high");
-  const highGaps = high.map((p) => p.sapiensBaselineGap ?? 0);
+function userLongShowcaseStats(user: User): {
+  hasLong: number;
+  longShowcaseCount: number;
+  maxLongShowcaseGap: number;
+  maxLongShowcaseWords: number;
+  longHighCount: number;
+  maxLongHighGap: number;
+  maxGap: number;
+} {
+  const longProducts = user.products.filter((p) => groundTruthLengthRank(p) === 0);
+  const longShowcase = user.products.filter(isLongShowcaseProduct);
+  const longHigh = longShowcase.filter((p) => p.catalogPriorityTier === "high");
+  const longShowcaseGaps = longShowcase.map((p) => p.sapiensBaselineGap ?? 0);
+  const longHighGaps = longHigh.map((p) => p.sapiensBaselineGap ?? 0);
   const allGaps = user.products.map((p) => p.sapiensBaselineGap ?? 0);
   return {
-    highCount: high.length,
-    maxHighGap: highGaps.length ? Math.max(...highGaps) : 0,
+    hasLong: longProducts.length > 0 ? 0 : 1,
+    longShowcaseCount: longShowcase.length,
+    maxLongShowcaseGap: longShowcaseGaps.length ? Math.max(...longShowcaseGaps) : 0,
+    maxLongShowcaseWords: longShowcase.length
+      ? Math.max(...longShowcase.map(productWordCount))
+      : 0,
+    longHighCount: longHigh.length,
+    maxLongHighGap: longHighGaps.length ? Math.max(...longHighGaps) : 0,
     maxGap: allGaps.length ? Math.max(...allGaps) : 0,
   };
 }
 
 function compareUsers(a: User, b: User, sortMode: string): number {
   if (sortMode === "priority_tier_gap") {
-    const aStats = userHighPriorityStats(a);
-    const bStats = userHighPriorityStats(b);
+    const aStats = userLongShowcaseStats(a);
+    const bStats = userLongShowcaseStats(b);
     return (
-      bStats.highCount - aStats.highCount ||
-      bStats.maxHighGap - aStats.maxHighGap ||
+      aStats.hasLong - bStats.hasLong ||
+      bStats.longShowcaseCount - aStats.longShowcaseCount ||
+      bStats.maxLongShowcaseGap - aStats.maxLongShowcaseGap ||
+      bStats.maxLongShowcaseWords - aStats.maxLongShowcaseWords ||
+      bStats.longHighCount - aStats.longHighCount ||
+      bStats.maxLongHighGap - aStats.maxLongHighGap ||
       bStats.maxGap - aStats.maxGap ||
       b.similarityScore - a.similarityScore ||
       a.id.localeCompare(b.id)
     );
   }
-  return b.similarityScore - a.similarityScore || a.id.localeCompare(b.id);
+
+  const aLong = userLongShowcaseStats(a);
+  const bLong = userLongShowcaseStats(b);
+  if (aLong.hasLong !== bLong.hasLong) return aLong.hasLong - bLong.hasLong;
+
+  return (
+    bLong.maxLongShowcaseGap - aLong.maxLongShowcaseGap ||
+    bLong.maxLongShowcaseWords - aLong.maxLongShowcaseWords ||
+    b.similarityScore - a.similarityScore ||
+    a.id.localeCompare(b.id)
+  );
 }
 
 function normalizeProduct(r: RawReview, domain?: "healthcare" | "video_games"): Product {
@@ -279,6 +347,10 @@ function normalizeProduct(r: RawReview, domain?: "healthcare" | "video_games"): 
     healthcareBenchmark: Boolean(r.healthcare_benchmark),
     videoGamesBenchmark: Boolean(r.video_games_benchmark),
     catalogPriorityTier: normalizePriorityTier(r.catalog_priority_tier),
+    reviewWordCount:
+      typeof r.review_word_count === "number"
+        ? r.review_word_count
+        : wordCount(r.review_text),
     sapiensBaselineGap:
       typeof r.sapiens_baseline_gap === "number" ? r.sapiens_baseline_gap : undefined,
     overallSimilarityScore:

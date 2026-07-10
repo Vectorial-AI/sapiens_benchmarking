@@ -30,7 +30,7 @@
       },
       "meanSimilarityScore": 0.9042,
       "meanSapiensBaselineGap": 0.451,
-      "highPriorityCount": 8,
+      "highPriorityCount": 4,
       "maxHighPriorityGap": 0.7933
     },
     {
@@ -63,8 +63,8 @@
       },
       "meanSimilarityScore": 0.8944,
       "meanSapiensBaselineGap": 0.4186,
-      "highPriorityCount": 4,
-      "maxHighPriorityGap": 0.7644
+      "highPriorityCount": 1,
+      "maxHighPriorityGap": 0.4238
     },
     {
       "id": "cluster_0-micro_9",

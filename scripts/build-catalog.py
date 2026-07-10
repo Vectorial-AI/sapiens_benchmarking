@@ -74,6 +74,8 @@ HISTORY_RANK_WEIGHT_THEME = 0.7
 # UI catalog: Sapiens must beat best baseline by >10pp and score ≥65% overall.
 MIN_UI_SAPIENS_BASELINE_GAP = 0.10
 MIN_UI_OVERALL_SIMILARITY = 0.65
+# Ground-truth reviews shorter than this are kept in catalog but demoted in sort order.
+MIN_GROUND_TRUTH_WORDS = 35
 # Manually excluded from UI catalog (review_key).
 UI_CATALOG_EXCLUDED_REVIEW_KEYS = frozenset(
     {
@@ -836,11 +838,54 @@ def tribe_mean_sapiens_baseline_gap(tribe: dict) -> float:
     return round(sum(gaps) / len(gaps), 4) if gaps else 0.0
 
 
+def review_word_count(text: str) -> int:
+    return len(str(text or "").split())
+
+
+def attach_review_word_count(product: dict) -> dict:
+    out = dict(product)
+    out["review_word_count"] = review_word_count(out.get("review_text") or "")
+    return out
+
+
+def ground_truth_length_rank(product: dict) -> int:
+    """0 = long enough for top slots; 1 = demoted (still in catalog)."""
+    wc = product.get("review_word_count")
+    if wc is None:
+        wc = review_word_count(product.get("review_text") or "")
+    return 0 if int(wc) >= MIN_GROUND_TRUTH_WORDS else 1
+
+
+def showcase_tier_rank(tier: str) -> int:
+    return 1 if str(tier or "").lower() == "low" else 0
+
+
+def product_word_count(product: dict) -> int:
+    wc = product.get("review_word_count")
+    if wc is not None:
+        return int(wc)
+    return review_word_count(product.get("review_text") or "")
+
+
+def product_priority_sort_key(product: dict) -> tuple:
+    tier = str(product.get("catalog_priority_tier") or "medium").lower()
+    return (
+        ground_truth_length_rank(product),
+        showcase_tier_rank(tier),
+        -float(product.get("sapiens_baseline_gap") or 0),
+        PRIORITY_TIER_ORDER.get(tier, 1),
+        -product_word_count(product),
+        str(product.get("review_key") or ""),
+    )
+
+
 def sort_products_by_sapiens_gap(products: list[dict]) -> list[dict]:
     return sorted(
         products,
         key=lambda p: (
+            ground_truth_length_rank(p),
             -float(p.get("sapiens_baseline_gap") or 0),
+            -product_word_count(p),
             str(p.get("review_key") or ""),
         ),
     )
@@ -877,20 +922,22 @@ def infer_priority_tier(product: dict, tier_map: dict[str, str]) -> str:
 
 
 def apply_catalog_priority_tier(product: dict, tier_map: dict[str, str]) -> dict:
-    out = dict(product)
+    out = attach_review_word_count(dict(product))
     out["catalog_priority_tier"] = infer_priority_tier(out, tier_map)
     return out
 
 
 def sort_products_by_priority_tier_and_gap(products: list[dict]) -> list[dict]:
-    return sorted(
-        products,
-        key=lambda p: (
-            PRIORITY_TIER_ORDER.get(str(p.get("catalog_priority_tier") or "medium").lower(), 1),
-            -float(p.get("sapiens_baseline_gap") or 0),
-            str(p.get("review_key") or ""),
-        ),
-    )
+    return sorted(products, key=product_priority_sort_key)
+
+
+def _long_showcase_products(products: list[dict]) -> list[dict]:
+    return [
+        p
+        for p in products
+        if ground_truth_length_rank(p) == 0
+        and showcase_tier_rank(str(p.get("catalog_priority_tier") or "")) == 0
+    ]
 
 
 def tribe_priority_stats(products: list[dict]) -> tuple[int, float]:
@@ -898,42 +945,52 @@ def tribe_priority_stats(products: list[dict]) -> tuple[int, float]:
         float(p.get("sapiens_baseline_gap") or 0)
         for p in products
         if str(p.get("catalog_priority_tier") or "").lower() == "high"
+        and ground_truth_length_rank(p) == 0
     ]
     return len(high_gaps), max(high_gaps) if high_gaps else 0.0
 
 
 def sort_users_by_priority_tier_and_gap(users: list[dict]) -> list[dict]:
-    def user_stats(user: dict) -> tuple[int, float, float]:
+    def user_stats(user: dict) -> tuple[int, int, float, int, int, float, float]:
         products = user.get("products") or []
-        high = [
-            p for p in products if str(p.get("catalog_priority_tier") or "").lower() == "high"
+        long_showcase = _long_showcase_products(products)
+        long_high = [
+            p for p in long_showcase if str(p.get("catalog_priority_tier") or "").lower() == "high"
         ]
-        high_count = len(high)
-        max_high_gap = max(
-            (float(p.get("sapiens_baseline_gap") or 0) for p in high),
-            default=0.0,
+        has_long = 0 if any(ground_truth_length_rank(p) == 0 for p in products) else 1
+        return (
+            has_long,
+            len(long_showcase),
+            max(
+                (float(p.get("sapiens_baseline_gap") or 0) for p in long_showcase),
+                default=0.0,
+            ),
+            max((product_word_count(p) for p in long_showcase), default=0),
+            len(long_high),
+            max((float(p.get("sapiens_baseline_gap") or 0) for p in long_high), default=0.0),
+            max((float(p.get("sapiens_baseline_gap") or 0) for p in products), default=0.0),
         )
-        max_gap = max(
-            (float(p.get("sapiens_baseline_gap") or 0) for p in products),
-            default=0.0,
-        )
-        return high_count, max_high_gap, max_gap
 
     return sorted(
         users,
         key=lambda u: (
-            -user_stats(u)[0],
+            user_stats(u)[0],
             -user_stats(u)[1],
             -user_stats(u)[2],
+            -user_stats(u)[3],
+            -user_stats(u)[4],
+            -user_stats(u)[5],
+            -user_stats(u)[6],
             str(u.get("user_id") or ""),
         ),
     )
 
 
 def sort_products_for_catalog(products: list[dict], sort_by: str, tier_map: dict[str, str]) -> list[dict]:
-    tagged = [apply_catalog_priority_tier(p, tier_map) for p in products]
     if sort_by == "priority_tier_gap":
+        tagged = [apply_catalog_priority_tier(p, tier_map) for p in products]
         return sort_products_by_priority_tier_and_gap(tagged)
+    tagged = [attach_review_word_count(p) for p in products]
     if sort_by == "overall_similarity":
         return sort_products_by_overall_similarity(tagged)
     return sort_products_by_sapiens_gap(tagged)
@@ -948,16 +1005,28 @@ def sort_users_for_catalog(users: list[dict], sort_by: str) -> list[dict]:
 
 
 def sort_users_by_sapiens_gap(users: list[dict]) -> list[dict]:
-    def user_gap(user: dict) -> float:
-        product_gaps = [
-            float(p.get("sapiens_baseline_gap") or 0) for p in user.get("products") or []
-        ]
-        return max(product_gaps) if product_gaps else 0.0
+    def user_key(user: dict) -> tuple:
+        products = user.get("products") or []
+        long_products = [p for p in products if ground_truth_length_rank(p) == 0]
+        has_long = 0 if long_products else 1
+        max_long_gap = max(
+            (float(p.get("sapiens_baseline_gap") or 0) for p in long_products),
+            default=0.0,
+        )
+        max_long_words = max((product_word_count(p) for p in long_products), default=0)
+        max_gap = max(
+            (float(p.get("sapiens_baseline_gap") or 0) for p in products),
+            default=0.0,
+        )
+        return (
+            has_long,
+            -max_long_gap,
+            -max_long_words,
+            -max_gap,
+            str(user.get("user_id") or ""),
+        )
 
-    return sorted(
-        users,
-        key=lambda u: (-user_gap(u), str(u.get("user_id") or "")),
-    )
+    return sorted(users, key=user_key)
 
 
 def load_healthcare_benchmark_index() -> tuple[
@@ -1060,7 +1129,7 @@ def healthcare_product_from_entry(
     sub = entry.get("major_subcategory_label")
     if sub:
         product["major_subcategory"] = sub
-    return product
+    return attach_review_word_count(product)
 
 
 def video_games_benchmark_product_from_row(
@@ -1112,7 +1181,7 @@ def video_games_benchmark_product_from_row(
         product["user_norm_context"] = user_norm_context.strip()
     if leave_one_out_history_reviews:
         product["leave_one_out_history_reviews"] = leave_one_out_history_reviews
-    return product
+    return attach_review_word_count(product)
 
 
 def sort_user_products(
@@ -2048,14 +2117,21 @@ def build_video_games_software_benchmark_tribe(
         if sort_by == "overall_similarity":
             user_score = max(float(p.get("overall_similarity_score") or 0) for p in products)
         elif sort_by == "priority_tier_gap":
-            high_gaps = [
+            long_high_gaps = [
                 float(p.get("sapiens_baseline_gap") or 0)
                 for p in products
                 if str(p.get("catalog_priority_tier") or "").lower() == "high"
+                and ground_truth_length_rank(p) == 0
             ]
-            user_score = max(high_gaps) if high_gaps else max(
-                float(p.get("sapiens_baseline_gap") or 0) for p in products
-            )
+            long_showcase_gaps = [
+                float(p.get("sapiens_baseline_gap") or 0) for p in _long_showcase_products(products)
+            ]
+            if long_high_gaps:
+                user_score = max(long_high_gaps)
+            elif long_showcase_gaps:
+                user_score = max(long_showcase_gaps)
+            else:
+                user_score = max(float(p.get("sapiens_baseline_gap") or 0) for p in products)
         else:
             user_score = max(float(p.get("sapiens_baseline_gap") or 0) for p in products)
 
