@@ -187,14 +187,37 @@ function shortTraitLabel(trait: string): string {
   return `${trimmed.slice(0, 69).trim()}…`;
 }
 
+/** Insert tribe name before the first "tribe" mention in a summary (post-processing, not LLM). */
+export function injectTribeNameInSummary(summary: string, tribeName: string): string {
+  const name = tribeName.trim();
+  const text = summary.trim();
+  if (!name || !text) return summary;
+
+  const match = /\btribe\b/i.exec(text);
+  if (!match || match.index === undefined) return summary;
+
+  const idx = match.index;
+  const before = text.slice(0, idx).trimEnd();
+  if (
+    before.endsWith(name) ||
+    before.toLowerCase().endsWith(name.toLowerCase())
+  ) {
+    return summary;
+  }
+
+  const prefix = before.length ? `${before} ` : "";
+  return `${prefix}${name} ${text.slice(idx)}`;
+}
+
 function buildFallbackSummary(
   influences: InferredTraitInfluence[],
-  _tribeName: string,
+  tribeName: string,
 ): string {
   if (!influences.length) {
-    return (
+    return injectTribeNameInSummary(
       "Tribe traits and user traits shaped what this review emphasizes — " +
-      "which product points get airtime, how strongly they're rated, and the overall tone."
+        "which product points get airtime, how strongly they're rated, and the overall tone.",
+      tribeName,
     );
   }
 
@@ -215,10 +238,11 @@ function buildFallbackSummary(
   }
   const joined = parts.length ? parts.join(", while ") : "known persona traits steer the review's focus";
 
-  return (
+  return injectTribeNameInSummary(
     `${joined.charAt(0).toUpperCase()}${joined.slice(1)}. ` +
-    `The clearest influence (${Math.round(top.confidence * 100)}% confidence) is ${shortTraitLabel(top.trait).toLowerCase()}, ` +
-    `which shows up directly in what the review chooses to praise or criticize.`
+      `The clearest influence (${Math.round(top.confidence * 100)}% confidence) is ${shortTraitLabel(top.trait).toLowerCase()}, ` +
+      `which shows up directly in what the review chooses to praise or criticize.`,
+    tribeName,
   );
 }
 
@@ -231,7 +255,7 @@ function sanitizeSummary(
   if (!cleaned || cleaned.length < 80) {
     return buildFallbackSummary(influences, tribeName);
   }
-  return cleaned;
+  return injectTribeNameInSummary(cleaned, tribeName);
 }
 
 function fallbackInfluences(

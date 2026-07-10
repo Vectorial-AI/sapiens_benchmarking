@@ -326,6 +326,28 @@ export function topKThemeEntries(
   return ranked.slice(0, k);
 }
 
+/** Minimum confidence for a predicted theme to appear in generated-review UI. */
+export const MAIN_THEME_MIN_CONFIDENCE = 0.75;
+
+/**
+ * Display-only: union of tie-aware top-k and themes with score >= minConfidence.
+ * Does not affect recall@k or composite metrics.
+ */
+export function mainThemeEntriesForDisplay(
+  predictedThemes: Record<string, number> | undefined | null,
+  k: number,
+  minConfidence = MAIN_THEME_MIN_CONFIDENCE,
+): Array<[string, number]> {
+  const ranked = rankThemeEntries(predictedThemes ?? {});
+  if (!ranked.length || k <= 0) return [];
+
+  const topKNames = new Set(tieAwareTopKThemeNames(predictedThemes ?? {}, k).map(normalizeThemeName));
+  return ranked.filter(
+    ([theme, score]) =>
+      topKNames.has(normalizeThemeName(theme)) || score >= minConfidence,
+  );
+}
+
 /** k for recall@k / UI — unique ground-truth theme count for this review. */
 export function themeTopKFromGroundTruth(groundTruthThemes: string[]): number {
   return new Set(

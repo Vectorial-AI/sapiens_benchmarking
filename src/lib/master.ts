@@ -225,10 +225,8 @@ function showcaseTierRank(tier: string | undefined): number {
   return tier === "low" ? 1 : 0;
 }
 
-function isLongShowcaseProduct(product: Product): boolean {
-  return (
-    groundTruthLengthRank(product) === 0 && showcaseTierRank(product.catalogPriorityTier) === 0
-  );
+function isShowcaseProduct(product: Product): boolean {
+  return showcaseTierRank(product.catalogPriorityTier) === 0;
 }
 
 function productSortScore(p: Product, sortMode: string): number {
@@ -239,15 +237,16 @@ function productSortScore(p: Product, sortMode: string): number {
 }
 
 function compareProducts(a: Product, b: Product, sortMode: string): number {
-  const lengthDiff = groundTruthLengthRank(a) - groundTruthLengthRank(b);
-  if (lengthDiff !== 0) return lengthDiff;
-
   if (sortMode === "priority_tier_gap") {
-    const showcaseDiff = showcaseTierRank(a.catalogPriorityTier) - showcaseTierRank(b.catalogPriorityTier);
+    const showcaseDiff =
+      showcaseTierRank(a.catalogPriorityTier) - showcaseTierRank(b.catalogPriorityTier);
     if (showcaseDiff !== 0) return showcaseDiff;
 
     const gapDiff = productSortScore(b, sortMode) - productSortScore(a, sortMode);
     if (gapDiff !== 0) return gapDiff;
+
+    const lengthDiff = groundTruthLengthRank(a) - groundTruthLengthRank(b);
+    if (lengthDiff !== 0) return lengthDiff;
 
     const tierDiff =
       priorityTierOrder(a.catalogPriorityTier) - priorityTierOrder(b.catalogPriorityTier);
@@ -258,63 +257,49 @@ function compareProducts(a: Product, b: Product, sortMode: string): number {
 
   return (
     productSortScore(b, sortMode) - productSortScore(a, sortMode) ||
+    groundTruthLengthRank(a) - groundTruthLengthRank(b) ||
     productWordCount(b) - productWordCount(a) ||
     a.reviewKey.localeCompare(b.reviewKey)
   );
 }
 
-function userLongShowcaseStats(user: User): {
+function userShowcaseStats(user: User): {
+  showcaseBand: number;
+  maxShowcaseGap: number;
   hasLong: number;
-  longShowcaseCount: number;
-  maxLongShowcaseGap: number;
-  maxLongShowcaseWords: number;
-  longHighCount: number;
-  maxLongHighGap: number;
   maxGap: number;
 } {
-  const longProducts = user.products.filter((p) => groundTruthLengthRank(p) === 0);
-  const longShowcase = user.products.filter(isLongShowcaseProduct);
-  const longHigh = longShowcase.filter((p) => p.catalogPriorityTier === "high");
-  const longShowcaseGaps = longShowcase.map((p) => p.sapiensBaselineGap ?? 0);
-  const longHighGaps = longHigh.map((p) => p.sapiensBaselineGap ?? 0);
+  const showcase = user.products.filter(isShowcaseProduct);
+  const longPool = showcase.length ? showcase : user.products;
+  const showcaseGaps = showcase.map((p) => p.sapiensBaselineGap ?? 0);
   const allGaps = user.products.map((p) => p.sapiensBaselineGap ?? 0);
   return {
-    hasLong: longProducts.length > 0 ? 0 : 1,
-    longShowcaseCount: longShowcase.length,
-    maxLongShowcaseGap: longShowcaseGaps.length ? Math.max(...longShowcaseGaps) : 0,
-    maxLongShowcaseWords: longShowcase.length
-      ? Math.max(...longShowcase.map(productWordCount))
-      : 0,
-    longHighCount: longHigh.length,
-    maxLongHighGap: longHighGaps.length ? Math.max(...longHighGaps) : 0,
+    showcaseBand: showcase.length > 0 ? 0 : 1,
+    maxShowcaseGap: showcaseGaps.length ? Math.max(...showcaseGaps) : 0,
+    hasLong: longPool.some((p) => groundTruthLengthRank(p) === 0) ? 0 : 1,
     maxGap: allGaps.length ? Math.max(...allGaps) : 0,
   };
 }
 
 function compareUsers(a: User, b: User, sortMode: string): number {
   if (sortMode === "priority_tier_gap") {
-    const aStats = userLongShowcaseStats(a);
-    const bStats = userLongShowcaseStats(b);
+    const aStats = userShowcaseStats(a);
+    const bStats = userShowcaseStats(b);
     return (
+      aStats.showcaseBand - bStats.showcaseBand ||
+      bStats.maxShowcaseGap - aStats.maxShowcaseGap ||
       aStats.hasLong - bStats.hasLong ||
-      bStats.longShowcaseCount - aStats.longShowcaseCount ||
-      bStats.maxLongShowcaseGap - aStats.maxLongShowcaseGap ||
-      bStats.maxLongShowcaseWords - aStats.maxLongShowcaseWords ||
-      bStats.longHighCount - aStats.longHighCount ||
-      bStats.maxLongHighGap - aStats.maxLongHighGap ||
       bStats.maxGap - aStats.maxGap ||
       b.similarityScore - a.similarityScore ||
       a.id.localeCompare(b.id)
     );
   }
 
-  const aLong = userLongShowcaseStats(a);
-  const bLong = userLongShowcaseStats(b);
-  if (aLong.hasLong !== bLong.hasLong) return aLong.hasLong - bLong.hasLong;
-
+  const aStats = userShowcaseStats(a);
+  const bStats = userShowcaseStats(b);
   return (
-    bLong.maxLongShowcaseGap - aLong.maxLongShowcaseGap ||
-    bLong.maxLongShowcaseWords - aLong.maxLongShowcaseWords ||
+    bStats.maxGap - aStats.maxGap ||
+    aStats.hasLong - bStats.hasLong ||
     b.similarityScore - a.similarityScore ||
     a.id.localeCompare(b.id)
   );

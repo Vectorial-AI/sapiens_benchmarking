@@ -39,13 +39,13 @@ import type {
   ReviewSentiment,
   SapiensRunResponse,
 } from "@/lib/types";
-import { INFERRED_TRAIT_UI_MIN_CONFIDENCE } from "@/lib/inferred-traits-explanation";
+import { INFERRED_TRAIT_UI_MIN_CONFIDENCE, injectTribeNameInSummary } from "@/lib/inferred-traits-explanation";
 import {
   clearWizardRestoreFlag,
   loadWizardSession,
   saveWizardSession,
 } from "@/lib/wizard-session";
-import { topKThemeEntries, topKThemeEntriesForSapiensDisplay, themeTopKFromGroundTruth } from "@/lib/scoring";
+import { mainThemeEntriesForDisplay, topKThemeEntries, themeTopKFromGroundTruth } from "@/lib/scoring";
 
 const DOMAIN_SECTIONS = [
   { id: "video_games" as const, label: "Video Games & Software" },
@@ -718,10 +718,9 @@ export default function Home() {
                     error={sapiens?.error}
                     latencyMs={sapiens?.latencyMs}
                     themeTopK={themeTopK}
-                    sapiensThemeDisplay
-                    themeDisplayGroundTruth={groundTruthThemes}
                     inferredTraitSummary={sapiens?.inferredTraitSummary}
                     inferredTraitInfluences={sapiens?.inferredTraitInfluences}
+                    tribeName={tribe?.name}
                   />
                 </div>
               </div>
@@ -859,11 +858,10 @@ export default function Home() {
                     error={sapiens?.error}
                     latencyMs={sapiens?.latencyMs}
                     themeTopK={themeTopK}
-                    sapiensThemeDisplay
-                    themeDisplayGroundTruth={groundTruthThemes}
                     similarityExplanation={sapiens?.similarityExplanation}
                     inferredTraitSummary={sapiens?.inferredTraitSummary}
                     inferredTraitInfluences={sapiens?.inferredTraitInfluences}
+                    tribeName={tribe?.name}
                   />
                   {baselines.map((b) => (
                     <ResultCard
@@ -1458,11 +1456,10 @@ function ResultCard({
   error,
   latencyMs,
   themeTopK,
-  sapiensThemeDisplay,
-  themeDisplayGroundTruth,
   similarityExplanation,
   inferredTraitSummary,
   inferredTraitInfluences,
+  tribeName,
   onRemove,
 }: {
   tone: Tone;
@@ -1476,28 +1473,26 @@ function ResultCard({
   error?: string;
   latencyMs?: number;
   themeTopK: number;
-  /** Sapiens only: recall@k theme list (best recall among tied scores). */
-  sapiensThemeDisplay?: boolean;
-  themeDisplayGroundTruth?: string[];
   similarityExplanation?: string | null;
   inferredTraitSummary?: string | null;
   inferredTraitInfluences?: InferredTraitInfluence[] | null;
+  tribeName?: string;
   onRemove?: () => void;
 }) {
   const isGenerated = tone !== "real";
   const showSkeleton = loading && isGenerated && !text;
-  const themeEntries = sapiensThemeDisplay
-    ? topKThemeEntriesForSapiensDisplay(
-        predictedThemes,
-        themeTopK,
-        themeDisplayGroundTruth,
-      )
+  const themeEntries = isGenerated
+    ? mainThemeEntriesForDisplay(predictedThemes, themeTopK)
     : topKThemeEntries(predictedThemes, themeTopK);
+  const themeSectionLabel = isGenerated ? "Main themes" : "Themes";
   const hasDetails = themeEntries.length > 0 || sentiment;
   const visibleTraitInfluences =
     inferredTraitInfluences?.filter(
       (item) => item.confidence >= INFERRED_TRAIT_UI_MIN_CONFIDENCE,
     ) ?? [];
+  const displayTraitSummary = inferredTraitSummary && tribeName
+    ? injectTribeNameInSummary(inferredTraitSummary, tribeName)
+    : inferredTraitSummary;
 
   return (
     <div className="rounded-2xl border border-border bg-surface flex flex-col overflow-hidden">
@@ -1585,7 +1580,7 @@ function ResultCard({
       </div>
 
       {tone === "sapiens" &&
-        (inferredTraitSummary || visibleTraitInfluences.length > 0) && (
+        (displayTraitSummary || visibleTraitInfluences.length > 0) && (
         <div className="px-6 pb-5">
           <div className="rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/[0.07] to-surface overflow-hidden shadow-sm">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-accent/15 bg-accent/[0.06]">
@@ -1593,12 +1588,17 @@ function ResultCard({
               <span className="text-[13px] font-semibold text-foreground">
                 Trait influence analysis
               </span>
+              {tribeName ? (
+                <span className="text-[12px] font-normal text-foreground/55 truncate">
+                  · {tribeName}
+                </span>
+              ) : null}
             </div>
             <div className="px-4 py-4 space-y-4">
-              {inferredTraitSummary && (
+              {displayTraitSummary && (
                 <div className="rounded-xl border border-border bg-surface px-4 py-3.5">
                   <p className="text-[13px] font-normal text-foreground leading-relaxed">
-                    {inferredTraitSummary}
+                    {displayTraitSummary}
                   </p>
                 </div>
               )}
@@ -1667,12 +1667,14 @@ function ResultCard({
 
           {themeEntries.length > 0 && (
             <div>
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 block mb-2.5">Themes</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40 block mb-2.5">
+                {themeSectionLabel}
+              </span>
               <ul className="space-y-2">
                 {themeEntries.map(([theme, value]) => (
                   <li key={theme} className="flex items-center gap-3">
                     <span className="text-[12px] font-normal text-foreground truncate flex-1" title={theme}>{theme}</span>
-                    {value !== 1 && (
+                    {(isGenerated || value !== 1) && (
                       <span className="text-[12px] font-bold text-foreground tabular-nums shrink-0">{value.toFixed(2)}</span>
                     )}
                   </li>

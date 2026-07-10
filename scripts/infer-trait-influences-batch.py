@@ -281,11 +281,28 @@ def short_trait_label(trait: str) -> str:
     return trimmed[:69].rstrip() + "…"
 
 
-def build_fallback_summary(influences: list[dict[str, Any]], _tribe_name: str) -> str:
+def inject_tribe_name_in_summary(summary: str, tribe_name: str) -> str:
+    name = str(tribe_name or "").strip()
+    text = str(summary or "").strip()
+    if not name or not text:
+        return summary
+    match = re.search(r"\btribe\b", text, re.IGNORECASE)
+    if not match:
+        return summary
+    idx = match.start()
+    before = text[:idx].rstrip()
+    if before.endswith(name) or before.lower().endswith(name.lower()):
+        return summary
+    prefix = f"{before} " if before else ""
+    return f"{prefix}{name} {text[idx:]}"
+
+
+def build_fallback_summary(influences: list[dict[str, Any]], tribe_name: str) -> str:
     if not influences:
-        return (
+        return inject_tribe_name_in_summary(
             "Tribe traits and user traits shaped what this review emphasizes — "
-            "which product points get airtime, how strongly they're rated, and the overall tone."
+            "which product points get airtime, how strongly they're rated, and the overall tone.",
+            tribe_name,
         )
     tribe_hits = [i for i in influences if i.get("source") == "tribe"]
     user_hits = [i for i in influences if i.get("source") == "user"]
@@ -304,10 +321,11 @@ def build_fallback_summary(influences: list[dict[str, Any]], _tribe_name: str) -
     joined = ", while ".join(parts) if parts else "known persona traits steer the review's focus"
     joined = joined[0].upper() + joined[1:] if joined else joined
     conf = int(round(float(top.get("confidence") or 0) * 100))
-    return (
+    return inject_tribe_name_in_summary(
         f"{joined}. "
         f"The clearest influence ({conf}% confidence) is {short_trait_label(str(top.get('trait') or '')).lower()}, "
-        "which shows up directly in what the review chooses to praise or criticize."
+        "which shows up directly in what the review chooses to praise or criticize.",
+        tribe_name,
     )
 
 
@@ -347,7 +365,7 @@ def sanitize_summary(summary: str, influences: list[dict[str, Any]], tribe_name:
     cleaned = " ".join(str(summary or "").split()).strip()
     if not cleaned or len(cleaned) < 80:
         return build_fallback_summary(influences, tribe_name)
-    return cleaned
+    return inject_tribe_name_in_summary(cleaned, tribe_name)
 
 
 def fallback_influences(

@@ -870,9 +870,9 @@ def product_word_count(product: dict) -> int:
 def product_priority_sort_key(product: dict) -> tuple:
     tier = str(product.get("catalog_priority_tier") or "medium").lower()
     return (
-        ground_truth_length_rank(product),
         showcase_tier_rank(tier),
         -float(product.get("sapiens_baseline_gap") or 0),
+        ground_truth_length_rank(product),
         PRIORITY_TIER_ORDER.get(tier, 1),
         -product_word_count(product),
         str(product.get("review_key") or ""),
@@ -883,8 +883,8 @@ def sort_products_by_sapiens_gap(products: list[dict]) -> list[dict]:
     return sorted(
         products,
         key=lambda p: (
-            ground_truth_length_rank(p),
             -float(p.get("sapiens_baseline_gap") or 0),
+            ground_truth_length_rank(p),
             -product_word_count(p),
             str(p.get("review_key") or ""),
         ),
@@ -931,12 +931,11 @@ def sort_products_by_priority_tier_and_gap(products: list[dict]) -> list[dict]:
     return sorted(products, key=product_priority_sort_key)
 
 
-def _long_showcase_products(products: list[dict]) -> list[dict]:
+def _showcase_products(products: list[dict]) -> list[dict]:
     return [
         p
         for p in products
-        if ground_truth_length_rank(p) == 0
-        and showcase_tier_rank(str(p.get("catalog_priority_tier") or "")) == 0
+        if showcase_tier_rank(str(p.get("catalog_priority_tier") or "")) == 0
     ]
 
 
@@ -951,39 +950,29 @@ def tribe_priority_stats(products: list[dict]) -> tuple[int, float]:
 
 
 def sort_users_by_priority_tier_and_gap(users: list[dict]) -> list[dict]:
-    def user_stats(user: dict) -> tuple[int, int, float, int, int, float, float]:
+    def user_key(user: dict) -> tuple[int, float, int, float, str]:
         products = user.get("products") or []
-        long_showcase = _long_showcase_products(products)
-        long_high = [
-            p for p in long_showcase if str(p.get("catalog_priority_tier") or "").lower() == "high"
-        ]
-        has_long = 0 if any(ground_truth_length_rank(p) == 0 for p in products) else 1
+        showcase = _showcase_products(products)
+        showcase_band = 0 if showcase else 1
+        max_showcase_gap = max(
+            (float(p.get("sapiens_baseline_gap") or 0) for p in showcase),
+            default=0.0,
+        )
+        long_pool = showcase if showcase else products
+        has_long = 0 if any(ground_truth_length_rank(p) == 0 for p in long_pool) else 1
+        max_gap = max(
+            (float(p.get("sapiens_baseline_gap") or 0) for p in products),
+            default=0.0,
+        )
         return (
+            showcase_band,
+            -max_showcase_gap,
             has_long,
-            len(long_showcase),
-            max(
-                (float(p.get("sapiens_baseline_gap") or 0) for p in long_showcase),
-                default=0.0,
-            ),
-            max((product_word_count(p) for p in long_showcase), default=0),
-            len(long_high),
-            max((float(p.get("sapiens_baseline_gap") or 0) for p in long_high), default=0.0),
-            max((float(p.get("sapiens_baseline_gap") or 0) for p in products), default=0.0),
+            -max_gap,
+            str(user.get("user_id") or ""),
         )
 
-    return sorted(
-        users,
-        key=lambda u: (
-            user_stats(u)[0],
-            -user_stats(u)[1],
-            -user_stats(u)[2],
-            -user_stats(u)[3],
-            -user_stats(u)[4],
-            -user_stats(u)[5],
-            -user_stats(u)[6],
-            str(u.get("user_id") or ""),
-        ),
-    )
+    return sorted(users, key=user_key)
 
 
 def sort_products_for_catalog(products: list[dict], sort_by: str, tier_map: dict[str, str]) -> list[dict]:
@@ -1007,22 +996,20 @@ def sort_users_for_catalog(users: list[dict], sort_by: str) -> list[dict]:
 def sort_users_by_sapiens_gap(users: list[dict]) -> list[dict]:
     def user_key(user: dict) -> tuple:
         products = user.get("products") or []
-        long_products = [p for p in products if ground_truth_length_rank(p) == 0]
-        has_long = 0 if long_products else 1
-        max_long_gap = max(
-            (float(p.get("sapiens_baseline_gap") or 0) for p in long_products),
-            default=0.0,
-        )
-        max_long_words = max((product_word_count(p) for p in long_products), default=0)
         max_gap = max(
             (float(p.get("sapiens_baseline_gap") or 0) for p in products),
             default=0.0,
         )
+        long_products = [p for p in products if ground_truth_length_rank(p) == 0]
+        max_long_gap = max(
+            (float(p.get("sapiens_baseline_gap") or 0) for p in long_products),
+            default=0.0,
+        )
+        has_long = 0 if long_products else 1
         return (
+            -max_gap,
             has_long,
             -max_long_gap,
-            -max_long_words,
-            -max_gap,
             str(user.get("user_id") or ""),
         )
 
@@ -2117,21 +2104,12 @@ def build_video_games_software_benchmark_tribe(
         if sort_by == "overall_similarity":
             user_score = max(float(p.get("overall_similarity_score") or 0) for p in products)
         elif sort_by == "priority_tier_gap":
-            long_high_gaps = [
-                float(p.get("sapiens_baseline_gap") or 0)
-                for p in products
-                if str(p.get("catalog_priority_tier") or "").lower() == "high"
-                and ground_truth_length_rank(p) == 0
+            showcase_gaps = [
+                float(p.get("sapiens_baseline_gap") or 0) for p in _showcase_products(products)
             ]
-            long_showcase_gaps = [
-                float(p.get("sapiens_baseline_gap") or 0) for p in _long_showcase_products(products)
-            ]
-            if long_high_gaps:
-                user_score = max(long_high_gaps)
-            elif long_showcase_gaps:
-                user_score = max(long_showcase_gaps)
-            else:
-                user_score = max(float(p.get("sapiens_baseline_gap") or 0) for p in products)
+            user_score = max(showcase_gaps) if showcase_gaps else max(
+                float(p.get("sapiens_baseline_gap") or 0) for p in products
+            )
         else:
             user_score = max(float(p.get("sapiens_baseline_gap") or 0) for p in products)
 
