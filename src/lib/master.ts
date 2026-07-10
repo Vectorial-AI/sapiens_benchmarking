@@ -8,6 +8,8 @@ import { wordCount } from "./review-history";
 
 /** Ground-truth reviews shorter than this stay in catalog but are demoted in sort order. */
 const MIN_GROUND_TRUTH_WORDS = 35;
+/** Reference length where length weight reaches 1.0 in gap × length sort score. */
+const SHOWCASE_LENGTH_SCALE_WORDS = 150;
 
 /** review_key -> static UI product title */
 const PRODUCT_TITLES: Record<string, string> =
@@ -217,8 +219,18 @@ function productWordCount(product: Product): number {
   return product.reviewWordCount ?? wordCount(product.groundTruthReview);
 }
 
-function groundTruthLengthRank(product: Product): number {
-  return productWordCount(product) >= MIN_GROUND_TRUTH_WORDS ? 0 : 1;
+function lengthWeightForShowcaseSort(words: number): number {
+  const w = Math.max(0, words);
+  if (w < MIN_GROUND_TRUTH_WORDS) {
+    return 0.15 + 0.25 * (w / MIN_GROUND_TRUTH_WORDS);
+  }
+  const scale = Math.max(SHOWCASE_LENGTH_SCALE_WORDS, MIN_GROUND_TRUTH_WORDS);
+  return 0.5 + 0.5 * Math.min(1, w / scale);
+}
+
+function showcaseCombinedScore(product: Product): number {
+  const gap = product.sapiensBaselineGap ?? 0;
+  return gap * lengthWeightForShowcaseSort(productWordCount(product));
 }
 
 function showcaseTierRank(tier: string | undefined): number {
@@ -242,41 +254,38 @@ function compareProducts(a: Product, b: Product, sortMode: string): number {
       showcaseTierRank(a.catalogPriorityTier) - showcaseTierRank(b.catalogPriorityTier);
     if (showcaseDiff !== 0) return showcaseDiff;
 
-    const gapDiff = productSortScore(b, sortMode) - productSortScore(a, sortMode);
-    if (gapDiff !== 0) return gapDiff;
-
-    const lengthDiff = groundTruthLengthRank(a) - groundTruthLengthRank(b);
-    if (lengthDiff !== 0) return lengthDiff;
+    const combinedDiff = showcaseCombinedScore(b) - showcaseCombinedScore(a);
+    if (combinedDiff !== 0) return combinedDiff;
 
     const tierDiff =
       priorityTierOrder(a.catalogPriorityTier) - priorityTierOrder(b.catalogPriorityTier);
     if (tierDiff !== 0) return tierDiff;
 
-    return productWordCount(b) - productWordCount(a) || a.reviewKey.localeCompare(b.reviewKey);
+    return a.reviewKey.localeCompare(b.reviewKey);
   }
 
   return (
+    showcaseCombinedScore(b) - showcaseCombinedScore(a) ||
     productSortScore(b, sortMode) - productSortScore(a, sortMode) ||
-    groundTruthLengthRank(a) - groundTruthLengthRank(b) ||
-    productWordCount(b) - productWordCount(a) ||
     a.reviewKey.localeCompare(b.reviewKey)
   );
 }
 
 function userShowcaseStats(user: User): {
   showcaseBand: number;
-  maxShowcaseGap: number;
-  hasLong: number;
+  maxCombined: number;
+  highCount: number;
   maxGap: number;
 } {
   const showcase = user.products.filter(isShowcaseProduct);
-  const longPool = showcase.length ? showcase : user.products;
-  const showcaseGaps = showcase.map((p) => p.sapiensBaselineGap ?? 0);
+  const pool = showcase.length ? showcase : user.products;
   const allGaps = user.products.map((p) => p.sapiensBaselineGap ?? 0);
   return {
     showcaseBand: showcase.length > 0 ? 0 : 1,
-    maxShowcaseGap: showcaseGaps.length ? Math.max(...showcaseGaps) : 0,
-    hasLong: longPool.some((p) => groundTruthLengthRank(p) === 0) ? 0 : 1,
+    maxCombined: pool.length
+      ? Math.max(...pool.map(showcaseCombinedScore))
+      : 0,
+    highCount: showcase.filter((p) => p.catalogPriorityTier === "high").length,
     maxGap: allGaps.length ? Math.max(...allGaps) : 0,
   };
 }
@@ -287,8 +296,8 @@ function compareUsers(a: User, b: User, sortMode: string): number {
     const bStats = userShowcaseStats(b);
     return (
       aStats.showcaseBand - bStats.showcaseBand ||
-      bStats.maxShowcaseGap - aStats.maxShowcaseGap ||
-      aStats.hasLong - bStats.hasLong ||
+      bStats.maxCombined - aStats.maxCombined ||
+      bStats.highCount - aStats.highCount ||
       bStats.maxGap - aStats.maxGap ||
       b.similarityScore - a.similarityScore ||
       a.id.localeCompare(b.id)
@@ -298,8 +307,8 @@ function compareUsers(a: User, b: User, sortMode: string): number {
   const aStats = userShowcaseStats(a);
   const bStats = userShowcaseStats(b);
   return (
+    bStats.maxCombined - aStats.maxCombined ||
     bStats.maxGap - aStats.maxGap ||
-    aStats.hasLong - bStats.hasLong ||
     b.similarityScore - a.similarityScore ||
     a.id.localeCompare(b.id)
   );

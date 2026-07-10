@@ -76,6 +76,8 @@ MIN_UI_SAPIENS_BASELINE_GAP = 0.10
 MIN_UI_OVERALL_SIMILARITY = 0.65
 # Ground-truth reviews shorter than this are kept in catalog but demoted in sort order.
 MIN_GROUND_TRUTH_WORDS = 35
+# Reference length where length_weight reaches 1.0 (used in gap × length sort score).
+SHOWCASE_LENGTH_SCALE_WORDS = 150
 # Manually excluded from UI catalog (review_key).
 UI_CATALOG_EXCLUDED_REVIEW_KEYS = frozenset(
     {
@@ -867,14 +869,27 @@ def product_word_count(product: dict) -> int:
     return review_word_count(product.get("review_text") or "")
 
 
+def length_weight_for_showcase_sort(words: int) -> float:
+    """0–1 multiplier: rewards longer reviews; short (<35w) stay but rank lower."""
+    w = max(0, int(words))
+    if w < MIN_GROUND_TRUTH_WORDS:
+        return 0.15 + 0.25 * (w / MIN_GROUND_TRUTH_WORDS)
+    scale = max(SHOWCASE_LENGTH_SCALE_WORDS, MIN_GROUND_TRUTH_WORDS)
+    return 0.5 + 0.5 * min(1.0, w / scale)
+
+
+def showcase_combined_score(product: dict) -> float:
+    """gap × length_weight — both gap and review length influence rank together."""
+    gap = float(product.get("sapiens_baseline_gap") or 0)
+    return gap * length_weight_for_showcase_sort(product_word_count(product))
+
+
 def product_priority_sort_key(product: dict) -> tuple:
     tier = str(product.get("catalog_priority_tier") or "medium").lower()
     return (
         showcase_tier_rank(tier),
-        -float(product.get("sapiens_baseline_gap") or 0),
-        ground_truth_length_rank(product),
+        -round(showcase_combined_score(product), 6),
         PRIORITY_TIER_ORDER.get(tier, 1),
-        -product_word_count(product),
         str(product.get("review_key") or ""),
     )
 
@@ -883,9 +898,7 @@ def sort_products_by_sapiens_gap(products: list[dict]) -> list[dict]:
     return sorted(
         products,
         key=lambda p: (
-            -float(p.get("sapiens_baseline_gap") or 0),
-            ground_truth_length_rank(p),
-            -product_word_count(p),
+            -round(showcase_combined_score(p), 6),
             str(p.get("review_key") or ""),
         ),
     )
@@ -953,21 +966,25 @@ def sort_users_by_priority_tier_and_gap(users: list[dict]) -> list[dict]:
     def user_key(user: dict) -> tuple[int, float, int, float, str]:
         products = user.get("products") or []
         showcase = _showcase_products(products)
+        pool = showcase if showcase else products
         showcase_band = 0 if showcase else 1
-        max_showcase_gap = max(
-            (float(p.get("sapiens_baseline_gap") or 0) for p in showcase),
+        max_combined = max(
+            (showcase_combined_score(p) for p in pool),
             default=0.0,
         )
-        long_pool = showcase if showcase else products
-        has_long = 0 if any(ground_truth_length_rank(p) == 0 for p in long_pool) else 1
         max_gap = max(
             (float(p.get("sapiens_baseline_gap") or 0) for p in products),
             default=0.0,
         )
+        high_count = sum(
+            1
+            for p in showcase
+            if str(p.get("catalog_priority_tier") or "").lower() == "high"
+        )
         return (
             showcase_band,
-            -max_showcase_gap,
-            has_long,
+            -round(max_combined, 6),
+            -high_count,
             -max_gap,
             str(user.get("user_id") or ""),
         )
@@ -996,20 +1013,17 @@ def sort_users_for_catalog(users: list[dict], sort_by: str) -> list[dict]:
 def sort_users_by_sapiens_gap(users: list[dict]) -> list[dict]:
     def user_key(user: dict) -> tuple:
         products = user.get("products") or []
+        max_combined = max(
+            (showcase_combined_score(p) for p in products),
+            default=0.0,
+        )
         max_gap = max(
             (float(p.get("sapiens_baseline_gap") or 0) for p in products),
             default=0.0,
         )
-        long_products = [p for p in products if ground_truth_length_rank(p) == 0]
-        max_long_gap = max(
-            (float(p.get("sapiens_baseline_gap") or 0) for p in long_products),
-            default=0.0,
-        )
-        has_long = 0 if long_products else 1
         return (
+            -round(max_combined, 6),
             -max_gap,
-            has_long,
-            -max_long_gap,
             str(user.get("user_id") or ""),
         )
 
@@ -2104,12 +2118,8 @@ def build_video_games_software_benchmark_tribe(
         if sort_by == "overall_similarity":
             user_score = max(float(p.get("overall_similarity_score") or 0) for p in products)
         elif sort_by == "priority_tier_gap":
-            showcase_gaps = [
-                float(p.get("sapiens_baseline_gap") or 0) for p in _showcase_products(products)
-            ]
-            user_score = max(showcase_gaps) if showcase_gaps else max(
-                float(p.get("sapiens_baseline_gap") or 0) for p in products
-            )
+            showcase_pool = _showcase_products(products) or products
+            user_score = max(showcase_combined_score(p) for p in showcase_pool)
         else:
             user_score = max(float(p.get("sapiens_baseline_gap") or 0) for p in products)
 
