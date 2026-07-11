@@ -13,7 +13,7 @@ function BenchmarkReport() {
           onClick={() => markWizardRestorePending()}
           className="text-[13px] font-medium text-[#B23F17] hover:underline"
         >
-          ← Back to benchmark wizard
+          Back
         </Link>
         <span className="text-[12px] text-[#8B8980]">SAPIENS 1.0 · Benchmark report</span>
       </div>
