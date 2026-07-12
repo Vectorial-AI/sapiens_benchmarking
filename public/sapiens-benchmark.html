@@ -40,18 +40,19 @@
   @media(max-width:680px){.sec-head{gap:10px}}
   h2.sec{font-size:clamp(30px,4.2vw,46px);max-width:none;font-weight:500}
 
-  header{position:sticky;top:0;background:rgba(251,250,247,.92);backdrop-filter:blur(8px);z-index:20;border-bottom:1px solid var(--line)}
-  .brand-stack{display:flex;flex-direction:column;align-items:flex-start;padding:16px 0 0}
+  header{position:sticky;top:0;background:rgba(251,250,247,.92);backdrop-filter:blur(8px);z-index:20}
+  .brand-bar{padding:16px 28px 14px clamp(140px,18vw,220px)}
   .logo-word{display:flex;align-items:center;gap:12px}
-  .logo-word img{height:22px;width:auto;display:block;flex-shrink:0}
-  .logo-word .sep{width:1px;height:14px;background:var(--line);flex-shrink:0}
-  .logo-word .sapiens-tag{font-family:var(--brand);font-weight:700;font-size:16px;letter-spacing:.04em;color:var(--orange);line-height:22px;height:22px;display:inline-flex;align-items:center;transform:translateY(0.5px)}
-  nav{display:flex;flex-wrap:wrap;gap:0;margin-top:18px;padding:0;width:100%}
-  nav a{border:none;color:var(--ink-soft);font-size:13.5px;margin:0;font-weight:500;padding:2px 18px 4px 0;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
-  nav a:not(:last-child){margin-right:8px}
-  nav a:hover{color:var(--orange-ink)}
-  nav a.active{color:var(--orange);border-bottom-color:var(--orange);font-weight:600}
-  @media(max-width:760px){nav{display:none}}
+  .logo-word img{height:20px;width:auto;display:block;flex-shrink:0}
+  .logo-word .sep{width:1px;height:13px;background:var(--line);flex-shrink:0}
+  .logo-word .sapiens-tag{font-family:var(--brand);font-weight:700;font-size:21px;letter-spacing:.04em;color:var(--orange);line-height:20px;height:20px;display:inline-flex;align-items:center;transform:translateY(0.5px)}
+  .nav-bar{display:flex;justify-content:center;border-top:1px solid var(--line);padding:0 28px 12px;background:transparent}
+  .nav-bar .inner{display:inline-flex;justify-content:center;border:1px solid var(--line);border-top:none;background:color-mix(in srgb,var(--paper) 70%,#fff);border-radius:0 0 12px 12px}
+  nav{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin:0;padding:6px;width:auto}
+  nav a{border:none;color:var(--ink-soft);font-size:13.5px;margin:0;font-weight:500;padding:7px 14px;border-radius:8px;transition:color .15s,background .15s}
+  nav a:hover{color:var(--orange-ink);background:var(--orange-wash)}
+  nav a.active{color:#fff;background:var(--orange);font-weight:600}
+  @media(max-width:760px){.nav-bar{display:none}}
 
   .hero{padding:72px 0 60px}
   .hero h1{font-size:clamp(36px,5.2vw,56px);max-width:none;letter-spacing:-.025em}
@@ -231,20 +232,24 @@
 <body>
 
 <header>
-  <div class="wrap brand-stack">
+  <div class="brand-bar">
     <div class="logo-word">
       <img src="/vectorial-logo.png" alt="Vectorial" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
       <span style="display:none;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:22px;line-height:22px">VECTORIAL</span>
       <span class="sep"></span>
       <span class="sapiens-tag">SAPIENS</span>
     </div>
-    <nav>
-      <a href="#baselines">Baselines</a>
-      <a href="#academic">Academic evidence</a>
-      <a href="#behavior">Behavior models</a>
-      <a href="#data">Dataset</a>
-      <a href="#moat">Data moat</a>
-    </nav>
+  </div>
+  <div class="nav-bar">
+    <div class="inner">
+      <nav>
+        <a href="#baselines">Baselines</a>
+        <a href="#academic">Academic evidence</a>
+        <a href="#behavior">Behavior models</a>
+        <a href="#data">Dataset</a>
+        <a href="#moat">Data moat</a>
+      </nav>
+    </div>
   </div>
 </header>
 
