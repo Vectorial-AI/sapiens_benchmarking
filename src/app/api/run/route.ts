@@ -198,7 +198,6 @@ export async function POST(req: Request) {
     let source: string = hasGatewayKey() ? "gateway" : "mock";
     let usedPrecomputed = false;
     let resolvedPreRunIndex: number | null = null;
-    let showcaseDelay: Promise<void> | null = null;
 
     // Video-games tribes with blind i2 pre_runs: serve rotating precomputed reviews
     // (no live review generation). Baselines stay live.
@@ -206,23 +205,22 @@ export async function POST(req: Request) {
     const canUsePrecomputed = Boolean(reviewKey) && tribe.domain === "video_games";
 
     if (canUsePrecomputed && reviewKey) {
-      const showcaseLatencyMs = 2000;
+      const lookupStart = Date.now();
       const lookup = lookupPrecomputedPrediction(
         tribe.cluster,
         tribe.microId,
         reviewKey,
         requestedPreRun,
       );
+      const lookupLatencyMs = Date.now() - lookupStart;
       if (lookup) {
         usedPrecomputed = true;
         resolvedPreRunIndex = lookup.preRunIndex;
-        showcaseDelay = new Promise((r) => setTimeout(r, showcaseLatencyMs));
-        sapiens = toPrecomputedEngineResult(lookup, showcaseLatencyMs);
+        sapiens = toPrecomputedEngineResult(lookup, lookupLatencyMs);
         source = `pre_run_${lookup.preRunIndex}`;
       } else if (product?.userHistoryReview?.trim()) {
         usedPrecomputed = true;
-        showcaseDelay = new Promise((r) => setTimeout(r, showcaseLatencyMs));
-        sapiens = catalogFallbackPrediction(product, showcaseLatencyMs);
+        sapiens = catalogFallbackPrediction(product, lookupLatencyMs);
         source = "catalog";
       }
     }
@@ -283,8 +281,6 @@ export async function POST(req: Request) {
       inferredTraitSummary: inferredTraits?.summary ?? null,
       inferredTraitInfluences: inferredTraits?.influences ?? null,
     };
-
-    await showcaseDelay;
 
     return NextResponse.json({
       groundTruth,
