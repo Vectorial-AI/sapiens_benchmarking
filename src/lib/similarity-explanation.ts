@@ -229,7 +229,7 @@ function similarityOnlySapiensLine(line: string): string {
   return cleaned;
 }
 
-function fallbackExplanation(args: {
+export function buildSimilarityFallbackExplanation(args: {
   generatedReview: string;
   groundTruthReview: string;
   groundTruthThemes?: string[];
@@ -292,7 +292,7 @@ export async function generateSimilarityExplanation(args: {
     engine === "sapiens" && !isSapiensNearPerfectMatch(score);
 
   if (!hasGatewayKey()) {
-    return fallbackExplanation({ ...args, engine, sapiensPartialMatch });
+    return buildSimilarityFallbackExplanation({ ...args, engine, sapiensPartialMatch });
   }
 
   try {
@@ -309,9 +309,9 @@ export async function generateSimilarityExplanation(args: {
       .map((s) => s.trim())
       .filter(Boolean)
       .join(" ");
-    if (!line) return fallbackExplanation({ ...args, engine, sapiensPartialMatch });
+    if (!line) return buildSimilarityFallbackExplanation({ ...args, engine, sapiensPartialMatch });
     return enforceOpening(line, bucket, engine, sapiensPartialMatch);
   } catch {
-    return fallbackExplanation({ ...args, engine, sapiensPartialMatch });
+    return buildSimilarityFallbackExplanation({ ...args, engine, sapiensPartialMatch });
   }
 }

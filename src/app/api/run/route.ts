@@ -17,7 +17,7 @@ import {
 } from "@/lib/prompts";
 import { hasGatewayKey, mockPrediction, runModel } from "@/lib/ai";
 import { generateInferredTraitInfluences } from "@/lib/inferred-traits-explanation";
-import { generateSimilarityExplanation } from "@/lib/similarity-explanation";
+import { generateSimilarityExplanation, buildSimilarityFallbackExplanation } from "@/lib/similarity-explanation";
 import {
   hasPreRuns,
   lookupPrecomputedPrediction,
@@ -217,10 +217,9 @@ export async function POST(req: Request) {
       if (lookup) {
         usedPrecomputed = true;
         resolvedPreRunIndex = lookup.preRunIndex;
-        // Artificial latency so the UI can animate a "generating" feel.
-        const fakeLatencyMs = 1600 + Math.floor(Math.random() * 900);
-        await new Promise((r) => setTimeout(r, fakeLatencyMs));
-        sapiens = toPrecomputedEngineResult(lookup, fakeLatencyMs);
+        const showcaseLatencyMs = 2000;
+        await new Promise((r) => setTimeout(r, showcaseLatencyMs));
+        sapiens = toPrecomputedEngineResult(lookup, showcaseLatencyMs);
         source = `pre_run_${lookup.preRunIndex}`;
       }
     }
@@ -247,30 +246,39 @@ export async function POST(req: Request) {
       }
     }
 
-    const inferredTraits = sapiens.reviewText.trim()
-      ? await generateInferredTraitInfluences({
-          sapiensReview: sapiens.reviewText,
-          tribe,
-          user,
-          category,
-        })
-      : null;
+    const inferredTraits =
+      sapiens.reviewText.trim() && !usedPrecomputed
+        ? await generateInferredTraitInfluences({
+            sapiensReview: sapiens.reviewText,
+            tribe,
+            user,
+            category,
+          })
+        : null;
 
     // Prefer precomputed delta metrics; otherwise score live.
     if (!sapiens.metrics && scoringGroundTruth) {
       sapiens = await attachMetrics(sapiens, scoringGroundTruth, "SAPIENS");
     } else if (sapiens.metrics && scoringGroundTruth) {
-      const similarityExplanation = await generateSimilarityExplanation({
-        generatedReview: sapiens.reviewText,
-        groundTruthReview: scoringGroundTruth.reviewText,
-        groundTruthThemes: scoringGroundTruth.themes,
-        predictedThemes: sapiens.predictedThemes,
-        predictedSentiment: sapiens.sentiment,
-        groundTruthSentiment: scoringGroundTruth.sentiment,
-        metrics: sapiens.metrics,
-        label: "SAPIENS",
-        engine: "sapiens",
-      });
+      const similarityExplanation = usedPrecomputed
+        ? buildSimilarityFallbackExplanation({
+            generatedReview: sapiens.reviewText,
+            groundTruthReview: scoringGroundTruth.reviewText,
+            groundTruthThemes: scoringGroundTruth.themes,
+            metrics: sapiens.metrics,
+            engine: "sapiens",
+          })
+        : await generateSimilarityExplanation({
+            generatedReview: sapiens.reviewText,
+            groundTruthReview: scoringGroundTruth.reviewText,
+            groundTruthThemes: scoringGroundTruth.themes,
+            predictedThemes: sapiens.predictedThemes,
+            predictedSentiment: sapiens.sentiment,
+            groundTruthSentiment: scoringGroundTruth.sentiment,
+            metrics: sapiens.metrics,
+            label: "SAPIENS",
+            engine: "sapiens",
+          });
       sapiens = { ...sapiens, similarityExplanation };
     }
 

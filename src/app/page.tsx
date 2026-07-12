@@ -76,32 +76,6 @@ function commitPreRunIndex(reviewKey: string | null | undefined, index: number):
   }
 }
 
-async function typewriterReveal(
-  fullText: string,
-  onUpdate: (partial: string) => void,
-  durationMs = 1400,
-): Promise<void> {
-  if (!fullText) {
-    onUpdate("");
-    return;
-  }
-  const start = Date.now();
-  const total = fullText.length;
-  await new Promise<void>((resolve) => {
-    const tick = () => {
-      const elapsed = Date.now() - start;
-      const progress = Math.min(1, elapsed / durationMs);
-      // Ease-out so early chars appear faster, then slow near the end.
-      const eased = 1 - (1 - progress) ** 2;
-      const n = Math.max(1, Math.floor(total * eased));
-      onUpdate(fullText.slice(0, n));
-      if (progress >= 1) resolve();
-      else requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  });
-}
-
 const DOMAIN_SECTIONS = [
   { id: "video_games" as const, label: "Video Games & Software" },
   { id: "healthcare" as const, label: "Healthcare & Wellness" },
@@ -309,11 +283,13 @@ export default function Home() {
 
   useEffect(() => {
     if (!product) {
+      setGroundTruth(null);
       setGroundTruthThemes([]);
       setGroundTruthSentiment(null);
       setThemeTopK(0);
       return;
     }
+    setGroundTruth(product.groundTruthReview?.trim() || null);
     const themes = product.groundTruthThemes ?? [];
     setGroundTruthThemes(themes);
     setGroundTruthSentiment(product.groundTruthSentiment ?? null);
@@ -323,7 +299,6 @@ export default function Home() {
   function resetOutputs() {
     setSapiens(null);
     setBaselines([]);
-    setGroundTruth(null);
   }
 
   const gtThemeRecord = useMemo(
@@ -454,19 +429,16 @@ export default function Home() {
         commitPreRunIndex(activeReviewKey, data.preRunIndex ?? preRunIndex);
       }
 
-      // Reveal review text progressively so it feels like generation.
-      setSapiens({ ...full, reviewText: "" });
-      await typewriterReveal(full.reviewText, (partial) => {
-        setSapiens((prev) => (prev ? { ...prev, reviewText: partial } : { ...full, reviewText: partial }));
-      });
       setSapiens(full);
 
-      setGroundTruth(data.groundTruth ?? null);
-      setGroundTruthThemes(data.groundTruthThemes ?? []);
-      setGroundTruthSentiment(data.groundTruthSentiment ?? null);
-      setThemeTopK(
-        data.themeTopK ?? themeTopKFromGroundTruth(data.groundTruthThemes ?? []),
-      );
+      if (!groundTruth && data.groundTruth) {
+        setGroundTruth(data.groundTruth);
+        setGroundTruthThemes(data.groundTruthThemes ?? []);
+        setGroundTruthSentiment(data.groundTruthSentiment ?? null);
+        setThemeTopK(
+          data.themeTopK ?? themeTopKFromGroundTruth(data.groundTruthThemes ?? []),
+        );
+      }
       if (data.source === "gateway" || usedPreRun) setGatewayConnected(true);
     } catch {
       /* noop */

@@ -16,6 +16,7 @@ export type CatalogProduct = {
   productDescription: string;
   mainProductDescription?: string;
   category: string;
+  groundTruthReview?: string;
   groundTruthThemes?: string[];
   groundTruthSentiment?: ReviewSentiment | null;
   healthcareBenchmark?: boolean;

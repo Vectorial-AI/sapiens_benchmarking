@@ -520,7 +520,7 @@ export function getCatalog(): CatalogTribeIndex[] {
   return getCatalogIndex().tribes;
 }
 
-/** Full tribe with users/products but no ground-truth review text. */
+/** Full tribe with users/products for the showcase UI (includes ground-truth review text). */
 export function getCatalogTribe(id: string): CatalogTribe | undefined {
   const tribe = getTribe(id);
   const idx = getCatalogIndex().tribes.find((t) => t.id === id);
@@ -551,6 +551,7 @@ export function getCatalogTribe(id: string): CatalogTribe | undefined {
         productDescription: p.productDescription,
         mainProductDescription: p.mainProductDescription,
         category: p.category,
+        groundTruthReview: p.groundTruthReview,
         groundTruthThemes: p.predictedThemes,
         groundTruthSentiment: p.groundTruthSentiment,
         healthcareBenchmark: p.healthcareBenchmark,
