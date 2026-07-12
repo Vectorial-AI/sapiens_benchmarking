@@ -1,0 +1,289 @@
+{
+  "deltas": [
+    {
+      "review_key": "AGQ44DK7UC7TQMR4AK7I57IDMDSA_review_4",
+      "user_id": "AGQ44DK7UC7TQMR4AK7I57IDMDSA",
+      "review_idx": 4,
+      "text_delta": 0.28327520581530574,
+      "text_embedding_delta": 0.28327520581530574,
+      "text_length_delta": 0.4649735207179272,
+      "text_style_delta": 0.3154648767857287,
+      "theme_delta_jsd": 0.379944374157259,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.07081880145382646,
+      "overall_similarity": 0.9291811985461735,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AGQ44DK7UC7TQMR4AK7I57IDMDSA_review_4",
+      "category": "Appstore for Android",
+      "product_description": "It's Fibbage - the lying, bluffing, fib-till-you-win multiplayer trivia party game from the makers of YOU DON'T KNOW JACK! Fool your friends with your lies, avoid theirs, and find the (outrageous) truth. And get this: your phone or tablet is your controller! It's easy. Just type in your lies to questions like: \"The mayor of Rabbit Hash, Kentucky is a _____.\" Baby? Rabbit? Ham sandwich? It's up to you! Fool your opponents into thinking your lie is true and you'll rack up the points! But be careful, if you pick an opponent's lie, they'll be doing a Fibbage fancy dance. There's a free version that features a handful of starter questions, and you can upgrade to full Fibbage to get hours and hours of game party material! So grab your most trusting friends, family, and any other easily-fooled nitwits and get ready to laugh till you can't lie no more. Think your B.S. don't stink? You're about to find out! Product feature bullets • Play with 2-8 players!• Use your phone or tablet - or any device with Internet access - to join and play.• Quick 7-question games (but you'll just keep playing over and over - it's what everybody does).• Specialty questions like Celebrity Tweets and Road Trip! And of course...The Final Fibbage.• Free version upgradable to full version with hundreds more outrageous questions.",
+      "prediction": {
+        "review_text": "Best part is how effortlessly everyone jumps in on Fire TV using their phones as controllers. It turns into instant couch-co-op chaos and works great for family game night. Rounds are quick and the UI is simple. The free starter pack is fine, but you'll want the paid question pack pretty fast.",
+        "predicted_themes": {
+          "Installation & Technical Performance": 0.4,
+          "Intrusive Ads & Monetization Frustrations": 0.5,
+          "Feature Set, Usability & Accessibility": 0.65,
+          "Content Availability, Licensing & Online Requirements": 0.3,
+          "Security, Privacy & Update Policies": 0.05,
+          "Customer Support, Pricing & Marketing Transparency": 0.25,
+          "Gameplay Experience & Educational Value": 0.85,
+          "Hardware Integration & Performance": 0.7
+        },
+        "sentiment": "Positive"
+      },
+      "actual": {
+        "review_text": "This is a must have for family game night on your fireTv.  It is so much fun, and the fact that everyone can use their phone as a controller is just pure genius.",
+        "rating": 5.0,
+        "sentiment": "Positive",
+        "predicted_themes": [
+          "Gameplay Experience & Educational Value",
+          "Hardware Integration & Performance"
+        ]
+      }
+    },
+    {
+      "review_key": "AGQ44DK7UC7TQMR4AK7I57IDMDSA_review_3",
+      "user_id": "AGQ44DK7UC7TQMR4AK7I57IDMDSA",
+      "review_idx": 3,
+      "text_delta": 0.35519990609971985,
+      "text_embedding_delta": 0.35519990609971985,
+      "text_length_delta": 0.3662823752549378,
+      "text_style_delta": 0.5472412033315559,
+      "theme_delta_jsd": 0.2309203895073642,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.08879997652492999,
+      "overall_similarity": 0.91120002347507,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AGQ44DK7UC7TQMR4AK7I57IDMDSA_review_3",
+      "category": "Software",
+      "product_description": "Corel CorelDRAW Home and Student Suite X7 High-resolution and multi-display support View larger Corel PHOTO-PAINT Effects View larger Discover a world of new design possibilities for Home and school Design your way with CorelDRAW Home & Student Suite X7. Whether you dabble in design or have existing expertise, you can express your unique creativity by using the intuitive graphic design, illustration, page layout, web graphics and photo-editing features. Create eye-catching projects with a variety of content, including professionally-designed templates, high-quality photos and clipart. It's easy to edit photos and design reports, drawings, flyers, ads, business cards, logos and more. Plus, this latest version offers a redesigned workspace for ease of use, all-new special effects, learning videos, Quick Start Guide, and the ability to share content with other CorelDRAW users. Everything you need in one complete graphic design suite. All-in-one graphic design Create all types of graphics and photo projects with an array of intuitive and user-friendly features for designers of all levels. With graphic design, vector illustration, tracing, page layout, and photo-editing features, you'll have all the tools you need to design projects like a professional. Versatile drawing tools Produce original and compelling designs for print or web with a robust toolbox of text, graphics, layout and editing tools that help you get the job done. Whether you're designing reports, drawings, flyers, logos or flyers, we've got you covered. Advanced photo editing Enhance and improve any photograph with the professional photo-editing tools and effects included in Corel PHOTO-PAINT Home & Student X7. Popular photo tricks such as retouching and enhancement, bitmap creation, digital painting, and streamlined web exporting are just a click away. System Requirements: Microsoft Windows 8/8.1 or Windows 7 (32-bit or 64-bit editions), with latest service packs installed Microsoft Windows 8/8.1 or Windows 7 (32-bit or 64-bit editions), with latest service packs installed Intel Core 2 Duo or AMD Athlon 64 Intel Core 2 Duo or AMD Athlon 64 2 GB RAM 2 GB RAM 1 GB hard disk space 1 GB hard disk space Mouse, tablet or multi-touch screen Mouse, tablet or multi-touch screen 1280 x 768 or higher monitor resolution 1280 x 768 or higher monitor resolution DVD drive required for box installation (digital download included) DVD drive required for box installation (digital download included) Microsoft Internet Explorer 8 or higher Microsoft Internet Explorer 8 or higher Internet connection required for CorelDRAW Standard Membership, performance and stability updates, online content and Content Exchange Internet connection required for CorelDRAW Standard Membership, performance and stability updates, online content and Content Exchange Content*: 1,300 high-quality clipart and digital images; 100 royalty-free, high-resolution digital photos; 125 fonts; 75 photo frames; Over 100 professionally designed templates, including certificates, ads, business cards, letterhead, flyers, posters and more; 100 fills; Online Quick Start Guide; Over 2 hours of training videos; *CorelDRAW Standard Membership account required to download Comparison Matrix View larger CorelDRAW Home & Student Suite X7 View larger CorelDRAW Graphics Suite X7 CorelDRAW X7 (Home & Student version excludes Pro Features) ✓✓ Corel PHOTO-PAINT X7 (Home & Student version excludes Pro Features) ✓✓ Corel PowerTRACE X7 ✓✓ Corel Website Creator ✓ Corel CAPTURE X7 ✓✓ Corel CONNECT ✓✓ Barcode Wizard ✓✓ PhotoZoom Pro 3 ✓",
+      "prediction": {
+        "review_text": "For the price, this is a pretty solid \"all-in-one\" design suite for home/school stuff. You get real vector drawing plus PHOTO-PAINT for basic to fairly serious photo work, and the templates/clipart/fonts are actually useful when you just need a flyer, report, or simple logo without starting from zero.\n\nThat said, don't buy this thinking it's going to feel like a lightweight app. The interface is dense, with a lot of panels and menus, and there's definitely a learning curve if you've never used CorelDRAW (or any pro-ish editor). I like that you can dig into a ton of options once you learn where things are, but a casual \"dabble once a month\" user may get frustrated.\n\nBig caution: some content/updates require a Corel membership/account + internet. I'm not a fan of anything that gatekeeps assets behind logins. If you're ok with that, it's a good value on Windows.",
+        "predicted_themes": {
+          "Installation & Technical Performance": 0.2,
+          "Intrusive Ads & Monetization Frustrations": 0.3,
+          "Feature Set, Usability & Accessibility": 0.85,
+          "Content Availability, Licensing & Online Requirements": 0.75,
+          "Security, Privacy & Update Policies": 0.35,
+          "Customer Support, Pricing & Marketing Transparency": 0.45,
+          "Gameplay Experience & Educational Value": 0.3,
+          "Hardware Integration & Performance": 0.1
+        },
+        "sentiment": "Neutral"
+      },
+      "actual": {
+        "review_text": "Despite what the description says, it's not really suitable for those who are just dabbling.  The user interface has a ton of menu options and isn't quite as intuitive as I'd like for the novice/dabbler.  However, at this price for 3 users you get both an advanced photo editor and a publisher style document creator, so it is a pretty good bang for your buck.  The only thing I didn't like was that fact that it nags you at every startup to create an account in order to use online templates and objects.  I already have too many online accounts and really did not want to create another.",
+        "rating": 4.0,
+        "sentiment": "Neutral",
+        "predicted_themes": [
+          "Feature Set, Usability & Accessibility",
+          "Content Availability, Licensing & Online Requirements",
+          "Customer Support, Pricing & Marketing Transparency"
+        ]
+      }
+    },
+    {
+      "review_key": "AG7XEWOPZU4ZHA5QTL65XEDXZNHA_review_1",
+      "user_id": "AG7XEWOPZU4ZHA5QTL65XEDXZNHA",
+      "review_idx": 1,
+      "text_delta": 0.5206897982557882,
+      "text_embedding_delta": 0.5206897982557882,
+      "text_length_delta": 0.35030176239152777,
+      "text_style_delta": 0.10155700678750612,
+      "theme_delta_jsd": 0.18684466296570706,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.13017244956394702,
+      "overall_similarity": 0.869827550436053,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AG7XEWOPZU4ZHA5QTL65XEDXZNHA_review_1",
+      "category": "Video Games",
+      "product_description": "Product description Step into the shoes of Buffy Summers, Sunnydale's hottest vampire slayer. Fight against fierce vampires using cool moves and awesome slayer weaponry. With advice from your watcher Giles, you'll destroy the most fearsome creatures of the night. Amazon.com Buffy the Vampire Slayer is the first third-person action-adventure game based on the international hit TV series. Players take on the role of Buffy Summers, a 17-year-old high-school student who must balance adolescent growing pains with the responsibility of being the Chosen One. As the slayer, Buffy eliminates vampires and other demonic creatures that threaten the world's existence. It's up to you to save the human race from being \"drained\" during this devilish time. Fortunately, Buffy is not alone. Her friends help her solve mysteries and watch her back. Fans of the series will recognize the voices of favorite characters including Angel, Xander, Willow, Cordelia, Spike, the Master, and Giles. Players fight a range of enemies including Spike, the Master, Drusilla, demons, zombies, and other supernatural creatures that threaten mankind. All of Buffy's favorite haunts are richly detailed: Sunnydale High School, the cemetery, the Bronze nightclub, and the library, which is the portal that sits atop the Hellmouth. Special supernatural effects such as morphing creatures, eldritch explosions, dynamic fogging, and arcane spell casting enhance the dark, mythical setting of the game. An intelligent combat system allows enemies to perform counterattacks and learn from character's fighting techniques.",
+      "prediction": {
+        "review_text": "I'm not even a big Buffy fan and mostly grabbed this for a cheap action game, but it won me over. The fighting actually has some depth and the enemies don't just stand there, so it stays fun instead of button-mashy. Difficulty felt fair and I kept coming back to clear more areas. If you never watched the show, it's still a solid beat-em-up style game.",
+        "predicted_themes": {
+          "Accessibility & Inclusive Design": 0.1,
+          "Audio and Visual Quality": 0.1,
+          "Battery Life and Portability": 0.0,
+          "Performance Stability and Bug Issues": 0.1,
+          "Hardware Build Quality Comfort and Connectivity": 0.0,
+          "Gameplay Mechanics Controls and Difficulty": 0.9,
+          "Content Depth Storyline and Appropriateness": 0.6,
+          "Online Multiplayer and Connectivity Services": 0.0,
+          "Installation DRM and Privacy Requirements": 0.0,
+          "Pricing Value and Monetization": 0.4,
+          "Customer Service Support and Delivery": 0.0
+        },
+        "sentiment": "Positive"
+      },
+      "actual": {
+        "review_text": "I am not a fan of the show.  I felt it was a bit to cheesy for my taste.  But the game is NO JOKE.  I played this game till I beat and then played it many times after that.  Very fun and the story line is actually decent!",
+        "rating": 5.0,
+        "sentiment": "Positive",
+        "predicted_themes": [
+          "Content Depth Storyline and Appropriateness",
+          "Gameplay Mechanics Controls and Difficulty"
+        ]
+      }
+    },
+    {
+      "review_key": "AGAKR2KZZS2OMN2GORTKQEW7PXPA_review_1",
+      "user_id": "AGAKR2KZZS2OMN2GORTKQEW7PXPA",
+      "review_idx": 1,
+      "text_delta": 0.42994859489033055,
+      "text_embedding_delta": 0.42994859489033055,
+      "text_length_delta": 0.1489419201565426,
+      "text_style_delta": 0.2630929753571457,
+      "theme_delta_jsd": 0.3395102414719167,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.10748714872258258,
+      "overall_similarity": 0.8925128512774174,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AGAKR2KZZS2OMN2GORTKQEW7PXPA_review_1",
+      "category": "Video Games",
+      "product_description": "Experience a military shooter set in a diverse & hostile open world that you can play solo or up to four-player co-op.",
+      "prediction": {
+        "review_text": "This feels like the same shooter again, with the same old bugs/performance hiccups I dealt with in the previous one. Frame drops and weird AI/pathing stuff make it hard to take seriously, and it screams copy-pasted code.\n\nThe open world is big, sure, but the visuals look dated for a \"modern\" release. Co-op can be fun for a night, but that doesn't excuse the technical mess.\n\nUnless they actually patch it and support it long-term, I'm done paying full price for this series. If another installment comes out like this, I'll only grab it at rock-bottom clearance.",
+        "predicted_themes": {
+          "Accessibility & Inclusive Design": 0.05,
+          "Audio and Visual Quality": 0.72,
+          "Battery Life and Portability": 0.0,
+          "Performance Stability and Bug Issues": 0.95,
+          "Hardware Build Quality Comfort and Connectivity": 0.0,
+          "Gameplay Mechanics Controls and Difficulty": 0.3,
+          "Content Depth Storyline and Appropriateness": 0.22,
+          "Online Multiplayer and Connectivity Services": 0.48,
+          "Installation DRM and Privacy Requirements": 0.05,
+          "Pricing Value and Monetization": 0.7,
+          "Customer Service Support and Delivery": 0.1
+        },
+        "sentiment": "Negative"
+      },
+      "actual": {
+        "review_text": "I believe this game code was written by kids in grade school. Hmmm, maybe not. They would have done a better job.<br /><br />It's obvious poor code was lifted from Wildlands because the same bugs from that game (which should have been fixed considering how long it's been out) are still in this one. Very disappointing in so many ways.<br /><br />The graphics look like games I bought 15 years ago.<br /><br />The next game they release will only be purchased by me when it's in the clearance bin at the Dollar Store.",
+        "rating": 2.0,
+        "sentiment": "Negative",
+        "predicted_themes": [
+          "Performance Stability and Bug Issues",
+          "Audio and Visual Quality"
+        ]
+      }
+    },
+    {
+      "review_key": "AGCSHQRXX6N4TA2ZNC5BZHQ6PQYA_review_1",
+      "user_id": "AGCSHQRXX6N4TA2ZNC5BZHQ6PQYA",
+      "review_idx": 1,
+      "text_delta": 0.5634619723663257,
+      "text_embedding_delta": 0.5634619723663257,
+      "text_length_delta": 0.5315322745050449,
+      "text_style_delta": 0.1309297535714574,
+      "theme_delta_jsd": 0.5089384052009583,
+      "theme_delta_recall": 0.5,
+      "theme_delta": 0.5,
+      "overall_delta": 0.5408654930915815,
+      "overall_similarity": 0.45913450690841856,
+      "sentiment_match": 0.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AGCSHQRXX6N4TA2ZNC5BZHQ6PQYA_review_1",
+      "category": "Video Games",
+      "product_description": "RIG 700HX Ultralight Wireless Gaming Headset with 3D Surround Sound for Xbox Series X|S, Xbox One, PC, USB",
+      "prediction": {
+        "review_text": "Fits my big head even at max adjustment, and the clamp is light enough for long sessions. Sound is solid for the price and wireless has been stable on Xbox and PC. Build feels a bit plasticky but it's ultra light, so I'll take it. No forced accounts so far.",
+        "predicted_themes": {
+          "Accessibility & Inclusive Design": 0.25,
+          "Audio and Visual Quality": 0.75,
+          "Battery Life and Portability": 0.15,
+          "Performance Stability and Bug Issues": 0.25,
+          "Hardware Build Quality Comfort and Connectivity": 0.95,
+          "Gameplay Mechanics Controls and Difficulty": 0.0,
+          "Content Depth Storyline and Appropriateness": 0.0,
+          "Online Multiplayer and Connectivity Services": 0.1,
+          "Installation DRM and Privacy Requirements": 0.7,
+          "Pricing Value and Monetization": 0.65,
+          "Customer Service Support and Delivery": 0.0
+        },
+        "sentiment": "Positive"
+      },
+      "actual": {
+        "review_text": "If you have a big head, this headset isn't for you. Even put on the biggest size wasn't even close to fitting properly. The hyperX Flights fight perfectly, however.",
+        "rating": 3.0,
+        "sentiment": "Negative",
+        "predicted_themes": [
+          "Hardware Build Quality Comfort and Connectivity",
+          "Accessibility & Inclusive Design"
+        ]
+      }
+    },
+    {
+      "review_key": "AEB5R4AU3242FXZFI6LJWQMYHKXA_review_0",
+      "user_id": "AEB5R4AU3242FXZFI6LJWQMYHKXA",
+      "review_idx": 0,
+      "text_delta": 0.22416083876616333,
+      "text_embedding_delta": 0.22416083876616333,
+      "text_length_delta": 0.42981846737560986,
+      "text_style_delta": 0.43207986160448314,
+      "theme_delta_jsd": 0.16302168714448356,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.05604020969154089,
+      "overall_similarity": 0.9439597903084591,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AEB5R4AU3242FXZFI6LJWQMYHKXA_review_0",
+      "category": "Video Games",
+      "product_description": "For ages 13 and up only. *Offer valid with the purchase of a new Meta Quest 2 device (128GB or 256GB) (\"Qualifying Product\") between August 1, 2022 12:01 AM PST- December 31, 2022 11:59 PM PST and while supplies last. User account (\"Account\") required. Offer Item (digital content): Beat Saber in the Meta Quest Store (approx. retail value $29.99). Additional downloadable content, including future music packs and other content, sold separately. To receive Offer Item, Qualifying Product must be first activated between August 1, 2022 12:01 AM PST - January 31, 2023 11:59 PM PST through an Account without Beat Saber entitlement previously enabled on such account (\"Activation\"). Upon Activation, you will receive a notification message via email, in your mobile app, and in VR with a link to redeem the Offer Item from the Meta Quest Store. There are no redemption codes in connection with this Offer. Offer Item must be redeemed within 14 days upon Activation. Once redeemed, Offer Item remains available for download indefinitely. Limit of one (1) Offer Item per Qualifying Product, regardless of the number of Accounts connected to such Qualifying Product. Qualifying Products first activated through an Account with Beat Saber entitlement previously enabled are ineligible to receive Offer Item. Not valid on prior orders or purchases. Offer is non-transferable, not for resale, and not valid for cash or cash equivalent. Offer may be canceled or modified at any time without notice. Void where prohibited or restricted.",
+      "prediction": {
+        "review_text": "This listing is basically the Meta Quest 2 + Beat Saber promo, so starting with the hardware: Quest 2's 1832×1920 per-eye resolution and up to 120Hz mode still looks surprisingly sharp for the money, and the lenses are \"good enough\" as long as you take the time to dial in IPD and keep the sweet spot centered. Compared side-by-side with my older baseline headset, text is easier to read and the image is cleaner, but you do still get some god rays on high-contrast scenes and the edges aren't as crisp as newer headsets.\n\nPerformance and storage are fine for what this device is meant to do. 128GB is the better value unless you're planning to hoard a ton of native installs (especially big rhythm/fitness libraries plus updates). Most of my serious VR time is PC VR anyway, and Quest 2 still shines there: Oculus Link with a decent USB-C cable is straightforward, and Air Link works well if your Wi‑Fi is solid and you're not trying to play right next to a congested router. PC linking is the real \"library multiplier\" here (SteamVR, older titles, mods, etc.), and it's why I still recommend Quest 2 to value-focused buyers.\n\nComfort is the part I'd budget for. The stock soft strap and face interface are acceptable for short sessions, but for longer play (Beat Saber especially) the front-heavy balance starts to bug me. A third-party strap (halo or an Elite-style) and a better face pad made a bigger difference than I expected, both for stability and for keeping the lenses in the sweet spot. If you have any sensitivity around your face/forehead, plan on this being a required upgrade, not an optional one.\n\nThe one big asterisk is the account requirement and Meta ecosystem lock-in. You're signing up for their platform to use the headset and redeem the included game, and that's either a non-issue for you or a hard pass on principle. For me it's tolerable, but I'm not going to pretend it's consumer-friendly.\n\nBeat Saber being included is a nice value add (and it's the obvious first game to show friends). Just note that extra music packs are paid DLC, so don't buy the headset thinking the bundle covers everything long-term.\n\nOverall: if you want the most VR for the least money and you're okay living in Meta's walled garden (with the option to PC link out of it), Quest 2 is still a strong buy-just don't skip the comfort accessories if you plan to use it for real sessions.",
+        "predicted_themes": {
+          "Accessibility & Inclusive Design": 0.12,
+          "Audio and Visual Quality": 0.78,
+          "Battery Life and Portability": 0.18,
+          "Performance Stability and Bug Issues": 0.34,
+          "Hardware Build Quality Comfort and Connectivity": 0.9,
+          "Gameplay Mechanics Controls and Difficulty": 0.26,
+          "Content Depth Storyline and Appropriateness": 0.14,
+          "Online Multiplayer and Connectivity Services": 0.28,
+          "Installation DRM and Privacy Requirements": 0.86,
+          "Pricing Value and Monetization": 0.82,
+          "Customer Service Support and Delivery": 0.05
+        },
+        "sentiment": "Positive"
+      },
+      "actual": {
+        "review_text": "This is the new Oculus Quest 2, which is basically exactly the same as the older Quest except that it comes with half the memory, 128Gb of inbuilt storage rather than 256Gb and is priced $100 cheaper than the 256Gb version.<br /><br />The Quest 2 is the perfect entry level headset to find out whether or not you like the VR world.  Some people don't  like VR for various reasons including vertigo and the feeling of getting sick, neck pain as the headsets are fairly heavy on your head etc.  Other people love it and spend hours on it.<br /><br />For your money your will get the headset itself, a fairly comfortable elastic strap to attach it to your head, two controllers and a charging cable.  Setup is fairly simple. You connect it to your phone using bluetooth and just follow the prompts.  You will need a Facebook account to tie it to and this puts some people off (I understand why) but the majority of people already have a facebook account anyway.<br /><br />The Quest 2 has 2 1832x1920 LCD screens. Not quite 4K but a higher resolution than HD.  For the money this isn't bad, especially considering the higher resolution Rift S is double the price.  The eye pieces are slightly adjustable to 3 different positions, dependent upon the size of your head and space between your eyes.  One great thing about the LCD display is that you can adjust the frame rate.  I have mine set to 72Hz which I feel is much smoother than default 60Hz setting and this makes me much less prone to feeling sick.  There is also a 90Hz refresh rate however for PC gaming that is too high unless you have a seriously beefy graphics card.  Note however that you do not need a PC to use this.<br /><br />The headset also has 3D capable audio built directly into the headset.  The sound quality is OK but nothing outstanding. As such a lot of people also wear headphones when using the Quest 2 and there is a built in 3.5mm audio port to hook your headphones into.  Personally, the sound is good enough for me and I prefer using it without the added weight of a pair of headphones.<br /><br />The headset is quite heavy and although the soft elastic strap that comes with it is adequate, I would highly recommend purchasing one of the Elite, hard backed straps that you can find on amazon. These do make a lot of difference in distributing the weight, making wearing the headset much more comfortable and you can wear it for longer.<br /><br />The Quest 2 has hundreds of apps and games available for it, from watching netflix and shooting games to fitness and boxing games.  Even games such as boxing do help you to get in shape as you quickly find yourself ducking and weaving as well as throwing punches as you get immersed in the gameplay.  These games are stored in the 128Gb of memory in the headset and aren't that large so even with 128Gb you should have plenty of room for a number of games and apps.<br /><br />You can also attach your headset to your PC and play VR games on your PC.  To do this you will need to buy an Oculus cable. The official one comes in at $80 which is very pricey.  You can find third party cables that do the exact same thing for much less.  I love to play DCS and Flight Simulator 2020 on my PC with the Quest.  The immersion takes it to a whole other level, however in order to do so you will also need a fairly beefy PC to handle the graphics.  My PC is a couple of years old, so its not powerful enough to turn up all the textures in Flight Sim to Ultra, but it is good enough to play with reasonably high definition.  Honestly this is the main use I have for the Quest 2.  At somepoint I will probably upgrade to the Rift S, but a new PC is in order before that.<br /><br />So if your interested in dabbling with VR or don't have the budget to buy the Rift S then I would highly recommend the Quest 2.  This 128Gb version, coming in at just $300 is well worth the money and I very highly recommend it.",
+        "rating": 5.0,
+        "sentiment": "Positive",
+        "predicted_themes": [
+          "Audio and Visual Quality",
+          "Hardware Build Quality Comfort and Connectivity",
+          "Pricing Value and Monetization",
+          "Installation DRM and Privacy Requirements"
+        ]
+      }
+    }
+  ]
+}
