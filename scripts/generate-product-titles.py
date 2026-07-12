@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate short static product titles from catalog product_description via gpt-4o-mini."""
+"""Generate short static product titles from catalog product_description via gpt-5-mini."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ DATA_DIR = ROOT / "src" / "data"
 TRIBES_DIR = DATA_DIR / "tribes"
 OUTPUT_PATH = DATA_DIR / "product_titles.json"
 
-PRODUCT_TITLES_MODEL = "gpt-4o-mini"
+PRODUCT_TITLES_MODEL = "gpt-5-mini"
 MAX_DESC_CHARS = 1200
 
 
@@ -73,18 +73,15 @@ def fallback_title(description: str) -> str:
 
 
 def call_openai(system: str, prompt: str) -> str:
-    try:
-        from openai import OpenAI
-    except ImportError as exc:
-        raise RuntimeError("Install openai: pip install openai") from exc
+    repo_root = Path(__file__).resolve().parents[2]
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
 
-    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
-    if not api_key:
-        raise RuntimeError("OPENAI_API_KEY is not set")
+    from llm.openai_client import create_openai_client, resolve_deployment_name
 
-    client = OpenAI(api_key=api_key)
+    client = create_openai_client()
     response = client.chat.completions.create(
-        model=PRODUCT_TITLES_MODEL,
+        model=resolve_deployment_name(PRODUCT_TITLES_MODEL),
         messages=[
             {"role": "system", "content": system},
             {"role": "user", "content": prompt},

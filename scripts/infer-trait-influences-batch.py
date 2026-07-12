@@ -40,7 +40,7 @@ HEALTHCARE_ACCURACY_PATH = (
     CLUSTERING / "Prediction_Accuracy_Refined" / "healthcare_digital_technical_accuracy.json"
 )
 
-INFERRED_TRAITS_MODEL = "gpt-4o-mini"
+INFERRED_TRAITS_MODEL = "gpt-5-mini"
 HEALTH_MAIN = "Health & Personal Care"
 VIDEO_GAMES_MAIN = "Video Games"
 SOFTWARE_MAIN = "Software"
@@ -473,18 +473,18 @@ Influence + confidence rules:
 
 
 def call_openai(system: str, prompt: str, *, model: str, temperature: float) -> str:
-    try:
-        from openai import OpenAI
-    except ImportError as exc:
-        raise RuntimeError("Install openai: pip install openai") from exc
+    import sys
+    from pathlib import Path
 
-    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
-    if not api_key:
-        raise RuntimeError("OPENAI_API_KEY is not set")
+    repo_root = Path(__file__).resolve().parents[2]
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
 
-    client = OpenAI(api_key=api_key)
+    from llm.openai_client import create_openai_client, resolve_deployment_name
+
+    client = create_openai_client()
     response = client.chat.completions.create(
-        model=model,
+        model=resolve_deployment_name(model),
         messages=[
             {"role": "system", "content": system},
             {"role": "user", "content": prompt},

@@ -8,8 +8,17 @@ import { wordCount } from "./review-history";
 
 /** Ground-truth reviews shorter than this stay in catalog but are demoted in sort order. */
 const MIN_GROUND_TRUTH_WORDS = 35;
+/** Reviews shorter than this get least priority in priority_tier_gap sort. */
+const MIN_PRIORITY_REVIEW_WORDS = 20;
 /** Reference length where length weight reaches 1.0 in gap × length sort score. */
 const SHOWCASE_LENGTH_SCALE_WORDS = 150;
+/** SAPIENS overall similarity required for showcase / top-slot priority. */
+export const SHOWCASE_MIN_OVERALL_SIMILARITY = 0.75;
+
+/** Pinned 1-based showcase rank (overrides automatic sort). */
+const SHOWCASE_RANK_OVERRIDES: Record<string, number> = {
+  "AGQ44DK7UC7TQMR4AK7I57IDMDSA_review_4": 2, // Fibbage → #2 in micro_9
+};
 
 /** review_key -> static UI product title */
 const PRODUCT_TITLES: Record<string, string> =
@@ -219,6 +228,10 @@ function productWordCount(product: Product): number {
   return product.reviewWordCount ?? wordCount(product.groundTruthReview);
 }
 
+function shortReviewPriorityRank(product: Product): number {
+  return productWordCount(product) >= MIN_PRIORITY_REVIEW_WORDS ? 0 : 1;
+}
+
 function lengthWeightForShowcaseSort(words: number): number {
   const w = Math.max(0, words);
   if (w < MIN_GROUND_TRUTH_WORDS) {
@@ -237,8 +250,15 @@ function showcaseTierRank(tier: string | undefined): number {
   return tier === "low" ? 1 : 0;
 }
 
+function similarityShowcaseBand(product: Product): number {
+  return (product.overallSimilarityScore ?? 0) >= SHOWCASE_MIN_OVERALL_SIMILARITY ? 0 : 1;
+}
+
 function isShowcaseProduct(product: Product): boolean {
-  return showcaseTierRank(product.catalogPriorityTier) === 0;
+  return (
+    similarityShowcaseBand(product) === 0 &&
+    showcaseTierRank(product.catalogPriorityTier) === 0
+  );
 }
 
 function productSortScore(p: Product, sortMode: string): number {
@@ -250,12 +270,22 @@ function productSortScore(p: Product, sortMode: string): number {
 
 function compareProducts(a: Product, b: Product, sortMode: string): number {
   if (sortMode === "priority_tier_gap") {
+    const similarityBandDiff = similarityShowcaseBand(a) - similarityShowcaseBand(b);
+    if (similarityBandDiff !== 0) return similarityBandDiff;
+
     const showcaseDiff =
       showcaseTierRank(a.catalogPriorityTier) - showcaseTierRank(b.catalogPriorityTier);
     if (showcaseDiff !== 0) return showcaseDiff;
 
-    const combinedDiff = showcaseCombinedScore(b) - showcaseCombinedScore(a);
-    if (combinedDiff !== 0) return combinedDiff;
+    const shortReviewDiff = shortReviewPriorityRank(a) - shortReviewPriorityRank(b);
+    if (shortReviewDiff !== 0) return shortReviewDiff;
+
+    const gapDiff = (b.sapiensBaselineGap ?? 0) - (a.sapiensBaselineGap ?? 0);
+    if (gapDiff !== 0) return gapDiff;
+
+    const similarityDiff =
+      (b.overallSimilarityScore ?? 0) - (a.overallSimilarityScore ?? 0);
+    if (similarityDiff !== 0) return similarityDiff;
 
     const tierDiff =
       priorityTierOrder(a.catalogPriorityTier) - priorityTierOrder(b.catalogPriorityTier);
@@ -265,7 +295,9 @@ function compareProducts(a: Product, b: Product, sortMode: string): number {
   }
 
   return (
+    similarityShowcaseBand(a) - similarityShowcaseBand(b) ||
     showcaseCombinedScore(b) - showcaseCombinedScore(a) ||
+    (b.overallSimilarityScore ?? 0) - (a.overallSimilarityScore ?? 0) ||
     productSortScore(b, sortMode) - productSortScore(a, sortMode) ||
     a.reviewKey.localeCompare(b.reviewKey)
   );
@@ -274,6 +306,7 @@ function compareProducts(a: Product, b: Product, sortMode: string): number {
 function userShowcaseStats(user: User): {
   showcaseBand: number;
   maxCombined: number;
+  maxSimilarity: number;
   highCount: number;
   maxGap: number;
 } {
@@ -284,6 +317,9 @@ function userShowcaseStats(user: User): {
     showcaseBand: showcase.length > 0 ? 0 : 1,
     maxCombined: pool.length
       ? Math.max(...pool.map(showcaseCombinedScore))
+      : 0,
+    maxSimilarity: pool.length
+      ? Math.max(...pool.map((p) => p.overallSimilarityScore ?? 0))
       : 0,
     highCount: showcase.filter((p) => p.catalogPriorityTier === "high").length,
     maxGap: allGaps.length ? Math.max(...allGaps) : 0,
@@ -296,9 +332,9 @@ function compareUsers(a: User, b: User, sortMode: string): number {
     const bStats = userShowcaseStats(b);
     return (
       aStats.showcaseBand - bStats.showcaseBand ||
-      bStats.maxCombined - aStats.maxCombined ||
-      bStats.highCount - aStats.highCount ||
       bStats.maxGap - aStats.maxGap ||
+      bStats.maxSimilarity - aStats.maxSimilarity ||
+      bStats.highCount - aStats.highCount ||
       b.similarityScore - a.similarityScore ||
       a.id.localeCompare(b.id)
     );
@@ -307,6 +343,8 @@ function compareUsers(a: User, b: User, sortMode: string): number {
   const aStats = userShowcaseStats(a);
   const bStats = userShowcaseStats(b);
   return (
+    aStats.showcaseBand - bStats.showcaseBand ||
+    bStats.maxSimilarity - aStats.maxSimilarity ||
     bStats.maxCombined - aStats.maxCombined ||
     bStats.maxGap - aStats.maxGap ||
     b.similarityScore - a.similarityScore ||
@@ -380,6 +418,27 @@ function normalizeUserHistoryReviews(
     }));
 }
 
+function applyShowcaseRankOverrides(products: Product[]): Product[] {
+  const pinned = new Map<number, Product>();
+  for (const p of products) {
+    const rank = SHOWCASE_RANK_OVERRIDES[p.reviewKey];
+    if (rank !== undefined) pinned.set(rank, p);
+  }
+  if (pinned.size === 0) return products;
+  const rest = products.filter((p) => SHOWCASE_RANK_OVERRIDES[p.reviewKey] === undefined);
+  const out: Product[] = [];
+  let restI = 0;
+  for (let rank = 1; rank <= products.length; rank++) {
+    const pinnedProduct = pinned.get(rank);
+    if (pinnedProduct) out.push(pinnedProduct);
+    else {
+      out.push(rest[restI]);
+      restI += 1;
+    }
+  }
+  return out;
+}
+
 function normalizePriorityTier(value: string | undefined): "high" | "medium" | "low" | undefined {
   const tier = value?.trim().toLowerCase();
   if (tier === "high" || tier === "medium" || tier === "low") return tier;
@@ -393,6 +452,7 @@ function normalizeTribe(raw: RawTribe): Tribe {
     const reviews = raw.members_grouped_by_user[u.user_id] ?? [];
     const products: Product[] = reviews.map((r) => normalizeProduct(r, raw.domain));
     products.sort((a, b) => compareProducts(a, b, sortMode));
+    const sortedProducts = applyShowcaseRankOverrides(products);
     const userHistoryReviews = normalizeUserHistoryReviews(
       u.user_history_reviews ?? u.history_noise_reviews,
     );
@@ -401,7 +461,7 @@ function normalizeTribe(raw: RawTribe): Tribe {
       characteristicSummary: u.characteristic_summary,
       categoryCharacteristics: u.category_characteristics ?? {},
       similarityScore: u.similarity_score ?? 0.5,
-      products,
+      products: sortedProducts,
       userHistoryReviews,
     };
   });

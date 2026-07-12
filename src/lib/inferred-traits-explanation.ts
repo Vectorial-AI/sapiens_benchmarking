@@ -9,7 +9,7 @@ import type {
 } from "./types";
 import { TRAIT_GROUP_LABELS } from "./types";
 
-export const INFERRED_TRAITS_MODEL = "openai/gpt-4o-mini";
+export const INFERRED_TRAITS_MODEL = "openai/gpt-5-mini";
 /** Minimum confidence to show a trait proof in the UI. */
 export const INFERRED_TRAIT_UI_MIN_CONFIDENCE = 0.75;
 

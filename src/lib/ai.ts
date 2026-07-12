@@ -1,4 +1,19 @@
-import { generateText } from "ai";
+function openAiBaseUrl(): string {
+  if (process.env.AI_GATEWAY_API_KEY) {
+    return "https://ai-gateway.vercel.sh/v1";
+  }
+  return (
+    process.env.OPENAI_BASE_URL ||
+    process.env.AZURE_OPENAI_ENDPOINT ||
+    "https://api.openai.com/v1"
+  ).replace(/\/$/, "");
+}
+
+function deploymentName(model: string): string {
+  const name = model.replace(/^openai\//, "");
+  if (name === "gpt-4o-mini") return "gpt-5-mini";
+  return name;
+}
 
 export const hasGatewayKey = () =>
   Boolean(process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN);
@@ -9,13 +24,56 @@ export async function runModel(args: {
   prompt: string;
   temperature?: number;
 }): Promise<string> {
-  const { text } = await generateText({
-    model: args.model,
-    system: args.system,
-    prompt: args.prompt,
-    temperature: args.temperature ?? 0.8,
+  if (hasGatewayKey()) {
+    const { generateText } = await import("ai");
+    const { text } = await generateText({
+      model: args.model,
+      system: args.system,
+      prompt: args.prompt,
+      temperature: args.temperature ?? 0.8,
+    });
+    return text;
+  }
+
+  const apiKey = process.env.OPENAI_API_KEY || process.env.AZURE_OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is not set");
+  }
+
+  const model = deploymentName(args.model);
+  const isReasoning = /^(o[134]|gpt-5)/i.test(model);
+  const body: Record<string, unknown> = {
+    model,
+    messages: [
+      { role: "system", content: args.system },
+      { role: "user", content: args.prompt },
+    ],
+  };
+  if (isReasoning) {
+    body.max_completion_tokens = 2500;
+  } else {
+    body.max_tokens = 2500;
+    body.temperature = args.temperature ?? 0.8;
+  }
+
+  const res = await fetch(`${openAiBaseUrl()}/chat/completions`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
   });
-  return text;
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Chat completion failed (${res.status}): ${err.slice(0, 300)}`);
+  }
+
+  const data = (await res.json()) as {
+    choices?: { message?: { content?: string } }[];
+  };
+  return data.choices?.[0]?.message?.content?.trim() || "";
 }
 
 /** Offline mock predictions so the app is fully demoable without a gateway key. */

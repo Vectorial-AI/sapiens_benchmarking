@@ -2,7 +2,7 @@ import { hasGatewayKey, runModel } from "./ai";
 import { MATCH_THRESHOLD, topKThemeEntries } from "./scoring";
 import type { PipelineMetrics, ReviewSentiment } from "./types";
 
-export const SIMILARITY_EXPLAINER_MODEL = "openai/gpt-4o-mini";
+export const SIMILARITY_EXPLAINER_MODEL = "openai/gpt-5-mini";
 /** SAPIENS uses the strict match-only explainer at or above this overall similarity score. */
 export const SAPIENS_NEAR_MATCH_THRESHOLD = 0.9;
 

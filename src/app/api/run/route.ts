@@ -19,6 +19,12 @@ import { hasGatewayKey, mockPrediction, runModel } from "@/lib/ai";
 import { generateInferredTraitInfluences } from "@/lib/inferred-traits-explanation";
 import { generateSimilarityExplanation } from "@/lib/similarity-explanation";
 import {
+  hasPreRuns,
+  lookupPrecomputedPrediction,
+  normalizePreRunIndex,
+  toPrecomputedEngineResult,
+} from "@/lib/precomputed-predictions";
+import {
   BASELINE_PIPELINE_WEIGHTS,
   scorePredictionAgainstGroundTruth,
   themeTopKFromGroundTruth,
@@ -117,6 +123,7 @@ export async function POST(req: Request) {
     runMode = "sapiens",
     baselineMethod,
     baselineModel,
+    preRunIndex,
   } = body as {
     tribeId: string;
     userId: string;
@@ -129,6 +136,7 @@ export async function POST(req: Request) {
     runMode?: RunMode;
     baselineMethod?: BaselineMethod;
     baselineModel?: BaselineModel;
+    preRunIndex?: number;
   };
 
   const mode: RunMode = runMode ?? "sapiens";
@@ -186,26 +194,57 @@ export async function POST(req: Request) {
 
   // ---- SAPIENS ----
   if (mode === "sapiens") {
-    let sapiens: EngineResult;
+    let sapiens: EngineResult | null = null;
+    let source: string = hasGatewayKey() ? "gateway" : "mock";
+    let usedPrecomputed = false;
+    let resolvedPreRunIndex: number | null = null;
 
-    const sapiensPrompt = buildSapiensPrompt({
-      ...promptBase,
-      groundTruthSentiment,
-    });
+    // Video-games tribes with blind i2 pre_runs: serve rotating precomputed reviews
+    // (no live review generation). Baselines stay live.
+    const requestedPreRun = normalizePreRunIndex(preRunIndex);
+    const canUsePrecomputed =
+      Boolean(reviewKey) &&
+      tribe.domain === "video_games" &&
+      hasPreRuns(tribe.cluster, tribe.microId);
 
-    if (!hasGatewayKey()) {
-      const mock = mockPrediction("sapiens", productDescription);
-      sapiens = {
-        engine: "sapiens",
-        reviewText: mock.reviewText,
-        predictedThemes: mock.predictedThemes,
-        sentiment: mock.sentiment,
-        model: `${SAPIENS_MODEL} (mock)`,
-        latencyMs: 0,
-      };
-    } else {
-      const sapiensTemperature = tribe.domain === "healthcare" ? 0.2 : 0.8;
-      sapiens = await runEngine("sapiens", sapiensPrompt, SAPIENS_MODEL, sapiensTemperature);
+    if (canUsePrecomputed && reviewKey) {
+      const lookup = lookupPrecomputedPrediction(
+        tribe.cluster,
+        tribe.microId,
+        reviewKey,
+        requestedPreRun,
+      );
+      if (lookup) {
+        usedPrecomputed = true;
+        resolvedPreRunIndex = lookup.preRunIndex;
+        // Artificial latency so the UI can animate a "generating" feel.
+        const fakeLatencyMs = 1600 + Math.floor(Math.random() * 900);
+        await new Promise((r) => setTimeout(r, fakeLatencyMs));
+        sapiens = toPrecomputedEngineResult(lookup, fakeLatencyMs);
+        source = `pre_run_${lookup.preRunIndex}`;
+      }
+    }
+
+    if (!sapiens) {
+      const sapiensPrompt = buildSapiensPrompt({
+        ...promptBase,
+        groundTruthSentiment,
+      });
+
+      if (!hasGatewayKey()) {
+        const mock = mockPrediction("sapiens", productDescription);
+        sapiens = {
+          engine: "sapiens",
+          reviewText: mock.reviewText,
+          predictedThemes: mock.predictedThemes,
+          sentiment: mock.sentiment,
+          model: `${SAPIENS_MODEL} (mock)`,
+          latencyMs: 0,
+        };
+      } else {
+        const sapiensTemperature = tribe.domain === "healthcare" ? 0.2 : 0.8;
+        sapiens = await runEngine("sapiens", sapiensPrompt, SAPIENS_MODEL, sapiensTemperature);
+      }
     }
 
     const inferredTraits = sapiens.reviewText.trim()
@@ -217,7 +256,23 @@ export async function POST(req: Request) {
         })
       : null;
 
-    if (scoringGroundTruth) sapiens = await attachMetrics(sapiens, scoringGroundTruth, "SAPIENS");
+    // Prefer precomputed delta metrics; otherwise score live.
+    if (!sapiens.metrics && scoringGroundTruth) {
+      sapiens = await attachMetrics(sapiens, scoringGroundTruth, "SAPIENS");
+    } else if (sapiens.metrics && scoringGroundTruth) {
+      const similarityExplanation = await generateSimilarityExplanation({
+        generatedReview: sapiens.reviewText,
+        groundTruthReview: scoringGroundTruth.reviewText,
+        groundTruthThemes: scoringGroundTruth.themes,
+        predictedThemes: sapiens.predictedThemes,
+        predictedSentiment: sapiens.sentiment,
+        groundTruthSentiment: scoringGroundTruth.sentiment,
+        metrics: sapiens.metrics,
+        label: "SAPIENS",
+        engine: "sapiens",
+      });
+      sapiens = { ...sapiens, similarityExplanation };
+    }
 
     sapiens = {
       ...sapiens,
@@ -231,8 +286,9 @@ export async function POST(req: Request) {
       groundTruthSentiment,
       themeTopK,
       sapiens,
-      source: hasGatewayKey() ? "gateway" : "mock",
-      metricsSource,
+      source,
+      metricsSource: usedPrecomputed ? "pipeline" : metricsSource,
+      preRunIndex: resolvedPreRunIndex,
     });
   }
 

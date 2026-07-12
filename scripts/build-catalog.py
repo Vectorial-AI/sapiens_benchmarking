@@ -71,11 +71,15 @@ HISTORY_WORST_FALLBACK_REVIEWS = 3
 # Rank history · gpt-5 fallback candidates (worst = lowest score).
 HISTORY_RANK_WEIGHT_TEXT = 0.3
 HISTORY_RANK_WEIGHT_THEME = 0.7
-# UI catalog: Sapiens must beat best baseline by >10pp and score ≥65% overall.
+# UI catalog: Sapiens must beat best baseline by >10pp and score ≥75% overall.
 MIN_UI_SAPIENS_BASELINE_GAP = 0.10
-MIN_UI_OVERALL_SIMILARITY = 0.65
+MIN_UI_OVERALL_SIMILARITY = 0.75
+# SAPIENS overall similarity required for showcase / top-slot priority.
+SHOWCASE_MIN_OVERALL_SIMILARITY = 0.75
 # Ground-truth reviews shorter than this are kept in catalog but demoted in sort order.
 MIN_GROUND_TRUTH_WORDS = 35
+# Reviews shorter than this get least priority in priority_tier_gap sort (still in catalog).
+MIN_PRIORITY_REVIEW_WORDS = 20
 # Reference length where length_weight reaches 1.0 (used in gap × length sort score).
 SHOWCASE_LENGTH_SCALE_WORDS = 150
 # Manually excluded from UI catalog (review_key).
@@ -88,6 +92,10 @@ UI_CATALOG_EXCLUDED_REVIEW_KEYS = frozenset(
         "AGG5VFUD4XK5TBLA4B724XEEV26Q_review_3",
     }
 )
+# Pinned 1-based showcase rank (overrides automatic sort for these review_keys).
+SHOWCASE_RANK_OVERRIDES: dict[str, int] = {
+    "AGQ44DK7UC7TQMR4AK7I57IDMDSA_review_4": 2,  # Fibbage → #2 in micro_9
+}
 VIDEO_GAMES_SOFTWARE_DETAILS_DIR = CLUSTERING / "micro_cluster_details_video_games_software"
 VIDEO_GAMES_SOFTWARE_MAINS = frozenset({VIDEO_GAMES_MAIN, SOFTWARE_MAIN})
 MAX_SAME_CATEGORY_HISTORY_REVIEWS = 3
@@ -862,6 +870,18 @@ def showcase_tier_rank(tier: str) -> int:
     return 1 if str(tier or "").lower() == "low" else 0
 
 
+def similarity_showcase_band(product: dict) -> int:
+    sim = float(product.get("overall_similarity_score") or 0)
+    return 0 if sim >= SHOWCASE_MIN_OVERALL_SIMILARITY else 1
+
+
+def is_showcase_product(product: dict) -> bool:
+    return (
+        similarity_showcase_band(product) == 0
+        and showcase_tier_rank(str(product.get("catalog_priority_tier") or "")) == 0
+    )
+
+
 def product_word_count(product: dict) -> int:
     wc = product.get("review_word_count")
     if wc is not None:
@@ -884,11 +904,20 @@ def showcase_combined_score(product: dict) -> float:
     return gap * length_weight_for_showcase_sort(product_word_count(product))
 
 
+def short_review_priority_rank(product: dict) -> int:
+    """0 = normal priority; 1 = demoted to bottom of tier/gap band (<20 words)."""
+    return 0 if product_word_count(product) >= MIN_PRIORITY_REVIEW_WORDS else 1
+
+
 def product_priority_sort_key(product: dict) -> tuple:
     tier = str(product.get("catalog_priority_tier") or "medium").lower()
+    gap = float(product.get("sapiens_baseline_gap") or 0)
     return (
+        similarity_showcase_band(product),
         showcase_tier_rank(tier),
-        -round(showcase_combined_score(product), 6),
+        short_review_priority_rank(product),
+        -round(gap, 6),
+        -round(float(product.get("overall_similarity_score") or 0), 6),
         PRIORITY_TIER_ORDER.get(tier, 1),
         str(product.get("review_key") or ""),
     )
@@ -940,16 +969,39 @@ def apply_catalog_priority_tier(product: dict, tier_map: dict[str, str]) -> dict
     return out
 
 
+def apply_showcase_rank_overrides(products: list[dict]) -> list[dict]:
+    """Insert manually pinned ranks (1-based) after automatic priority sort."""
+    pinned = {
+        rank: p
+        for p in products
+        if (rk := str(p.get("review_key") or "").strip())
+        and (rank := SHOWCASE_RANK_OVERRIDES.get(rk)) is not None
+    }
+    if not pinned:
+        return products
+    rest = [
+        p
+        for p in products
+        if str(p.get("review_key") or "").strip() not in SHOWCASE_RANK_OVERRIDES
+    ]
+    out: list[dict] = []
+    rest_i = 0
+    for rank in range(1, len(products) + 1):
+        if rank in pinned:
+            out.append(pinned[rank])
+        else:
+            out.append(rest[rest_i])
+            rest_i += 1
+    return out
+
+
 def sort_products_by_priority_tier_and_gap(products: list[dict]) -> list[dict]:
-    return sorted(products, key=product_priority_sort_key)
+    ordered = sorted(products, key=product_priority_sort_key)
+    return apply_showcase_rank_overrides(ordered)
 
 
 def _showcase_products(products: list[dict]) -> list[dict]:
-    return [
-        p
-        for p in products
-        if showcase_tier_rank(str(p.get("catalog_priority_tier") or "")) == 0
-    ]
+    return [p for p in products if is_showcase_product(p)]
 
 
 def tribe_priority_stats(products: list[dict]) -> tuple[int, float]:
@@ -963,13 +1015,13 @@ def tribe_priority_stats(products: list[dict]) -> tuple[int, float]:
 
 
 def sort_users_by_priority_tier_and_gap(users: list[dict]) -> list[dict]:
-    def user_key(user: dict) -> tuple[int, float, int, float, str]:
+    def user_key(user: dict) -> tuple[int, float, float, int, float, str]:
         products = user.get("products") or []
         showcase = _showcase_products(products)
         pool = showcase if showcase else products
         showcase_band = 0 if showcase else 1
-        max_combined = max(
-            (showcase_combined_score(p) for p in pool),
+        max_similarity = max(
+            (float(p.get("overall_similarity_score") or 0) for p in pool),
             default=0.0,
         )
         max_gap = max(
@@ -983,9 +1035,9 @@ def sort_users_by_priority_tier_and_gap(users: list[dict]) -> list[dict]:
         )
         return (
             showcase_band,
-            -round(max_combined, 6),
+            -round(max_gap, 6),
+            -round(max_similarity, 6),
             -high_count,
-            -max_gap,
             str(user.get("user_id") or ""),
         )
 

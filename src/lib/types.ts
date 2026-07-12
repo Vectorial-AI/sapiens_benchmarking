@@ -151,6 +151,8 @@ export type SapiensRunResponse = {
   sapiens: EngineResult;
   source: string;
   metricsSource?: "pipeline" | "mock";
+  /** Which blind i2 pre_run was served (1–3), when using precomputed reviews. */
+  preRunIndex?: number | null;
 };
 
 export type BaselineRunResponse = {

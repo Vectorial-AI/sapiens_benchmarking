@@ -37,6 +37,8 @@ function lexicalTextDelta(a: string, b: string): number {
 
 async function fetchEmbeddings(texts: string[]): Promise<number[][]> {
   const key =
+    process.env.OPENAI_EMBEDDINGS_API_KEY ||
+    process.env.OPENAI_DIRECT_API_KEY ||
     process.env.AI_GATEWAY_API_KEY ||
     process.env.OPENAI_API_KEY ||
     process.env.VERCEL_OIDC_TOKEN;
@@ -44,7 +46,10 @@ async function fetchEmbeddings(texts: string[]): Promise<number[][]> {
 
   const baseUrl = process.env.AI_GATEWAY_API_KEY
     ? "https://ai-gateway.vercel.sh/v1"
-    : "https://api.openai.com/v1";
+    : (
+        process.env.OPENAI_EMBEDDINGS_BASE_URL ||
+        "https://api.openai.com/v1"
+      ).replace(/\/$/, "");
 
   const model = process.env.AI_GATEWAY_API_KEY
     ? `openai/${EMBEDDING_MODEL}`

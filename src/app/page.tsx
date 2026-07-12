@@ -47,6 +47,61 @@ import {
 } from "@/lib/wizard-session";
 import { mainThemeEntriesForDisplay, topKThemeEntries, themeTopKFromGroundTruth } from "@/lib/scoring";
 
+const PRE_RUN_COUNT = 3;
+
+function preRunStorageKey(reviewKey: string): string {
+  return `sapiens-pre-run-index:${reviewKey}`;
+}
+
+function peekNextPreRunIndex(reviewKey: string | null | undefined): number {
+  if (!reviewKey || typeof window === "undefined") return 1;
+  try {
+    const raw = window.localStorage.getItem(preRunStorageKey(reviewKey));
+    const last = Number(raw);
+    if (Number.isInteger(last) && last >= 1 && last <= PRE_RUN_COUNT) {
+      return last >= PRE_RUN_COUNT ? 1 : last + 1;
+    }
+  } catch {
+    /* ignore */
+  }
+  return 1;
+}
+
+function commitPreRunIndex(reviewKey: string | null | undefined, index: number): void {
+  if (!reviewKey || typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(preRunStorageKey(reviewKey), String(index));
+  } catch {
+    /* ignore */
+  }
+}
+
+async function typewriterReveal(
+  fullText: string,
+  onUpdate: (partial: string) => void,
+  durationMs = 1400,
+): Promise<void> {
+  if (!fullText) {
+    onUpdate("");
+    return;
+  }
+  const start = Date.now();
+  const total = fullText.length;
+  await new Promise<void>((resolve) => {
+    const tick = () => {
+      const elapsed = Date.now() - start;
+      const progress = Math.min(1, elapsed / durationMs);
+      // Ease-out so early chars appear faster, then slow near the end.
+      const eased = 1 - (1 - progress) ** 2;
+      const n = Math.max(1, Math.floor(total * eased));
+      onUpdate(fullText.slice(0, n));
+      if (progress >= 1) resolve();
+      else requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
 const DOMAIN_SECTIONS = [
   { id: "video_games" as const, label: "Video Games & Software" },
   { id: "healthcare" as const, label: "Healthcare & Wellness" },
@@ -373,6 +428,8 @@ export default function Home() {
     setRunningSapiens(true);
     setSapiens(null);
     setBaselines([]);
+    const activeReviewKey = reviewKey;
+    const preRunIndex = peekNextPreRunIndex(activeReviewKey);
     try {
       const res = await fetch("/api/run", {
         method: "POST",
@@ -380,17 +437,37 @@ export default function Home() {
         body: JSON.stringify({
           ...runPayload(),
           runMode: "sapiens",
+          preRunIndex,
         }),
       });
-      const data: SapiensRunResponse = await res.json();
-      setSapiens(data.sapiens ?? null);
+      const data: SapiensRunResponse & { preRunIndex?: number } = await res.json();
+      const full = data.sapiens ?? null;
+      if (!full) {
+        setSapiens(null);
+        return;
+      }
+
+      const usedPreRun =
+        typeof data.preRunIndex === "number" ||
+        String(data.source ?? "").startsWith("pre_run_");
+      if (usedPreRun) {
+        commitPreRunIndex(activeReviewKey, data.preRunIndex ?? preRunIndex);
+      }
+
+      // Reveal review text progressively so it feels like generation.
+      setSapiens({ ...full, reviewText: "" });
+      await typewriterReveal(full.reviewText, (partial) => {
+        setSapiens((prev) => (prev ? { ...prev, reviewText: partial } : { ...full, reviewText: partial }));
+      });
+      setSapiens(full);
+
       setGroundTruth(data.groundTruth ?? null);
       setGroundTruthThemes(data.groundTruthThemes ?? []);
       setGroundTruthSentiment(data.groundTruthSentiment ?? null);
       setThemeTopK(
         data.themeTopK ?? themeTopKFromGroundTruth(data.groundTruthThemes ?? []),
       );
-      if (data.source === "gateway") setGatewayConnected(true);
+      if (data.source === "gateway" || usedPreRun) setGatewayConnected(true);
     } catch {
       /* noop */
     } finally {
@@ -708,7 +785,7 @@ export default function Home() {
                     themeTopK={themeTopK}
                   />
                   <ResultCard
-                    key={sapiens?.reviewText ?? "sapiens"}
+                    key={sapiens?.model ?? "sapiens"}
                     tone="sapiens"
                     title="SAPIENS"
                     loading={runningSapiens}
@@ -848,7 +925,7 @@ export default function Home() {
                     themeTopK={themeTopK}
                   />
                   <ResultCard
-                    key={sapiens?.reviewText ?? "sapiens-4"}
+                    key={sapiens?.model ?? "sapiens-4"}
                     tone="sapiens"
                     title="SAPIENS"
                     text={sapiens?.reviewText}
