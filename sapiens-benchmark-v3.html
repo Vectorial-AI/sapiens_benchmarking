@@ -6,16 +6,15 @@
 <title>SAPIENS — Behavior Benchmark · Vectorial</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#17161A; --ink-soft:#46443F; --muted:#8B8980;
     --line:#E7E4DB; --paper:#FBFAF7; --card:#FFFFFF;
     --orange:#E85D2C; --orange-ink:#B23F17; --orange-wash:#FBEDE6;
     --plum:#7A2E6B;
-    --disp:"Poppins",system-ui,sans-serif;
-    --body:"Poppins",system-ui,sans-serif;
-    --brand:"Space Grotesk",system-ui,sans-serif;
+    --disp:"Space Grotesk",system-ui,sans-serif;
+    --body:"Inter",system-ui,sans-serif;
     --mono:"IBM Plex Mono",ui-monospace,monospace;
   }
   *{box-sizing:border-box}
@@ -26,56 +25,51 @@
   a:hover{border-bottom-color:var(--orange-ink)}
   h1,h2,h3{font-family:var(--disp);font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:0}
   section{padding:76px 0;border-top:1px solid var(--line)}
-  .lede{color:var(--ink-soft);font-size:17.5px;max-width:none}
+  .lede{color:var(--ink-soft);font-size:17.5px;max-width:68ch}
   .mono{font-family:var(--mono)}
   .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--plum);display:flex;align-items:center;gap:10px;margin-bottom:20px}
   .eyebrow .rule{flex:1;height:1px;background:var(--line)}
 
   /* section heading system: number + big title, then subheading */
-  .sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:6px;flex-wrap:nowrap}
-  .sec-head .n{font-family:var(--disp);font-size:clamp(28px,4vw,44px);font-weight:700;color:var(--orange);letter-spacing:-.025em;line-height:1.04;flex-shrink:0;white-space:nowrap}
-  .sec-head h2{font-family:var(--disp);font-weight:700;font-size:clamp(28px,4.2vw,52px);letter-spacing:-.025em;line-height:1.04;max-width:none;white-space:nowrap}
+  .sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:6px}
+  .sec-head .n{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--orange);letter-spacing:.06em;padding-top:6px}
+  .sec-head h2{font-family:var(--disp);font-weight:700;font-size:clamp(36px,5.4vw,60px);letter-spacing:-.025em;line-height:1.04;max-width:18ch}
   .sec-rule{height:1px;background:var(--line);margin:20px 0 26px}
-  h2.sec,h3.sub{font-family:var(--disp);font-weight:500;font-size:clamp(20px,2.4vw,26px);letter-spacing:-.015em;line-height:1.25;max-width:none;color:var(--ink)}
-  @media(max-width:680px){.sec-head{gap:10px}}
-  h2.sec{font-size:clamp(30px,4.2vw,46px);max-width:none;font-weight:500}
+  h2.sec,h3.sub{font-family:var(--disp);font-weight:700;font-size:clamp(20px,2.4vw,26px);letter-spacing:-.015em;line-height:1.25;max-width:30ch;color:var(--ink)}
+  @media(max-width:680px){.sec-head{gap:10px}.sec-head .n{padding-top:3px}}
+  h2.sec{font-size:clamp(30px,4.2vw,46px);max-width:22ch}
 
   header{padding:20px 0;position:sticky;top:0;background:rgba(251,250,247,.88);backdrop-filter:blur(8px);z-index:20;border-bottom:1px solid var(--line)}
   .brand{display:flex;align-items:center;justify-content:space-between}
-  .logo-word{display:flex;align-items:center;gap:12px}
-  .logo-word img{height:22px;width:auto;display:block}
-  .logo-word .sep{width:1px;height:18px;background:var(--line)}
-  .logo-word .sapiens-tag{font-family:var(--brand);font-weight:700;font-size:19px;letter-spacing:.02em;color:var(--orange);line-height:22px}
-  nav a{border:none;color:var(--ink-soft);font-size:14px;margin-left:20px;font-weight:500;padding-bottom:2px;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+  .logo-word{font-family:var(--disp);font-weight:700;font-size:19px}
+  .logo-word .o{color:var(--orange)}
+  nav a{border:none;color:var(--ink-soft);font-size:14px;margin-left:20px}
   nav a:hover{color:var(--orange-ink)}
-  nav a.active{color:var(--orange);border-bottom-color:var(--orange);font-weight:600}
   @media(max-width:760px){nav{display:none}}
 
   .hero{padding:72px 0 60px}
-  .hero h1{font-size:clamp(36px,5.2vw,56px);max-width:none;letter-spacing:-.025em}
+  .hero h1{font-size:clamp(40px,6.4vw,70px);max-width:18ch}
   .hero h1 .hl{color:var(--orange)}
   .hero p{margin-top:22px}
-  .hero .lede{max-width:none}
-  .paper-strip{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:30px;padding:20px 24px;background:var(--card);border:1px solid var(--line);border-radius:14px}
-  .paper-strip img{max-height:40px;max-width:140px;object-fit:contain;flex-shrink:0}
-  .paper-strip .fb{font-family:var(--disp);font-weight:700;font-size:15px;line-height:1.35;color:var(--ink);flex-shrink:0;text-align:center;min-width:100px}
-  .paper-strip .sep{width:1px;align-self:stretch;background:var(--line);flex-shrink:0}
-  .paper-strip .txt{font-size:15px;color:var(--ink-soft);flex:1;min-width:240px;line-height:1.6}
+  .paper-strip{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:30px;padding:18px 22px;background:var(--card);border:1px solid var(--line);border-radius:14px}
+  .paper-strip img{max-height:44px;max-width:150px;object-fit:contain}
+  .paper-strip .fb{font-family:var(--disp);font-weight:700;font-size:15px;line-height:1.25}
+  .paper-strip .txt{font-size:15px;color:var(--ink-soft);flex:1;min-width:240px}
 
   .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px}
   .panel .cap{font-size:12.5px;color:var(--muted);font-family:var(--mono);margin:0 0 16px;line-height:1.5}
-  .chart-box{position:relative;width:100%;height:400px}
+  .chart-box{position:relative;width:100%;height:380px}
 
   .sm{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
   .sm .panel{padding:20px 16px 12px}
   .sm h3{font-size:16px}
   .sm .sub{font-size:13px;color:var(--muted);margin:6px 0 10px;line-height:1.45;min-height:56px}
-  .sm .chart-box{height:270px}
+  .sm .chart-box{height:230px}
   @media(max-width:860px){.sm{grid-template-columns:1fr}.sm .sub{min-height:0}}
 
   .quote{border-left:3px solid var(--orange);padding:6px 0 6px 22px;margin:30px 0;font-family:var(--disp);font-weight:600;font-size:clamp(19px,2.4vw,25px);letter-spacing:-.01em;line-height:1.35}
   .quote cite{display:block;font-family:var(--mono);font-weight:400;font-size:12.5px;font-style:normal;color:var(--muted);letter-spacing:.03em;margin-top:12px}
-  .kicker{font-family:var(--disp);font-weight:700;font-size:clamp(19px,2.2vw,24px);letter-spacing:-.015em;line-height:1.28;max-width:none;margin:44px 0 14px}
+  .kicker{font-family:var(--disp);font-weight:700;font-size:clamp(19px,2.2vw,24px);letter-spacing:-.015em;line-height:1.28;max-width:34ch;margin:44px 0 14px}
 
   /* cited-paper snapshots */
   .papers{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:26px}
@@ -123,7 +117,7 @@
   .refs li{font-size:14.5px;color:var(--ink-soft);margin:5px 0}
 
   .northstar{display:flex;align-items:center;justify-content:center;text-align:center;margin-top:40px;padding-top:34px;border-top:1px solid var(--line)}
-  .northstar p{margin:0;font-family:var(--disp);font-weight:700;font-size:clamp(21px,3vw,30px);letter-spacing:-.02em;max-width:none}
+  .northstar p{margin:0;font-family:var(--disp);font-weight:700;font-size:clamp(21px,3vw,30px);letter-spacing:-.02em;max-width:26ch}
 
   .labs{display:flex;flex-wrap:wrap;gap:16px;margin-top:28px}
   .lab{flex:1;min-width:200px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:150px;text-align:center}
@@ -133,11 +127,11 @@
 
   /* ---------- DATA MOAT ---------- */
   .moat-lede b{color:var(--orange-ink);font-weight:600}
-  .srclink{display:inline-flex;align-items:center;gap:8px;margin-top:22px;font-size:14px;font-weight:600;
-    color:var(--orange-ink);border:1.5px solid rgba(232,93,44,.35);background:var(--orange-wash);padding:11px 18px;
+  .srclink{display:inline-flex;align-items:center;gap:8px;margin-top:22px;font-size:13.5px;
+    color:var(--ink-soft);border:1px solid var(--line);background:var(--card);padding:9px 16px;
     border-radius:999px;transition:.18s}
-  .srclink:hover{border-color:var(--orange);background:#F8E0D4;color:var(--orange-ink)}
-  .srclink svg{width:14px;height:14px}
+  .srclink:hover{border-color:var(--orange);color:var(--orange-ink)}
+  .srclink svg{width:13px;height:13px}
 
   .axes{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:24px}
   .axis{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 22px 26px;
@@ -230,12 +224,7 @@
 
 <header>
   <div class="wrap brand">
-    <div class="logo-word">
-      <img src="/vectorial-logo.png" alt="Vectorial" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
-      <span style="display:none;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:17px">VECTORIAL</span>
-      <span class="sep"></span>
-      <span class="sapiens-tag">SAPIENS</span>
-    </div>
+    <div class="logo-word">Vectorial<span class="o"> · SAPIENS</span></div>
     <nav>
       <a href="#baselines">Baselines</a>
       <a href="#academic">Academic evidence</a>
@@ -256,10 +245,9 @@
     <p class="lede">As new instruction-tuned LLMs (GPT, Llama, Claude, Gemini) get better at hard math, science, PhD-level, and coding problems, they are plateauing in their ability to model behavior. The sharper these models get at reasoning, the further they drift from replicating how people actually behave.</p>
 
     <div class="paper-strip">
-      <img src="bair-logo.png" alt="Berkeley AI Research (BAIR)" onerror="this.style.display='none';this.nextElementSibling.style.display='block';this.nextElementSibling.nextElementSibling.style.display='block';">
+      <img src="bair-logo.png" alt="Berkeley AI Research (BAIR)" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
       <div class="fb" style="display:none">Berkeley<br>AI Research</div>
-      <div class="sep" style="display:none"></div>
-      <div class="txt">Research paper submitted to <b>EMNLP</b>, a top peer-reviewed conference, with <b>BAIR</b> (Berkeley AI Research).<br><a href="#" target="_blank" rel="noopener">Read the paper →</a></div>
+      <div class="txt">Research paper submitted to <b>EMNLP</b>, a top peer-reviewed conference, with <b>BAIR</b> (Berkeley AI Research). <a href="#" target="_blank" rel="noopener">Read the paper →</a></div>
     </div>
 
     <div class="panel" style="margin-top:34px">
@@ -303,8 +291,8 @@
 
     <div class="papers" style="grid-template-columns:1fr 1.15fr;align-items:stretch;margin-top:28px">
       <a class="paper" href="https://arxiv.org/pdf/2603.11245" target="_blank" rel="noopener" style="border-bottom:1px solid var(--line)">
-        <div class="shot">
-          <img src="/paper-cmu.png" alt="Snapshot of the CMU LTI paper, arXiv:2603.11245" style="transform:scale(1.2) translateY(-6%);transform-origin:top center" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';">
+        <div class="shot" style="height:100%;min-height:250px">
+          <img src="paper-cmu.png" alt="Snapshot of the CMU LTI paper, arXiv:2603.11245" onerror="this.style.display='none';">
           <div class="ph"><div class="t">Paper snapshot</div><div class="t" style="opacity:.7">paper-cmu.png</div></div>
         </div>
         <div class="meta">
@@ -341,7 +329,7 @@
     <div class="papers" style="grid-template-columns:1fr">
       <a class="paper" href="https://arxiv.org/pdf/2508.06950" target="_blank" rel="noopener" style="border-bottom:1px solid var(--line);flex-direction:row;align-items:stretch">
         <div class="shot" style="width:230px;flex:none;height:auto;min-height:140px;border-bottom:none;border-right:1px solid var(--line)">
-          <img src="/paper-2508.png" alt="Snapshot of the paper, arXiv:2508.06950" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';">
+          <img src="paper-2508.png" alt="Snapshot of the paper, arXiv:2508.06950" onerror="this.style.display='none';">
           <div class="ph"><div class="t">Paper snapshot</div><div class="t" style="opacity:.7">paper-2508.png</div></div>
         </div>
         <div class="meta" style="display:flex;flex-direction:column;justify-content:center">
@@ -369,21 +357,21 @@
     <div class="papers" style="grid-template-columns:repeat(3,1fr)">
       <a class="paper" href="https://www.nature.com/articles/s41586-025-09215-4" target="_blank" rel="noopener" style="border-bottom:1px solid var(--line)">
         <div class="shot" style="height:180px">
-          <img src="/paper-centaur.png" alt="Snapshot of the Centaur paper in Nature" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';">
+          <img src="paper-centaur.png" alt="Snapshot of the Centaur paper in Nature" onerror="this.style.display='none';">
           <div class="ph"><div class="t">Paper snapshot</div><div class="t" style="opacity:.7">paper-centaur.png</div></div>
         </div>
         <div class="meta"><div class="id">Nature · 2025</div><h4>Centaur</h4><p>A foundation model of human cognition.</p></div>
       </a>
       <a class="paper" href="https://arxiv.org/html/2505.23058v1" target="_blank" rel="noopener" style="border-bottom:1px solid var(--line)">
         <div class="shot" style="height:180px">
-          <img src="/paper-befm.png" alt="Snapshot of the Be.FM paper, arXiv:2505.23058" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';">
+          <img src="paper-befm.png" alt="Snapshot of the Be.FM paper, arXiv:2505.23058" onerror="this.style.display='none';">
           <div class="ph"><div class="t">Paper snapshot</div><div class="t" style="opacity:.7">paper-befm.png</div></div>
         </div>
         <div class="meta"><div class="id">arXiv:2505.23058</div><h4>Be.FM</h4><p>An open foundation model for human behavior.</p></div>
       </a>
       <a class="paper" href="https://arxiv.org/pdf/2606.14199" target="_blank" rel="noopener" style="border-bottom:1px solid var(--line)">
         <div class="shot" style="height:180px">
-          <img src="/paper-2606.png" alt="Snapshot of the paper, arXiv:2606.14199" style="transform:scale(1.2);transform-origin:top center" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none';">
+          <img src="paper-2606.png" alt="Snapshot of the paper, arXiv:2606.14199" onerror="this.style.display='none';">
           <div class="ph"><div class="t">Paper snapshot</div><div class="t" style="opacity:.7">paper-2606.png</div></div>
         </div>
         <div class="meta"><div class="id">arXiv:2606.14199</div><h4>ODYSSIM</h4><p>Recent work on purpose-built behavior modeling.</p></div>
@@ -625,6 +613,7 @@
 <footer>
   <div class="wrap row">
     <div>© Vectorial AI · SAPIENS behavior benchmark</div>
+    <div class="mono">Amazon Public Dataset · semantic-similarity scoring</div>
   </div>
 </footer>
 
@@ -651,93 +640,85 @@
     {label:'Opus 4.8',   date:'Apr 2026', v:50.4}
   ];
 
-  function valueLabels(suffix,fontSize){
-    suffix=suffix||'%'; fontSize=fontSize||12;
+  function valueLabels(suffix){
+    suffix=suffix||'%';
     return {id:'vl'+Math.random(),afterDatasetsDraw:function(c){
-      var ctx=c.ctx;ctx.save();ctx.font='600 '+fontSize+'px "IBM Plex Mono"';ctx.textAlign='center';
+      var ctx=c.ctx;ctx.save();ctx.font='500 11.5px "IBM Plex Mono"';ctx.textAlign='center';
       c.data.datasets.forEach(function(ds,di){
         var meta=c.getDatasetMeta(di);
         meta.data.forEach(function(bar,i){
           var v=ds.data[i]; if(v===null||v===undefined) return;
           var col=Array.isArray(ds.backgroundColor)?ds.backgroundColor[i]:ds.backgroundColor;
           ctx.fillStyle=(col===ORANGE)?ORANGE_INK:AXIS;
-          ctx.fillText(v.toFixed(1)+suffix,bar.x,bar.y-9);
+          ctx.fillText(v.toFixed(1)+suffix,bar.x,bar.y-7);
         });
       });
       ctx.restore();}};
   }
-  /* refLine: align=right keeps label away from bar value labels on the left */
-  function refLine(y,label,color,alignRight){
+  function refLine(y,label,color){
     return {id:'rl'+Math.random(),afterDraw:function(c){
       var ctx=c.ctx,ya=c.scales.y,xa=c.scales.x,py=ya.getPixelForValue(y);ctx.save();
-      ctx.strokeStyle=color||CEIL;ctx.setLineDash([5,4]);ctx.lineWidth=1.4;
+      ctx.strokeStyle=color||CEIL;ctx.setLineDash([5,4]);ctx.lineWidth=1.2;
       ctx.beginPath();ctx.moveTo(xa.left,py);ctx.lineTo(xa.right,py);ctx.stroke();ctx.setLineDash([]);
-      if(label){
-        ctx.fillStyle=color||AXIS;ctx.font='600 11px "IBM Plex Mono"';
-        if(alignRight){ctx.textAlign='right';ctx.fillText(label,xa.right-6,py-7);}
-        else{ctx.textAlign='left';ctx.fillText(label,xa.left+6,py-7);}
-      }
+      if(label){ctx.fillStyle=color||AXIS;ctx.font='500 11px "IBM Plex Mono"';ctx.textAlign='left';ctx.fillText(label,xa.left+5,py-6);}
       ctx.restore();}};
   }
   function opts(extra){
-    return Object.assign({responsive:true,maintainAspectRatio:false,layout:{padding:{top:36,right:8}},
+    return Object.assign({responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:function(x){return x.dataset.label?x.dataset.label+': '+x.parsed.y:x.parsed.y;}}}},
-      scales:{y:{beginAtZero:true,max:100,grid:{color:GRIDL,drawBorder:false},ticks:{font:{size:11},padding:6}},
+      scales:{y:{beginAtZero:true,max:100,grid:{color:GRIDL,drawBorder:false},ticks:{font:{size:11}}},
               x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:0,font:{size:11}}}}},extra||{});
   }
 
-  /* HERO TIMELINE — rotate labels 38° so 2-line date+name don't collide */
-  var tL=MODELS.map(function(m){return m.label+'\n'+m.date;}); tL.push('SAPIENS');
+  /* HERO TIMELINE */
+  var tL=MODELS.map(function(m){return [m.label,m.date];}); tL.push(['SAPIENS','']);
   var tD=MODELS.map(function(m){return m.v;}); tD.push(SAPIENS);
   var tC=MODELS.map(function(){return GRAY;}); tC.push(ORANGE);
   new Chart(document.getElementById('timeline'),{
     type:'bar',
-    data:{labels:tL,datasets:[{data:tD,backgroundColor:tC,borderRadius:5,maxBarThickness:56}]},
-    options:opts({layout:{padding:{top:36,bottom:8,right:8}},
-      scales:{y:{beginAtZero:true,max:100,grid:{color:GRIDL},ticks:{callback:function(v){return v+'%';},font:{size:11},padding:6}},
-      x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:38,minRotation:38,font:{size:11}}}}}),
-    plugins:[valueLabels('%',12),refLine(53.2,'frontier ceiling',CEIL,true)]
+    data:{labels:tL,datasets:[{data:tD,backgroundColor:tC,borderRadius:4,maxBarThickness:60}]},
+    options:opts({scales:{y:{beginAtZero:true,max:100,grid:{color:GRIDL},ticks:{callback:function(v){return v+'%';},font:{size:11}}},
+      x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:0,font:{size:11}}}}}),
+    plugins:[valueLabels('%'),refLine(53.2,'frontier ceiling')]
   });
 
-  /* CMU REGRESSION — reference line label right-aligned to avoid overlap with bars */
+  /* CMU REGRESSION (grouped: older vs newer flagship) */
   new Chart(document.getElementById('regress'),{
     type:'bar',
     data:{labels:['Gemini','Claude'],datasets:[
       {label:'Older model',data:[73.3,66.1],backgroundColor:GRAY,borderRadius:4,maxBarThickness:64},
       {label:'Newer flagship',data:[59.9,58.4],backgroundColor:GRAY_D,borderRadius:4,maxBarThickness:64}
     ]},
-    options:opts({plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:12,boxHeight:12,font:{size:12},padding:18}},
+    options:opts({plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:11,boxHeight:11,font:{size:11},padding:16}},
       tooltip:{callbacks:{label:function(x){return x.dataset.label+': '+x.parsed.y;}}}}}),
-    plugins:[valueLabels('',12),refLine(92.9,'human-to-human  92.9',ORANGE,true)]
+    plugins:[valueLabels(''),refLine(92.9,'human-to-human baseline  92.9',ORANGE)]
   });
 
-  /* BASELINE SMALL MULTIPLES — full names, max-rotation 45°, bigger value labels */
+  /* BASELINE SMALL MULTIPLES */
   function mini(id,rows,ceil){
     rows=rows.concat([['SAPIENS',SAPIENS]]);
     var cols=rows.map(function(r){return r[0]==='SAPIENS'?ORANGE:GRAY;});
     new Chart(document.getElementById(id),{
       type:'bar',
       data:{labels:rows.map(function(r){return r[0];}),
-        datasets:[{data:rows.map(function(r){return r[1];}),backgroundColor:cols,borderRadius:3,maxBarThickness:28}]},
-      options:opts({layout:{padding:{top:32,right:8}},
-        scales:{y:{beginAtZero:true,max:100,grid:{color:GRIDL},ticks:{callback:function(v){return v+'%';},font:{size:10},stepSize:25,padding:4}},
-        x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:45,minRotation:45,font:{size:10}}}}}),
-      plugins:[valueLabels('%',10),refLine(ceil,'',CEIL,false)]
+        datasets:[{data:rows.map(function(r){return r[1];}),backgroundColor:cols,borderRadius:3,maxBarThickness:26}]},
+      options:opts({scales:{y:{beginAtZero:true,max:100,grid:{color:GRIDL},ticks:{callback:function(v){return v+'%';},font:{size:10},stepSize:25}},
+        x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:52,minRotation:52,font:{size:10}}}}}),
+      plugins:[valueLabels('%'),refLine(ceil,'')]
     });
   }
-  mini('m_hist',[['o3',53.2],['GPT-5',47.6],['GPT-5.2',50.4],['GPT-5.5',50.4],['Sonnet 4.6',51.2],['Opus 4.8',50.4]],53.2);
-  mini('m_tribe',[['GPT-5',41.3],['GPT-5.2',44.4],['GPT-5.5',43.7]],44.4);
-  mini('m_pop',[['GPT-5',47.6],['GPT-5.2',45.2],['GPT-5.5',49.2],['Sonnet 4.6',46.8],['Opus 4.8',44.8]],49.2);
+  mini('m_hist',[['o3',53.2],['GPT-5',47.6],['5.2',50.4],['5.5',50.4],['Son 4.6',51.2],['Opus 4.8',50.4]],53.2);
+  mini('m_tribe',[['GPT-5',41.3],['5.2',44.4],['5.5',43.7]],44.4);
+  mini('m_pop',[['GPT-5',47.6],['5.2',45.2],['5.5',49.2],['Son 4.6',46.8],['Opus 4.8',44.8]],49.2);
 
-  /* BEHAVIOR MODELS */
+  /* BEHAVIOR MODELS — verify Centaur / Be.FM figures before use */
   new Chart(document.getElementById('bmodels'),{
     type:'bar',
     data:{labels:['Centaur','Be.FM','SAPIENS'],
-      datasets:[{data:[57,71,86],backgroundColor:[GRAY,GRAY,ORANGE],borderRadius:5,maxBarThickness:90}]},
-    options:opts({layout:{padding:{top:36,right:8}},
-      scales:{y:{beginAtZero:true,max:100,grid:{color:GRIDL},ticks:{callback:function(v){return v+'%';},font:{size:11},padding:6}},
-      x:{grid:{display:false},ticks:{font:{size:13}}}}}),
-    plugins:[valueLabels('%',13)]
+      datasets:[{data:[57,71,86],backgroundColor:[GRAY,GRAY,ORANGE],borderRadius:4,maxBarThickness:78}]},
+    options:opts({scales:{y:{beginAtZero:true,max:100,grid:{color:GRIDL},ticks:{callback:function(v){return v+'%';},font:{size:11}}},
+      x:{grid:{display:false},ticks:{font:{size:12}}}}}),
+    plugins:[valueLabels('%')]
   });
   /* DATA MOAT — animate coverage meters on scroll */
   var io=new IntersectionObserver(function(entries){
@@ -750,33 +731,6 @@
     });
   },{threshold:.45});
   document.querySelectorAll('.mrow').forEach(function(r){io.observe(r);});
-
-  /* NAV — highlight current section on scroll */
-  var navLinks=document.querySelectorAll('nav a[href^="#"]');
-  var sectionIds=Array.prototype.map.call(navLinks,function(a){return a.getAttribute('href').slice(1);});
-  var sections=sectionIds.map(function(id){return document.getElementById(id);}).filter(Boolean);
-  function setActiveNav(id){
-    navLinks.forEach(function(a){
-      a.classList.toggle('active',a.getAttribute('href')==='#'+id);
-    });
-  }
-  function syncNav(){
-    var headerH=(document.querySelector('header')||{}).offsetHeight||70;
-    var y=window.scrollY+headerH+40;
-    var current=sectionIds[0];
-    sections.forEach(function(sec){
-      if(sec.offsetTop<=y) current=sec.id;
-    });
-    /* clear highlight while still in hero (above first section) */
-    if(window.scrollY+headerH+40<(sections[0]?sections[0].offsetTop:0)){
-      navLinks.forEach(function(a){a.classList.remove('active');});
-      return;
-    }
-    setActiveNav(current);
-  }
-  window.addEventListener('scroll',syncNav,{passive:true});
-  window.addEventListener('resize',syncNav);
-  syncNav();
 })();
 </script>
 </body>

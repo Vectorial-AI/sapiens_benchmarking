@@ -6,21 +6,22 @@ import { markWizardRestorePending } from "@/lib/wizard-session";
 
 function BenchmarkReport() {
   return (
-    <div className="fixed inset-0 flex flex-col bg-[#FBFAF7]">
-      <div className="shrink-0 flex items-center justify-between border-b border-[#E7E4DB] bg-[#FBFAF7]/90 px-4 py-2.5 backdrop-blur-sm">
-        <Link
-          href="/"
-          onClick={() => markWizardRestorePending()}
-          className="text-[13px] font-medium text-[#B23F17] hover:underline"
-        >
-          Back
-        </Link>
-        <span className="text-[12px] text-[#8B8980]">SAPIENS 1.0 · Benchmark report</span>
-      </div>
+    <div className="fixed inset-0 bg-[#FBFAF7]">
+      {/* Floating back button — overlays the iframe without adding a second header */}
+      <Link
+        href="/"
+        onClick={() => markWizardRestorePending()}
+        className="fixed top-4 left-5 z-50 inline-flex items-center gap-1.5 rounded-full border border-[#E7E4DB] bg-[#FBFAF7]/90 px-3.5 py-1.5 text-[12px] font-semibold text-[#B23F17] shadow-sm backdrop-blur-sm hover:bg-white hover:border-[#E85D2C] transition-all"
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M7.5 2L3.5 6L7.5 10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        Back
+      </Link>
       <iframe
         src="/sapiens-benchmark.html"
         title="SAPIENS 1.0 Benchmark Report"
-        className="min-h-0 flex-1 w-full border-0"
+        className="w-full h-full border-0"
       />
     </div>
   );
