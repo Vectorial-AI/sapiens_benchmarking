@@ -21,6 +21,7 @@ All runtime data lives under `src/data/` — **the deployed app never reads `out
 
 - `src/data/catalog-index.json` — 30 tribes
 - `src/data/tribes/*.json` — users, products, evolved traits, ground-truth reviews
+- `src/data/pre_runs/{cluster}/{micro}/pre_run_{1,2,3}/` — bundled blind i2 predictions + deltas for video-game showcase (run `python3 scripts/bundle-pre-runs.py` after pipeline updates)
 - Each product may include `best_prediction_review` — copied from `best_delta_predictions.json` at catalog build time
 - `src/data/benchmark-metrics.json` — aggregated Sapiens vs baseline scores
 - `src/lib/prompts.ts` — Sapiens / baseline prompt builders

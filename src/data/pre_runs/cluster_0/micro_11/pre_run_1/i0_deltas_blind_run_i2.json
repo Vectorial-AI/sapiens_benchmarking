@@ -1,0 +1,572 @@
+{
+  "deltas": [
+    {
+      "review_key": "AGIEBEVKNIHCVYLO63WWTBGD6ZNA_review_5",
+      "user_id": "AGIEBEVKNIHCVYLO63WWTBGD6ZNA",
+      "review_idx": 5,
+      "text_delta": 0.34277443484185244,
+      "text_embedding_delta": 0.34277443484185244,
+      "text_length_delta": 0.3592297265147137,
+      "text_style_delta": 0.5,
+      "theme_delta_jsd": 0.12801710237426436,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.08569360871046316,
+      "overall_similarity": 0.9143063912895368,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AGIEBEVKNIHCVYLO63WWTBGD6ZNA_review_5",
+      "category": "Video Games",
+      "product_description": "Max Payne 2: The Fall of Max Payne is a violent, film-noir love story. Dark, tragic and intense, the in-depth story is a thrill-ride of shocking twists and revelations. Love hurts. Max Payne 2: The Fall of Max Payne delivers the most intense gameplay experience imaginable. The fierce, yet stylish action sequences and slow-motion gunplay that has become synonymous with Max Payne is back and better than ever. New and enhanced moves and options provide breathtaking cinematic game play. FEATURES: Storyline - a violent, Film Noir love story between a cop and a femme fatale murder suspect, between Max Payne and Mona Sax. Dark, tragic and intense, the story is a thrill-ride of shocking twists and revelations. Storyline - a violent, Film Noir love story between a cop and a femme fatale murder suspect, between Max Payne and Mona Sax. Dark, tragic and intense, the story is a thrill-ride of shocking twists and revelations. Max Payne's signature slow motion gunplay has been improved on every level. Get ready for Bullet Time 2.0. Max Payne's signature slow motion gunplay has been improved on every level. Get ready for Bullet Time 2.0. New guns and new moves make action more cinematic and intense than ever before. New guns and new moves make action more cinematic and intense than ever before. Fully integrated Havok physics engine allows for interactive environments creating incredible combat scenes. Ragdoll characters and physics in slow motion create breath-taking combat scenes. Fully integrated Havok physics engine allows for interactive environments creating incredible combat scenes. Ragdoll characters and physics in slow motion create breath-taking combat scenes. All new AI - cooperative NPC's fight with Max and more believable enemies create tension and more interesting and varied challenge. All new AI - cooperative NPC's fight with Max and more believable enemies create tension and more interesting and varied challenge. A stunning level of detail: Extremely detailed environments with photorealistic textures, highly enhanced radiosity lighting and extremely lifelike characters (including facial animations & lip synchronization) provide a visually staggering cinematic experience. A stunning level of detail: Extremely detailed environments with photorealistic textures, highly enhanced radiosity lighting and extremely lifelike characters (including facial animations & lip synchronization) provide a visually staggering cinematic experience. Massive production values - including a motion picture stunt crew, professional talent for voice acting and graphic novels, motion capture and authentic digital source material from New York City. Massive production values - including a motion picture stunt crew, professional talent for voice acting and graphic novels, motion capture and authentic digital source material from New York City. System Requirements Minimum Specifications: OS:XP, ME, 2000, 98Processor:Pentium III, Athlon 1.2 GHzRAM:256 MBHard Drive:1.5 GBVideo Card:32MB AGP graphics card with hardware transform & lighting supportAdditional Info:DirectX: 9.0Other:Internet connection required for game activation. Steam account required for game activation and installation. Legal: You must accept the license available online at rockstargames.com/eula. Non-transferable access to special features such as exclusive, unlockable, downloadable or online content, services, or functions may require single-use serial code, additional fee and/or online account registration (13+). Violation of EULA, Code of Conduct, or other policies may result in restriction or termination of access to game or online account. Access to special features may require internet connection, may not be available to all users, and may, upon 30 days notice, be terminated, modified, or offered under different terms.  The content of this videogame is purely fictional, and is not intended to represent or depict any actual event, person, or entity.  The makers and publishers of this videogame do not in any way endorse, condone or encourage engaging in any conduct depicted in this videogame. Unauthorized copying, reverse engineering, transmission, public performance, rental, pay for play, or circumvention of copy protection is strictly prohibited. Rockstar Games 622 Broadway, New York, NY 10012 (c)1998-2003 Rockstar Games, Inc. Rockstar Games, Rockstar Games R*, Max Payne, Take Two Interactive and their respective logos are trademarks and/or registered trademarks of Take-Two Interactive Software. Dolby, Pro Logic, and the double-D symbols are trademarks of Dolby Laboratories. Remedy and the Remedy logo are trademarks of Remedy Entertainment, Ltd. All other marks and trademarks are properties of their respective owners. The ratings icon(s) and all other marks and trademarks are properties of their respective owners. All rights reserved. System Requirements: Processor:  none specifiedRAM:  none specifiedHard Disk:  none specified",
+      "prediction": {
+        "review_text": "I mainly grabbed this to see if my original Max Payne 2 disc would run on my Xbox Series X, and it plays flawlessly. Being able to jump back into that dark noir story and bullet time on modern hardware is just awesome. Still a masterpiece.",
+        "predicted_themes": {
+          "Accessibility & Inclusive Design": 0.05,
+          "Audio and Visual Quality": 0.12,
+          "Battery Life and Portability": 0.0,
+          "Performance Stability and Bug Issues": 0.74,
+          "Hardware Build Quality Comfort and Connectivity": 0.06,
+          "Gameplay Mechanics Controls and Difficulty": 0.18,
+          "Content Depth Storyline and Appropriateness": 0.62,
+          "Online Multiplayer and Connectivity Services": 0.0,
+          "Installation DRM and Privacy Requirements": 0.0,
+          "Pricing Value and Monetization": 0.0,
+          "Customer Service Support and Delivery": 0.0
+        },
+        "sentiment": "Positive"
+      },
+      "actual": {
+        "review_text": "A masterpiece of a sequel to a beloved character, upon finding out this original Xbox title was compatible with the new series x console I had to get it, great game",
+        "rating": 5.0,
+        "sentiment": "Positive",
+        "predicted_themes": [
+          "Content Depth Storyline and Appropriateness",
+          "Performance Stability and Bug Issues"
+        ]
+      }
+    },
+    {
+      "review_key": "AGIEBEVKNIHCVYLO63WWTBGD6ZNA_review_4",
+      "user_id": "AGIEBEVKNIHCVYLO63WWTBGD6ZNA",
+      "review_idx": 4,
+      "text_delta": 0.44023898765406555,
+      "text_embedding_delta": 0.44023898765406555,
+      "text_length_delta": 0.45187632746739137,
+      "text_style_delta": 0.5,
+      "theme_delta_jsd": 0.3324739386492992,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.11005974691351639,
+      "overall_similarity": 0.8899402530864836,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AGIEBEVKNIHCVYLO63WWTBGD6ZNA_review_4",
+      "category": "Video Games",
+      "product_description": "Product Description Experience an all-new tactical combat experience in Tom Clancy's Ghost Recon Advanced Warfighter 2. Defend American soil from an attack by insurgent forces on the U.S./Mexico border. From the Manufacturer Tom Clancy's Ghost Recon Advanced Warfighter 2 Ubisoft's award-winning shooter that was founded on the PC returns with Tom Clancy's Ghost Recon Advanced Warfighter 2, designed specifically for the PC gamer by GRIN. Building on the foundation of Ghost Recon Advanced Warfighter, the sequel is a near-future warfare masterpiece. Ghost Recon Advanced Warfighter 2 for the PC screams tactics, and you'll need to bring your best to bear if you are going to get the Ghosts past their latest challenge. It's 2014, and the soldier of the future returns to encounter a new and more imminent threat along the recently completed wall on the U.S./Mexico border. The Ghosts are more powerful with an upgraded Integrated Warfighter System (IWS), but will have only 72 hours to assess the threat and stop the rebels from reaching U.S. soil. With a border that's 1,900 miles long and an enemy that doesn't play by the rules, this is a job for the U.S. military's most elite fighting unit. This is a job for the Ghosts. Vastly Improved Multiplayer: Huge variety of modes from classic team deathmatch to the exclusive recon vs. assault. Vastly Improved Multiplayer: Huge variety of modes from classic team deathmatch to the exclusive recon vs. assault. Top-Notch Tactical Gameplay: PC-exclusive tactical maps and non-linear missions in both indoor and outdoor environments. Top-Notch Tactical Gameplay: PC-exclusive tactical maps and non-linear missions in both indoor and outdoor environments. More Options Mean More Strategies: Your team is more customizable and has grown with the addition of a communications specialist. New team play options abound including the \"bubble system,\" which rewards players for more cohesive teamwork. More Options Mean More Strategies: Your team is more customizable and has grown with the addition of a communications specialist. New team play options abound including the \"bubble system,\" which rewards players for more cohesive teamwork. All-New Battlegrounds: For the first time ever, the Ghosts will defend U.S. soil from a cross-border attack, taking the fight to all-new locations. The Ghosts will battle enemies in mountain terrains, barren deserts, and even protect their home turf in El Paso, Texas. Each environment presents its own benefits and challenges and will call for fresh tactical approaches. All-New Battlegrounds: For the first time ever, the Ghosts will defend U.S. soil from a cross-border attack, taking the fight to all-new locations. The Ghosts will battle enemies in mountain terrains, barren deserts, and even protect their home turf in El Paso, Texas. Each environment presents its own benefits and challenges and will call for fresh tactical approaches. More Technology and Firepower: All systems have been upgraded to give players more power and control on the battlefield, including an improved Cross-Com. Cross-Com 2.0 will go full screen with the click of a button, enabling you to deliver more precise and deadly attacks. More Technology and Firepower: All systems have been upgraded to give players more power and control on the battlefield, including an improved Cross-Com. Cross-Com 2.0 will go full screen with the click of a button, enabling you to deliver more precise and deadly attacks. System Requirements Minimum Specifications: Recommended Specifications: OS:Windows XP/Vista (only) Processor:2.0 GHz Pentium IV or AMD Athlon2.8 GHz Pentium IV or AMD Athlon RAM:1 GBN/A Hard Drive:5.0 GB Video Card:128 MB DirectX 9.0c/ Shader Model 2.0-compliant video card256 MB DirectX 9.0c/ Shader Model 2.0-compliant video card Input Device:Windows-compatible mouse, keyboard, headsets (via TeamSpeak client) Supported Video Cards at Time of Release:NVIDIA GeForce\" 6200-8800 series; ATI Radeon 9559, 9600, 9800, X800-X1950; Laptop versions of these cards may work but are NOT supported. Additional chipsets may be supported after release. Please check http://support.ubi.com for the most up-to-date list of support video cards. Tom Clancy's Ghost Recon Advanced Warfighter 2",
+      "prediction": {
+        "review_text": "With Ghost Recon kind of on pause, I'm still hoping we get the next chapter, but jumping back into GRAW 2 is awesome. The near-future border storyline is the hook and it still feels tense and tactical. Runs fine on my PC, great classic.",
+        "predicted_themes": {
+          "Accessibility & Inclusive Design": 0.05,
+          "Audio and Visual Quality": 0.15,
+          "Battery Life and Portability": 0.0,
+          "Performance Stability and Bug Issues": 0.25,
+          "Hardware Build Quality Comfort and Connectivity": 0.0,
+          "Gameplay Mechanics Controls and Difficulty": 0.5,
+          "Content Depth Storyline and Appropriateness": 0.9,
+          "Online Multiplayer and Connectivity Services": 0.05,
+          "Installation DRM and Privacy Requirements": 0.0,
+          "Pricing Value and Monetization": 0.0,
+          "Customer Service Support and Delivery": 0.0
+        },
+        "sentiment": "Positive"
+      },
+      "actual": {
+        "review_text": "This was a great series under the ghost recon banner and we have yet to see a new entry, this one had some amazing content and futuristic storyline",
+        "rating": 4.0,
+        "sentiment": "Positive",
+        "predicted_themes": [
+          "Content Depth Storyline and Appropriateness"
+        ]
+      }
+    },
+    {
+      "review_key": "AH4252UAO2PJIFSEAOTVGBPABOMA_review_0",
+      "user_id": "AH4252UAO2PJIFSEAOTVGBPABOMA",
+      "review_idx": 0,
+      "text_delta": 0.3152679687184742,
+      "text_embedding_delta": 0.3152679687184742,
+      "text_length_delta": 0.29380100294924033,
+      "text_style_delta": 0.03333333333333333,
+      "theme_delta_jsd": 0.20995970622613613,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.07881699217961857,
+      "overall_similarity": 0.9211830078203814,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AH4252UAO2PJIFSEAOTVGBPABOMA_review_0",
+      "category": "Video Games",
+      "product_description": "From the Manufacturer From BioWare, the makers of Mass Effect , Star Wars: Knights of the Old Republic , and Baldur's Gate comes Dragon Age: Origins . An epic tale of violence, lust, and betrayal, Dragon Age: Origins is a single player role-playing game (RPG) set in a fantasy game environment, and featuring three playable character classes, accessible in the form of three races. In addition, the game features extreme character customization, a new game engine, party-based gameplay utilizing non-player characters and a built-in personal history system for each hero character rooted in a variety of possible origin stories. .caption { font-family: Verdana, Helvetica neue, Arial, serif; font-size: 10px; font-weight: bold; font-style: italic; } ul.indent { list-style: inside disc; text-indent: -15px; } table.callout { font-family: verdana; font-size: 11px; line-height: 1. 3em; } td.vgoverview { height: 125px; background: #9DC4D8 url(https://images-na.ssl-images-amazon.com/images/G/01/electronics/detail-page/callout-bg.png) repeat-x; border-left: 1px solid #999999; border-right: 1px solid #999999; padding-left: 20px; padding-right: 20px; padding-bottom: 10px; width: 250px; font-family: verdana; font-size: 12px; } 6 possible hero Origin Stories. View larger . 3 classes and 3 races to play as. View larger . Gritty, brutal action. View larger . Frightening enemies and bosses. View larger . Party-based combat using NPCs. View larger . Spell combining abilities. View larger . Stunning 3D environments. View larger . Story In Dragon Age: Origins the survival of humanity rests in the hands of those chosen by fate. You are a Grey Warden, one of the last of an ancient order of guardians who have defended the lands on the continent of Thedas throughout the centuries. Betrayed by a trusted general in a critical battle, you must hunt down the traitor and bring him to justice. As you fight your way towards the final confrontation with an evil nemesis, you will face monstrous foes and engage in epic quests to unite the disparate peoples of a world at war. A romance with a seductive shapeshifter may hold the key to victory, or she may be a dangerous diversion from the heart of your mission. To be a leader, you must make ruthless decisions and be willing to sacrifice your friends and loved ones for the greater good. Gameplay Dragon Age: Origins is a 3D oriented RPG based in a dark, heroic, fantasy realm where moral choices have a lasting impression on the people you meet, the members of your own party and the world around you. The inclusion of subtitle \"Origins\" in the game's title refers to the six unique origin stories available to new heroes as a new game begins. Each of these has an impact on the player's motivations and his or her experience, and renders a unique prelude, path, and possible ending(s) to the game. There are many different endings to the game based on the origin story of the character and the choices you make as you play through the game. The game features three character classes--warrior, mage, and rogue--and three races of being--Human, Elf or Dwarf--that can assume these classes. Although most game elements, such as weapons, magic, etc., are available to any character, each class and race has different strengths, abilities and affinities which lend themselves to better utilizing different elements. Dragon Age: Origins is a single player game based on party-based gameplay and combat where the player can join, control and quest with up to three non-player characters (NPCs). Players can also quest alone if they so choose, but with the chance of survival are slim. Convincing NPCs to join you, and treating them well may be necessary depending on the varying sentiments between the player and the NPC, or between the NPC's in the party based on the chosen history written into the origin story accepted at the beginning of the game. This uncertainty allows for a variety of possible dynamics within the party ranging from open hostility, all the way to romance. The game progresses in real-time via a pause-and-play tactical combat system that allows the player to check inventory levels, equip a character, etc. in a slight vacuum. Additional features found in the game include: a combination of a standard loot system and a currency system based on gold silver and copper; advanced character customization functionality; the use of poison, traps and herbalism; dual-wielding skills; and \"spell combos,\" which allow players to chain together different spells to create a unique effects. Key Game Features BioWare's deepest universe to date with over 80 hours of gameplay and more than double the size and scope of Mass Effect. BioWare's deepest universe to date with over 80 hours of gameplay and more than double the size and scope of Mass Effect . Travel throughout dozens of environments and fully immerse yourself in a shattered world that is on the brink of utter annihilation. Travel throughout dozens of environments and fully immerse yourself in a shattered world that is on the brink of utter annihilation. An epic story that is completely shaped and reactive to your play style. An epic story that is completely shaped and reactive to your play style. Complex moral dilemmas offering no easy choices. Complex moral dilemmas offering no easy choices. Tailor your Dragon Age: Origins experience from the very beginning by choose from six different origin stories. Tailor your Dragon Age: Origins experience from the very beginning by choose from six different origin stories. Decide how to handle complex issues like murder, genocide, betrayal, and the possession/sacrificing of children without the security of a good/bad slider to tell you what to do. Decide how to handle complex issues like murder, genocide, betrayal, and the possession/sacrificing of children without the security of a good/bad slider to tell you what to do. Full character customization allowing the player to sculpt a hero in your own image or fantasy. Full character customization allowing the player to sculpt a hero in your own image or fantasy. Elaborate character creator allows you to create your own hero unique from anyone else. Elaborate character creator allows you to create your own hero unique from anyone else. Shape your character's personality and morality based on the choices you make throughout the game. Shape your character's personality and morality based on the choices you make throughout the game. Engage in bone-crushing, visceral combat engaging in battle against massive and terrifying creatures. Engage in bone-crushing, visceral combat engaging in battle against massive and terrifying creatures. Unleash legendary powers and choose from over 100 different magical spells and skills. Unleash legendary powers and choose from over 100 different magical spells and skills. Experience the adrenaline rush of brutal combat, beheading your foes or casting spells that make enemies explode from within. Experience the adrenaline rush of brutal combat, beheading your foes or casting spells that make enemies explode from within. Dragon Age: Origins Digital Deluxe Edition contains: 3 exclusive in-game items 3 exclusive in-game items Bergen's Honor: A massive helmet made out of dragonbone (+2 to armor, +25 physical resistance, +6 to attack) Bergen's Honor: A massive helmet made out of dragonbone (+2 to armor, +25 physical resistance, +6 to attack) Grimoire of the Frozen Wastes: A special book that adds +3 to all attributes when read Grimoire of the Frozen Wastes: A special book that adds +3 to all attributes when read Final Reason: A magical staff of immense power (adds to damage, spell power, and fire damage) Final Reason: A magical staff of immense power (adds to damage, spell power, and fire damage) Additional downloadable content Additional downloadable content The \"Stone Prisoner\" downloadable content, making available a brand new party member Shale: a hulking golem with a unique play-style and devastating new abilities. Also included are all new quests that take you on a journey through sleepy town with a secret to Dwarven city. Find new items, achievements, and more! The \"Stone Prisoner\" downloadable content, making available a brand new party member Shale: a hulking golem with a unique play-style and devastating new abilities. Also included are all new quests that take you on a journey through sleepy town with a secret to Dwarven city. Find new items, achievements, and more! The \"Warden's Keep\" downloadable content, providing access to a new dungeon-exploring adventure, new loot including a set of ancient Grey Warden armor, a chance to gain two of six mysterious new abilities, and a new base complete with merchants and a party chest to store their hard-earned items. The \"Warden's Keep\" downloadable content, providing access to a new dungeon-exploring adventure, new loot including a set of ancient Grey Warden armor, a chance to gain two of six mysterious new abilities, and a new base complete with merchants and a party chest to store their hard-earned items. Downloadable \"Blood Dragon Armor\" for Mass Effect 2 and Dragon Age: Origins - An exclusive customized armor set that can be used in both games Downloadable \"Blood Dragon Armor\" for Mass Effect 2 and Dragon Age: Origins - An exclusive customized armor set that can be used in both games Digital soundtrack Digital soundtrack Wallpapers Wallpapers System Requirements: System Requirements: Minimum Recommended OS: Windows XP with SP3 / Vista with SP1 CPU: XP: Intel Core 2(or equivalent) running at 1.4Ghz or greater AMD X2(or equivalent) running at 1.8Ghz or greater / Vista: Intel Core 2 (or equivalent) running at 1.6Ghz or greater Intel Core 2 Quad 2.4Ghz Processor or equivalent RAM: XP: 1GB or more / 1.5GB or more 2 GB (XP) / 4 GB (Vista) HDD: 20GB Video: XP: ATI Radeon X850 128MB or greater, NVIDIA GeForce 6600 GT 128MB or greater / Vista: ATI Radeon X1550 256MB or greater, NVIDIA GeForce 7600 GT 256MB or greater ATI 3850 512 MB or greater, NVIDIA 8800GTS 512 MB or greater, AMD Phenom II X3 Triple-Core 2.8 GHz or greater Other: Mouse/keyboard/gamepad for gameplay",
+      "prediction": {
+        "review_text": "I can lose hours in Dragon Age: Origins and it's exactly the kind of long, absorbing single-player RPG I needed for some stay-at-home escapism. This one is still an awesome favorite for me, with plenty to do and choices that keep pulling you along. The physical copy arrived in pristine condition and worked perfectly.",
+        "predicted_themes": {
+          "Accessibility & Inclusive Design": 0.05,
+          "Audio and Visual Quality": 0.05,
+          "Battery Life and Portability": 0.0,
+          "Performance Stability and Bug Issues": 0.25,
+          "Hardware Build Quality Comfort and Connectivity": 0.05,
+          "Gameplay Mechanics Controls and Difficulty": 0.35,
+          "Content Depth Storyline and Appropriateness": 0.85,
+          "Online Multiplayer and Connectivity Services": 0.0,
+          "Installation DRM and Privacy Requirements": 0.0,
+          "Pricing Value and Monetization": 0.05,
+          "Customer Service Support and Delivery": 0.6
+        },
+        "sentiment": "Positive"
+      },
+      "actual": {
+        "review_text": "I would have to say by far the Dragon Age game series is my favorite. Dragon Age: Origins is awesome! This game came in perfect condition and has provided me with hours of fun while being sheltered in placed during a pandemic.",
+        "rating": 5.0,
+        "sentiment": "Positive",
+        "predicted_themes": [
+          "Content Depth Storyline and Appropriateness",
+          "Customer Service Support and Delivery"
+        ]
+      }
+    },
+    {
+      "review_key": "AHD2737H32DKT4XWJ6CR57O37YAA_review_6",
+      "user_id": "AHD2737H32DKT4XWJ6CR57O37YAA",
+      "review_idx": 6,
+      "text_delta": 0.39951722449726224,
+      "text_embedding_delta": 0.39951722449726224,
+      "text_length_delta": 1.0,
+      "text_style_delta": 0.3154648767857287,
+      "theme_delta_jsd": 0.08708431179355025,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.0998793061243155,
+      "overall_similarity": 0.9001206938756845,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AHD2737H32DKT4XWJ6CR57O37YAA_review_6",
+      "category": "Video Games",
+      "product_description": "Similar to last year's Mario & Luigi: Superstar saga + bowser's minions game, this new Nintendo 3DS game is a remake of a classic Mario & Luigi action RPG adventure. This time, fans can replay (or play for the first time) Mario & Luigi: bowser's inside story, One of the most critically acclaimed games in the Mario & Luigi series, with new graphics and a new mode that tells the behind-the-scenes story of bowser jr. Mario & Luigi: bowser's inside story + bowser jr.'S journey launches Exclusively for the Nintendo 3DS family of systems. Genre role playing, action, adventure.",
+      "prediction": {
+        "review_text": "Repetitive gameplay really undermined my enjoyment of this remake. It starts fun, but the battles and pacing got old fast and I just stopped wanting to play.",
+        "predicted_themes": {
+          "Accessibility & Inclusive Design": 0.0,
+          "Audio and Visual Quality": 0.0,
+          "Battery Life and Portability": 0.0,
+          "Performance Stability and Bug Issues": 0.0,
+          "Hardware Build Quality Comfort and Connectivity": 0.0,
+          "Gameplay Mechanics Controls and Difficulty": 0.92,
+          "Content Depth Storyline and Appropriateness": 0.18,
+          "Online Multiplayer and Connectivity Services": 0.0,
+          "Installation DRM and Privacy Requirements": 0.0,
+          "Pricing Value and Monetization": 0.0,
+          "Customer Service Support and Delivery": 0.0
+        },
+        "sentiment": "Negative"
+      },
+      "actual": {
+        "review_text": "Really wanted to like it but it's too repetitive.",
+        "rating": 2.0,
+        "sentiment": "Negative",
+        "predicted_themes": [
+          "Gameplay Mechanics Controls and Difficulty"
+        ]
+      }
+    },
+    {
+      "review_key": "AGMVFMJZYR3M5L5VSEQ3XS2M43OA_review_1",
+      "user_id": "AGMVFMJZYR3M5L5VSEQ3XS2M43OA",
+      "review_idx": 1,
+      "text_delta": 0.49937790924381187,
+      "text_embedding_delta": 0.49937790924381187,
+      "text_length_delta": 0.45702378261756166,
+      "text_style_delta": 0.18453512321427126,
+      "theme_delta_jsd": 0.5757993848549876,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.12484447731095294,
+      "overall_similarity": 0.8751555226890471,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AGMVFMJZYR3M5L5VSEQ3XS2M43OA_review_1",
+      "category": "Video Games",
+      "product_description": "Unreal Tournament 3 marks the return of the world's premiere first-person shooter to the PC. Unreal Tournament 3 unleashes the full power of Unreal Engine 3, taking graphics, gameplay, and challenge to a whole new level. Players engage in intense battles with other human players online, or against Unreal artificial intelligence that sets the industry standard. With the most powerful futuristic weapons and vehicles available, this is FPS action at its best!",
+      "prediction": {
+        "review_text": "Game arrived on time and works exactly as described. Installed without any hiccups and runs smooth. If you're looking for classic Unreal Tournament action with updated graphics, this is a solid buy and I'd recommend it.",
+        "predicted_themes": {
+          "Accessibility & Inclusive Design": 0.05,
+          "Audio and Visual Quality": 0.55,
+          "Battery Life and Portability": 0.0,
+          "Performance Stability and Bug Issues": 0.6,
+          "Hardware Build Quality Comfort and Connectivity": 0.05,
+          "Gameplay Mechanics Controls and Difficulty": 0.35,
+          "Content Depth Storyline and Appropriateness": 0.1,
+          "Online Multiplayer and Connectivity Services": 0.15,
+          "Installation DRM and Privacy Requirements": 0.55,
+          "Pricing Value and Monetization": 0.15,
+          "Customer Service Support and Delivery": 0.75
+        },
+        "sentiment": "Positive"
+      },
+      "actual": {
+        "review_text": "It was exactly what I expect it to be. I enjoyed playing this game and would recommend the seller and game to others.",
+        "rating": 4.0,
+        "sentiment": "Positive",
+        "predicted_themes": [
+          "Customer Service Support and Delivery"
+        ]
+      }
+    },
+    {
+      "review_key": "AHBZSLUFTC5A7MFVMPX544P75QNQ_review_3",
+      "user_id": "AHBZSLUFTC5A7MFVMPX544P75QNQ",
+      "review_idx": 3,
+      "text_delta": 0.41979542320109364,
+      "text_embedding_delta": 0.41979542320109364,
+      "text_length_delta": 0.03641442483972141,
+      "text_style_delta": 0.1309297535714574,
+      "theme_delta_jsd": 0.3271400619233377,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.10494885580027336,
+      "overall_similarity": 0.8950511441997266,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AHBZSLUFTC5A7MFVMPX544P75QNQ_review_3",
+      "category": "Video Games",
+      "product_description": "Brand New",
+      "prediction": {
+        "review_text": "Totally my bad-I ordered the wrong title 😅. But even putting that aside, this game is like a 2/5 for me. The gameplay just didn't click and it got boring fast, so I'm not gonna keep it. At least it showed up brand new and worked right away.",
+        "predicted_themes": {
+          "Accessibility & Inclusive Design": 0.02,
+          "Audio and Visual Quality": 0.05,
+          "Battery Life and Portability": 0.0,
+          "Performance Stability and Bug Issues": 0.15,
+          "Hardware Build Quality Comfort and Connectivity": 0.0,
+          "Gameplay Mechanics Controls and Difficulty": 0.85,
+          "Content Depth Storyline and Appropriateness": 0.2,
+          "Online Multiplayer and Connectivity Services": 0.0,
+          "Installation DRM and Privacy Requirements": 0.1,
+          "Pricing Value and Monetization": 0.05,
+          "Customer Service Support and Delivery": 0.35
+        },
+        "sentiment": "Negative"
+      },
+      "actual": {
+        "review_text": "This wasn't the game I wanted and this was my own fault, not looking into it more. So when I got it obviously it was a bit late xD I figure id do my research and check out the game play =)<br />It's kind of garbage. 3 out of 10",
+        "rating": 2.0,
+        "sentiment": "Negative",
+        "predicted_themes": [
+          "Gameplay Mechanics Controls and Difficulty"
+        ]
+      }
+    },
+    {
+      "review_key": "AEG6VDBAWH5YUPY2KNF33X3S7HTQ_review_1",
+      "user_id": "AEG6VDBAWH5YUPY2KNF33X3S7HTQ",
+      "review_idx": 1,
+      "text_delta": 0.37552896178739814,
+      "text_embedding_delta": 0.37552896178739814,
+      "text_length_delta": 0.10354779982897538,
+      "text_style_delta": 0.4439710470806909,
+      "theme_delta_jsd": 0.16540681869210372,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.09388224044684956,
+      "overall_similarity": 0.9061177595531504,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AEG6VDBAWH5YUPY2KNF33X3S7HTQ_review_1",
+      "category": "Video Games",
+      "product_description": "Grandia HD Collection (Switch Limited Run #80) - Nintendo Switch",
+      "prediction": {
+        "review_text": "This one's been such a cozy nostalgia trip on Switch-being able to pick up Grandia in handheld for a bit and then dock it and keep going on the TV is exactly what I wanted.\n\nMy copy arrived fast and honestly looked pristine, which always makes me feel better about snagging a \"used\" Limited Run title. The HD touch-ups make it easier on the eyes than I remember, and the classic JRPG vibe still holds up. If you're buying it to replay these games with modern convenience, it delivers.",
+        "predicted_themes": {
+          "Accessibility & Inclusive Design": 0.05,
+          "Audio and Visual Quality": 0.55,
+          "Battery Life and Portability": 0.8,
+          "Performance Stability and Bug Issues": 0.1,
+          "Hardware Build Quality Comfort and Connectivity": 0.15,
+          "Gameplay Mechanics Controls and Difficulty": 0.2,
+          "Content Depth Storyline and Appropriateness": 0.25,
+          "Online Multiplayer and Connectivity Services": 0.0,
+          "Installation DRM and Privacy Requirements": 0.0,
+          "Pricing Value and Monetization": 0.1,
+          "Customer Service Support and Delivery": 0.75
+        },
+        "sentiment": "Positive"
+      },
+      "actual": {
+        "review_text": "I'm so excited to play this again. The original game will still run on PS2, if you own the PS1 disk, but with tv's bigger it's not as clear. So having it redone for the switch is so exciting. Can play on it or tv is just fantastic. Well done, I haven't seen anything different and to get game one & two, such a great game set! I even got this used like new, and it came perfect and so quick! Very, very happy.",
+        "rating": 5.0,
+        "sentiment": "Positive",
+        "predicted_themes": [
+          "Audio and Visual Quality",
+          "Battery Life and Portability",
+          "Customer Service Support and Delivery"
+        ]
+      }
+    },
+    {
+      "review_key": "AGKNH4FDTQTQS5M7BU6ZYMZ4QTGA_review_2",
+      "user_id": "AGKNH4FDTQTQS5M7BU6ZYMZ4QTGA",
+      "review_idx": 2,
+      "text_delta": 0.2920644589519451,
+      "text_embedding_delta": 0.2920644589519451,
+      "text_length_delta": 0.3286085084438669,
+      "text_style_delta": 0.3154648767857287,
+      "theme_delta_jsd": 0.19646628155957327,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.0730161147379863,
+      "overall_similarity": 0.9269838852620137,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AGKNH4FDTQTQS5M7BU6ZYMZ4QTGA_review_2",
+      "category": "Video Games",
+      "product_description": "Super Mario Land - 3DS [Digital Code]",
+      "prediction": {
+        "review_text": "Super fun but pretty brief, just like I remembered. If you've got a 3DS/2DS (or compatible handheld) this is an easy pick-up for quick Mario sessions and it plays great.",
+        "predicted_themes": {
+          "Accessibility & Inclusive Design": 0.05,
+          "Audio and Visual Quality": 0.1,
+          "Battery Life and Portability": 0.2,
+          "Performance Stability and Bug Issues": 0.25,
+          "Hardware Build Quality Comfort and Connectivity": 0.05,
+          "Gameplay Mechanics Controls and Difficulty": 0.65,
+          "Content Depth Storyline and Appropriateness": 0.7,
+          "Online Multiplayer and Connectivity Services": 0.0,
+          "Installation DRM and Privacy Requirements": 0.05,
+          "Pricing Value and Monetization": 0.0,
+          "Customer Service Support and Delivery": 0.0
+        },
+        "sentiment": "Positive"
+      },
+      "actual": {
+        "review_text": "For a fun and short Mario game it's pretty fun I would say if you still have a 3ds/2ds buy this game",
+        "rating": 5.0,
+        "sentiment": "Positive",
+        "predicted_themes": [
+          "Gameplay Mechanics Controls and Difficulty",
+          "Content Depth Storyline and Appropriateness"
+        ]
+      }
+    },
+    {
+      "review_key": "AHFCVTO7VGLI4I74B65OPSDUQBYA_review_0",
+      "user_id": "AHFCVTO7VGLI4I74B65OPSDUQBYA",
+      "review_idx": 0,
+      "text_delta": 0.3585063192555322,
+      "text_embedding_delta": 0.3585063192555322,
+      "text_length_delta": 0.7303272326378699,
+      "text_style_delta": 0.3154648767857287,
+      "theme_delta_jsd": 0.024824006828779777,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.08962657981388311,
+      "overall_similarity": 0.9103734201861169,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AHFCVTO7VGLI4I74B65OPSDUQBYA_review_0",
+      "category": "Software",
+      "product_description": "From the Manufacturer An average of over 1,000,000 laptops are reported lost or stolen each year. And according to the FBI, less than 2-percent of lost or stolen laptops are ever recovered. What are your chances of recovering your laptop? Even if you file a police report, how would you obtain the physical location of your lost or stolen laptop? That's where SyNET Laptop Anti-Theft becomes key in locating, protecting, and recovering your laptop. SyNET Laptop Anti-Theft is an ideal anti-theft software solution for mobile PC users to track, recover, and protect important data on their mobile PCs. Complete protection is in your hands! Protect all of your important business information and personal files with the powerful data-encryption function. With an unauthorized password-access attempt, Laptop Anti-Theft immediately protects and shields your laptop and continuously displays warning message with alert alarm after laptop has been lost or stolen. Laptop Anti-Theft works with any type of Internet connection including dial-up, cable modem, DSL, T1, and wireless. It recognizes and traces through both internal and external networks for LAN/WAN configurations to pin point actual location of the lost or stolen laptop. Once installed invisibly on your laptop system, Laptop Anti-Theft sends a stealth e-mail message containing its exact location to a pre-determined e-mail address set by the owner. Each signal will contain all the required information on the status and physical location of your laptop. When the lost or stolen computer goes online it will send a stealth message to you containing information of its location using any Internet connection (phone modem, cable modem, DSL, ISDN, Corporate LAN, etc). Once this information is received, you can recover the lost or stolen property with help from law enforcement agency. Features: Invisible: install nTracker invisibly on your laptop; an unauthorized user can not enter into the program file without a pre-determined password issued by an authorized user. Invisible: install nTracker invisibly on your laptop; an unauthorized user can not enter into the program file without a pre-determined password issued by an authorized user. Undetectable: nTracker will not affect your computer performance or interfere with other applications. Undetectable: nTracker will not affect your computer performance or interfere with other applications. Compatible: fully compatible with all Windows OS enables nTracker to survive upgrades on the operating system without having to reinstall the software. Compatible: fully compatible with all Windows OS enables nTracker to survive upgrades on the operating system without having to reinstall the software. Easy to use: program installation is extremely simple and only takes a few minutes. Easy to use: program installation is extremely simple and only takes a few minutes.",
+      "prediction": {
+        "review_text": "I mainly got this for anti-theft, and so far it does what i need. Gives me some peace of mind if my laptop ever gets lost or stolen.",
+        "predicted_themes": {
+          "Installation & Technical Performance": 0.0,
+          "Intrusive Ads & Monetization Frustrations": 0.0,
+          "Feature Set, Usability & Accessibility": 0.35,
+          "Content Availability, Licensing & Online Requirements": 0.0,
+          "Security, Privacy & Update Policies": 0.75,
+          "Customer Support, Pricing & Marketing Transparency": 0.0,
+          "Gameplay Experience & Educational Value": 0.0,
+          "Hardware Integration & Performance": 0.0
+        },
+        "sentiment": "Positive"
+      },
+      "actual": {
+        "review_text": "So yeah try it and yeah kinda like it for anit-theft only.",
+        "rating": 5.0,
+        "sentiment": "Positive",
+        "predicted_themes": [
+          "Security, Privacy & Update Policies",
+          "Feature Set, Usability & Accessibility"
+        ]
+      }
+    },
+    {
+      "review_key": "AHFCVTO7VGLI4I74B65OPSDUQBYA_review_5",
+      "user_id": "AHFCVTO7VGLI4I74B65OPSDUQBYA",
+      "review_idx": 5,
+      "text_delta": 0.28362054816230786,
+      "text_embedding_delta": 0.28362054816230786,
+      "text_length_delta": 0.3182867623879138,
+      "text_style_delta": 0.5,
+      "theme_delta_jsd": 0.19087449459798406,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.070905137040577,
+      "overall_similarity": 0.929094862959423,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AHFCVTO7VGLI4I74B65OPSDUQBYA_review_5",
+      "category": "Video Games",
+      "product_description": "KINGDOM HEARTS HD 2.8 Final Chapter Prologue is a compilation that brings the popular KINGDOM HEARTS [Dream Drop Distance] to the PlayStation4 computer entertainment system platform remastered in high definition. Originally released in 2012, KINGDOM HEARTS [Dream Drop Distance] HD is a full-HD remastered version of KINGDOM HEARTS 3D [Dream Drop Distance]. Series protagonists Sora and Riku take on the Mark of Mastery exam in preparation for coming threats. The signature action of the KINGDOM HEARTS series has evolved, allowing players to experience faster-paced battles and exploration at a blistering pace.",
+      "prediction": {
+        "review_text": "Bought this as a gift for my sister and it arrived brand new/sealed and in perfect condition. She's a huge Kingdom Hearts fan and was genuinely excited to pop it into her PS4 right away, so for me it was a total win. If you're gifting a KH game to a fan, this one made her really happy.",
+        "predicted_themes": {
+          "Accessibility & Inclusive Design": 0.05,
+          "Audio and Visual Quality": 0.05,
+          "Battery Life and Portability": 0.0,
+          "Performance Stability and Bug Issues": 0.05,
+          "Hardware Build Quality Comfort and Connectivity": 0.0,
+          "Gameplay Mechanics Controls and Difficulty": 0.05,
+          "Content Depth Storyline and Appropriateness": 0.1,
+          "Online Multiplayer and Connectivity Services": 0.0,
+          "Installation DRM and Privacy Requirements": 0.05,
+          "Pricing Value and Monetization": 0.1,
+          "Customer Service Support and Delivery": 0.9
+        },
+        "sentiment": "Positive"
+      },
+      "actual": {
+        "review_text": "So yeah the game came out new and very nice i bought this for my sister for her birthday present and she is a big fan of the kingdom hearts so yeah she really wanted it and she is very happy and excited.",
+        "rating": 5.0,
+        "sentiment": "Positive",
+        "predicted_themes": [
+          "Customer Service Support and Delivery"
+        ]
+      }
+    },
+    {
+      "review_key": "AGARDEHS3SWCUXJPA3NIOHQUUYOQ_review_2",
+      "user_id": "AGARDEHS3SWCUXJPA3NIOHQUUYOQ",
+      "review_idx": 2,
+      "text_delta": 0.35765080881227485,
+      "text_embedding_delta": 0.35765080881227485,
+      "text_length_delta": 0.6680875342929395,
+      "text_style_delta": 0.3154648767857287,
+      "theme_delta_jsd": 0.12065243784989868,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.08941270220306874,
+      "overall_similarity": 0.9105872977969313,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AGARDEHS3SWCUXJPA3NIOHQUUYOQ_review_2",
+      "category": "Video Games",
+      "product_description": "Battlefield 2042 is a first-person shooter that marks the return to the iconic all-out warfare of the franchise. In a near-future world transformed by disorder, adapt and overcome dynamically-changing battlegrounds with the help of your squad and a cutting-edge arsenal.With support for 128 players, Battlefield 2042 brings unprecedented scale on vast battlegrounds across the globe. Players will take on several massive experiences, from updated multiplayer modes like Conquest and Breakthrough to the all-new Hazard Zone. *CONDITIONS AND RESTRICTIONS APPLY. System Requirements: Operating System: Windows 10 Operating System: Windows 10 Steam account required to download and install.",
+      "prediction": {
+        "review_text": "Noticeable lag in matches, and it also lost the vehicle-camping ability I used to rely on. Those two issues basically killed it for me.",
+        "predicted_themes": {
+          "Accessibility & Inclusive Design": 0.0,
+          "Audio and Visual Quality": 0.0,
+          "Battery Life and Portability": 0.0,
+          "Performance Stability and Bug Issues": 0.9,
+          "Hardware Build Quality Comfort and Connectivity": 0.0,
+          "Gameplay Mechanics Controls and Difficulty": 0.6,
+          "Content Depth Storyline and Appropriateness": 0.0,
+          "Online Multiplayer and Connectivity Services": 0.4,
+          "Installation DRM and Privacy Requirements": 0.0,
+          "Pricing Value and Monetization": 0.0,
+          "Customer Service Support and Delivery": 0.0
+        },
+        "sentiment": "Negative"
+      },
+      "actual": {
+        "review_text": "There is some lag and cannot vehicle camp like in older games",
+        "rating": 5.0,
+        "sentiment": "Negative",
+        "predicted_themes": [
+          "Performance Stability and Bug Issues",
+          "Gameplay Mechanics Controls and Difficulty"
+        ]
+      }
+    },
+    {
+      "review_key": "AGARDEHS3SWCUXJPA3NIOHQUUYOQ_review_3",
+      "user_id": "AGARDEHS3SWCUXJPA3NIOHQUUYOQ",
+      "review_idx": 3,
+      "text_delta": 0.5140986892834047,
+      "text_embedding_delta": 0.5140986892834047,
+      "text_length_delta": 1.0,
+      "text_style_delta": 0.3154648767857287,
+      "theme_delta_jsd": 0.4059369295335793,
+      "theme_delta_recall": 0.0,
+      "theme_delta": 0.0,
+      "overall_delta": 0.12852467232085119,
+      "overall_similarity": 0.8714753276791488,
+      "sentiment_match": 1.0,
+      "gate_metric": "confidence",
+      "used_logprob_prediction": false,
+      "used_logprob_actual": false,
+      "iteration_label": "i0_initial",
+      "post_id": "AGARDEHS3SWCUXJPA3NIOHQUUYOQ_review_3",
+      "category": "Video Games",
+      "product_description": "Write your own epic odyssey and become a legendary Spartan hero. Forge your destiny in a world on the brink of tearing itself apart. Influence how history unfolds in an ever-changing world shaped by your choices.",
+      "prediction": {
+        "review_text": "Endless open-world roaming is the best part. I've sunk tons of hours into it and it feels worth it.",
+        "predicted_themes": {
+          "Accessibility & Inclusive Design": 0.05,
+          "Audio and Visual Quality": 0.05,
+          "Battery Life and Portability": 0.0,
+          "Performance Stability and Bug Issues": 0.05,
+          "Hardware Build Quality Comfort and Connectivity": 0.0,
+          "Gameplay Mechanics Controls and Difficulty": 0.35,
+          "Content Depth Storyline and Appropriateness": 0.15,
+          "Online Multiplayer and Connectivity Services": 0.0,
+          "Installation DRM and Privacy Requirements": 0.0,
+          "Pricing Value and Monetization": 0.25,
+          "Customer Service Support and Delivery": 0.0
+        },
+        "sentiment": "Positive"
+      },
+      "actual": {
+        "review_text": "Cool open world game",
+        "rating": 4.0,
+        "sentiment": "Positive",
+        "predicted_themes": [
+          "Gameplay Mechanics Controls and Difficulty"
+        ]
+      }
+    }
+  ]
+}

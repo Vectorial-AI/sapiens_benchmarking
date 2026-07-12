@@ -41,13 +41,21 @@ type CachedPreRun = {
 
 const cache = new Map<string, CachedPreRun | null>();
 
-function repoRoot(): string {
-  return path.resolve(process.cwd(), "..");
+function bundledPreRunDir(cluster: string, microId: string, preRunIndex: number): string {
+  return path.join(
+    process.cwd(),
+    "src",
+    "data",
+    "pre_runs",
+    cluster,
+    microId,
+    `pre_run_${preRunIndex}`,
+  );
 }
 
-function preRunDir(cluster: string, microId: string, preRunIndex: number): string {
+function workspacePreRunDir(cluster: string, microId: string, preRunIndex: number): string {
   return path.join(
-    repoRoot(),
+    path.resolve(process.cwd(), ".."),
     "outputs",
     "amazon_sgo_health_care",
     cluster,
@@ -55,6 +63,13 @@ function preRunDir(cluster: string, microId: string, preRunIndex: number): strin
     "pre_runs",
     `pre_run_${preRunIndex}`,
   );
+}
+
+function resolvePreRunDir(cluster: string, microId: string, preRunIndex: number): string {
+  const bundled = bundledPreRunDir(cluster, microId, preRunIndex);
+  const blindBundled = path.join(bundled, "blind_run_i2.json");
+  if (fs.existsSync(blindBundled)) return bundled;
+  return workspacePreRunDir(cluster, microId, preRunIndex);
 }
 
 function normalizeSentiment(value: unknown): ReviewSentiment | null {
@@ -119,7 +134,7 @@ function loadPreRun(cluster: string, microId: string, preRunIndex: number): Cach
   const key = `${cluster}/${microId}/pre_run_${preRunIndex}`;
   if (cache.has(key)) return cache.get(key) ?? null;
 
-  const dir = preRunDir(cluster, microId, preRunIndex);
+  const dir = resolvePreRunDir(cluster, microId, preRunIndex);
   const blindPath = path.join(dir, "blind_run_i2.json");
   const deltasPath = path.join(dir, "i0_deltas_blind_run_i2.json");
   const blind = loadJson<BlindRunDoc>(blindPath);
@@ -186,6 +201,43 @@ export function toPrecomputedEngineResult(
     sentiment: lookup.prediction.sentiment,
     metrics: lookup.metrics ?? undefined,
     model: `pre_run_${lookup.preRunIndex} (blind_i2)`,
+    latencyMs,
+  };
+}
+
+/** Fallback when bundled pre_runs are unavailable (e.g. before bundle deploy). */
+export function catalogFallbackPrediction(
+  product: {
+    userHistoryReview?: string;
+    userHistoryThemes?: string[];
+    groundTruthSentiment?: ReviewSentiment | null;
+    overallSimilarityScore?: number;
+  },
+  latencyMs: number,
+): EngineResult | null {
+  const reviewText = product.userHistoryReview?.trim();
+  if (!reviewText) return null;
+  const themes = product.userHistoryThemes ?? [];
+  const predictedThemes =
+    themes.length > 0 ? Object.fromEntries(themes.map((t) => [t, 1])) : undefined;
+  const overall = product.overallSimilarityScore ?? null;
+  return {
+    engine: "sapiens",
+    reviewText,
+    predictedThemes,
+    sentiment: product.groundTruthSentiment ?? null,
+    metrics:
+      overall == null
+        ? undefined
+        : {
+            recallAtK: null,
+            textSimilarity: null,
+            textDelta: null,
+            sentimentMatch: null,
+            overallSimilarityScore: overall,
+            isMatch: overall >= 0.75,
+          },
+    model: "catalog (blind_i2)",
     latencyMs,
   };
 }

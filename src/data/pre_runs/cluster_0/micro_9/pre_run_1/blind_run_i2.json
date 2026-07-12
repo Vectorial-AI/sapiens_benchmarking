@@ -1,0 +1,593 @@
+{
+  "user_predictions": {
+    "AGQ44DK7UC7TQMR4AK7I57IDMDSA": [
+      {
+        "product_description": "Corel CorelDRAW Home and Student Suite X7 High-resolution and multi-display support View larger Corel PHOTO-PAINT Effects View larger Discover a world of new design possibilities for Home and school Design your way with CorelDRAW Home & Student Suite X7. Whether you dabble in design or have existing expertise, you can express your unique creativity by using the intuitive graphic design, illustration, page layout, web graphics and photo-editing features. Create eye-catching projects with a variety of content, including professionally-designed templates, high-quality photos and clipart. It's easy to edit photos and design reports, drawings, flyers, ads, business cards, logos and more. Plus, this latest version offers a redesigned workspace for ease of use, all-new special effects, learning videos, Quick Start Guide, and the ability to share content with other CorelDRAW users. Everything you need in one complete graphic design suite. All-in-one graphic design Create all types of graphics and photo projects with an array of intuitive and user-friendly features for designers of all levels. With graphic design, vector illustration, tracing, page layout, and photo-editing features, you'll have all the tools you need to design projects like a professional. Versatile drawing tools Produce original and compelling designs for print or web with a robust toolbox of text, graphics, layout and editing tools that help you get the job done. Whether you're designing reports, drawings, flyers, logos or flyers, we've got you covered. Advanced photo editing Enhance and improve any photograph with the professional photo-editing tools and effects included in Corel PHOTO-PAINT Home & Student X7. Popular photo tricks such as retouching and enhancement, bitmap creation, digital painting, and streamlined web exporting are just a click away. System Requirements: Microsoft Windows 8/8.1 or Windows 7 (32-bit or 64-bit editions), with latest service packs installed Microsoft Windows 8/8.1 or Windows 7 (32-bit or 64-bit editions), with latest service packs installed Intel Core 2 Duo or AMD Athlon 64 Intel Core 2 Duo or AMD Athlon 64 2 GB RAM 2 GB RAM 1 GB hard disk space 1 GB hard disk space Mouse, tablet or multi-touch screen Mouse, tablet or multi-touch screen 1280 x 768 or higher monitor resolution 1280 x 768 or higher monitor resolution DVD drive required for box installation (digital download included) DVD drive required for box installation (digital download included) Microsoft Internet Explorer 8 or higher Microsoft Internet Explorer 8 or higher Internet connection required for CorelDRAW Standard Membership, performance and stability updates, online content and Content Exchange Internet connection required for CorelDRAW Standard Membership, performance and stability updates, online content and Content Exchange Content*: 1,300 high-quality clipart and digital images; 100 royalty-free, high-resolution digital photos; 125 fonts; 75 photo frames; Over 100 professionally designed templates, including certificates, ads, business cards, letterhead, flyers, posters and more; 100 fills; Online Quick Start Guide; Over 2 hours of training videos; *CorelDRAW Standard Membership account required to download Comparison Matrix View larger CorelDRAW Home & Student Suite X7 View larger CorelDRAW Graphics Suite X7 CorelDRAW X7 (Home & Student version excludes Pro Features) ✓✓ Corel PHOTO-PAINT X7 (Home & Student version excludes Pro Features) ✓✓ Corel PowerTRACE X7 ✓✓ Corel Website Creator ✓ Corel CAPTURE X7 ✓✓ Corel CONNECT ✓✓ Barcode Wizard ✓✓ PhotoZoom Pro 3 ✓",
+        "category": "Software",
+        "review_key": "AGQ44DK7UC7TQMR4AK7I57IDMDSA_review_3",
+        "user_id": "AGQ44DK7UC7TQMR4AK7I57IDMDSA",
+        "review_idx": 3,
+        "status": "success",
+        "prediction": {
+          "review_text": "For the money, this is a pretty solid \"all in one\" vector + photo editing suite, and it's a nice alternative if you don't want to pay ongoing subscription pricing. That said, don't buy this thinking it's going to feel simple just because it says Home & Student. The interface is still dense, with a lot of menus/panels, and if you're a first-time editor you're going to spend time hunting for things.\n\nOnce you get past that, the toolset is legitimately capable for flyers, logos, basic page layout, and cleaning up photos in PHOTO-PAINT. The templates/fonts/clipart are handy, but I'm not a fan of needing an online membership/account just to download some of the included content/updates. I want software I bought to work without extra hoops. Overall good value if you can handle the learning curve.",
+          "predicted_themes": {
+            "Installation & Technical Performance": 0.25,
+            "Intrusive Ads & Monetization Frustrations": 0.15,
+            "Feature Set, Usability & Accessibility": 0.85,
+            "Content Availability, Licensing & Online Requirements": 0.75,
+            "Security, Privacy & Update Policies": 0.25,
+            "Customer Support, Pricing & Marketing Transparency": 0.55,
+            "Gameplay Experience & Educational Value": 0.2,
+            "Hardware Integration & Performance": 0.05
+          },
+          "sentiment": "Neutral"
+        },
+        "actual": {
+          "review_text": "Despite what the description says, it's not really suitable for those who are just dabbling.  The user interface has a ton of menu options and isn't quite as intuitive as I'd like for the novice/dabbler.  However, at this price for 3 users you get both an advanced photo editor and a publisher style document creator, so it is a pretty good bang for your buck.  The only thing I didn't like was that fact that it nags you at every startup to create an account in order to use online templates and objects.  I already have too many online accounts and really did not want to create another.",
+          "rating": 4.0,
+          "sentiment": "Neutral",
+          "predicted_themes": [
+            "Feature Set, Usability & Accessibility",
+            "Content Availability, Licensing & Online Requirements",
+            "Customer Support, Pricing & Marketing Transparency"
+          ]
+        },
+        "initial_deltas": {
+          "text_delta": 0.32464653127000886,
+          "theme_delta": 0.0,
+          "theme_delta_jsd": 0.17077143805081865,
+          "theme_delta_recall": 0.0,
+          "overall_delta": 0.13116163281750226
+        },
+        "deltas": {
+          "text_delta": 0.32464653127000886,
+          "theme_delta": 0.0,
+          "theme_delta_jsd": 0.17077143805081865,
+          "theme_delta_recall": 0.0,
+          "overall_delta": 0.13116163281750226,
+          "theme_jsd": 0.17077143805081865,
+          "theme_recall": 0.0,
+          "delta_weights": {
+            "text": 0.7,
+            "theme": 0.3
+          }
+        },
+        "i0_topic_classification": {
+          "topics_ordered": [
+            "Installation & Technical Performance",
+            "Intrusive Ads & Monetization Frustrations",
+            "Feature Set, Usability & Accessibility",
+            "Content Availability, Licensing & Online Requirements",
+            "Security, Privacy & Update Policies",
+            "Customer Support, Pricing & Marketing Transparency",
+            "Gameplay Experience & Educational Value",
+            "Hardware Integration & Performance"
+          ],
+          "topic_probabilities": {
+            "Installation & Technical Performance": 0.25,
+            "Intrusive Ads & Monetization Frustrations": 0.15,
+            "Feature Set, Usability & Accessibility": 0.85,
+            "Content Availability, Licensing & Online Requirements": 0.75,
+            "Security, Privacy & Update Policies": 0.25,
+            "Customer Support, Pricing & Marketing Transparency": 0.55,
+            "Gameplay Experience & Educational Value": 0.2,
+            "Hardware Integration & Performance": 0.05
+          },
+          "topic_probabilities_before_normalisation": null,
+          "topic_logprobs": null,
+          "per_topic_errors": null,
+          "classification_method": "unified_persona_review_and_theme_confidence",
+          "prediction_uses_post_body": true,
+          "predicted_theme_labels": {
+            "Installation & Technical Performance": 0.25,
+            "Intrusive Ads & Monetization Frustrations": 0.15,
+            "Feature Set, Usability & Accessibility": 0.85,
+            "Content Availability, Licensing & Online Requirements": 0.75,
+            "Security, Privacy & Update Policies": 0.25,
+            "Customer Support, Pricing & Marketing Transparency": 0.55,
+            "Gameplay Experience & Educational Value": 0.2,
+            "Hardware Integration & Performance": 0.05
+          }
+        }
+      },
+      {
+        "product_description": "It's Fibbage - the lying, bluffing, fib-till-you-win multiplayer trivia party game from the makers of YOU DON'T KNOW JACK! Fool your friends with your lies, avoid theirs, and find the (outrageous) truth. And get this: your phone or tablet is your controller! It's easy. Just type in your lies to questions like: \"The mayor of Rabbit Hash, Kentucky is a _____.\" Baby? Rabbit? Ham sandwich? It's up to you! Fool your opponents into thinking your lie is true and you'll rack up the points! But be careful, if you pick an opponent's lie, they'll be doing a Fibbage fancy dance. There's a free version that features a handful of starter questions, and you can upgrade to full Fibbage to get hours and hours of game party material! So grab your most trusting friends, family, and any other easily-fooled nitwits and get ready to laugh till you can't lie no more. Think your B.S. don't stink? You're about to find out! Product feature bullets • Play with 2-8 players!• Use your phone or tablet - or any device with Internet access - to join and play.• Quick 7-question games (but you'll just keep playing over and over - it's what everybody does).• Specialty questions like Celebrity Tweets and Road Trip! And of course...The Final Fibbage.• Free version upgradable to full version with hundreds more outrageous questions.",
+        "category": "Appstore for Android",
+        "review_key": "AGQ44DK7UC7TQMR4AK7I57IDMDSA_review_4",
+        "user_id": "AGQ44DK7UC7TQMR4AK7I57IDMDSA",
+        "review_idx": 4,
+        "status": "success",
+        "prediction": {
+          "review_text": "This is still one of my go-to \"everyone jump in\" games on Fire TV because friends/family can join instantly from their phones as controllers, and it turns into a loud, fun couch-co-op night fast. The lie-typing mechanic is the standout and the 7-question rounds keep it moving. Free pack is fine, but you'll want the upgrade pretty quick for variety.",
+          "predicted_themes": {
+            "Installation & Technical Performance": 0.3,
+            "Intrusive Ads & Monetization Frustrations": 0.45,
+            "Feature Set, Usability & Accessibility": 0.6,
+            "Content Availability, Licensing & Online Requirements": 0.3,
+            "Security, Privacy & Update Policies": 0.05,
+            "Customer Support, Pricing & Marketing Transparency": 0.35,
+            "Gameplay Experience & Educational Value": 0.85,
+            "Hardware Integration & Performance": 0.75
+          },
+          "sentiment": "Positive"
+        },
+        "actual": {
+          "review_text": "This is a must have for family game night on your fireTv.  It is so much fun, and the fact that everyone can use their phone as a controller is just pure genius.",
+          "rating": 5.0,
+          "sentiment": "Positive",
+          "predicted_themes": [
+            "Gameplay Experience & Educational Value",
+            "Hardware Integration & Performance"
+          ]
+        },
+        "initial_deltas": {
+          "text_delta": 0.34418586591733225,
+          "theme_delta": 0.0,
+          "theme_delta_jsd": 0.3624942314955153,
+          "theme_delta_recall": 0.0,
+          "overall_delta": 0.13604646647933305
+        },
+        "deltas": {
+          "text_delta": 0.34418586591733225,
+          "theme_delta": 0.0,
+          "theme_delta_jsd": 0.3624942314955153,
+          "theme_delta_recall": 0.0,
+          "overall_delta": 0.13604646647933305,
+          "theme_jsd": 0.3624942314955153,
+          "theme_recall": 0.0,
+          "delta_weights": {
+            "text": 0.7,
+            "theme": 0.3
+          }
+        },
+        "i0_topic_classification": {
+          "topics_ordered": [
+            "Installation & Technical Performance",
+            "Intrusive Ads & Monetization Frustrations",
+            "Feature Set, Usability & Accessibility",
+            "Content Availability, Licensing & Online Requirements",
+            "Security, Privacy & Update Policies",
+            "Customer Support, Pricing & Marketing Transparency",
+            "Gameplay Experience & Educational Value",
+            "Hardware Integration & Performance"
+          ],
+          "topic_probabilities": {
+            "Installation & Technical Performance": 0.3,
+            "Intrusive Ads & Monetization Frustrations": 0.45,
+            "Feature Set, Usability & Accessibility": 0.6,
+            "Content Availability, Licensing & Online Requirements": 0.3,
+            "Security, Privacy & Update Policies": 0.05,
+            "Customer Support, Pricing & Marketing Transparency": 0.35,
+            "Gameplay Experience & Educational Value": 0.85,
+            "Hardware Integration & Performance": 0.75
+          },
+          "topic_probabilities_before_normalisation": null,
+          "topic_logprobs": null,
+          "per_topic_errors": null,
+          "classification_method": "unified_persona_review_and_theme_confidence",
+          "prediction_uses_post_body": true,
+          "predicted_theme_labels": {
+            "Installation & Technical Performance": 0.3,
+            "Intrusive Ads & Monetization Frustrations": 0.45,
+            "Feature Set, Usability & Accessibility": 0.6,
+            "Content Availability, Licensing & Online Requirements": 0.3,
+            "Security, Privacy & Update Policies": 0.05,
+            "Customer Support, Pricing & Marketing Transparency": 0.35,
+            "Gameplay Experience & Educational Value": 0.85,
+            "Hardware Integration & Performance": 0.75
+          }
+        }
+      }
+    ],
+    "AG7XEWOPZU4ZHA5QTL65XEDXZNHA": [
+      {
+        "product_description": "Product description Step into the shoes of Buffy Summers, Sunnydale's hottest vampire slayer. Fight against fierce vampires using cool moves and awesome slayer weaponry. With advice from your watcher Giles, you'll destroy the most fearsome creatures of the night. Amazon.com Buffy the Vampire Slayer is the first third-person action-adventure game based on the international hit TV series. Players take on the role of Buffy Summers, a 17-year-old high-school student who must balance adolescent growing pains with the responsibility of being the Chosen One. As the slayer, Buffy eliminates vampires and other demonic creatures that threaten the world's existence. It's up to you to save the human race from being \"drained\" during this devilish time. Fortunately, Buffy is not alone. Her friends help her solve mysteries and watch her back. Fans of the series will recognize the voices of favorite characters including Angel, Xander, Willow, Cordelia, Spike, the Master, and Giles. Players fight a range of enemies including Spike, the Master, Drusilla, demons, zombies, and other supernatural creatures that threaten mankind. All of Buffy's favorite haunts are richly detailed: Sunnydale High School, the cemetery, the Bronze nightclub, and the library, which is the portal that sits atop the Hellmouth. Special supernatural effects such as morphing creatures, eldritch explosions, dynamic fogging, and arcane spell casting enhance the dark, mythical setting of the game. An intelligent combat system allows enemies to perform counterattacks and learn from character's fighting techniques.",
+        "category": "Video Games",
+        "review_key": "AG7XEWOPZU4ZHA5QTL65XEDXZNHA_review_1",
+        "user_id": "AG7XEWOPZU4ZHA5QTL65XEDXZNHA",
+        "review_idx": 1,
+        "status": "success",
+        "prediction": {
+          "review_text": "I'm not even a big Buffy fan and I honestly grabbed this just for a cheap action game. It won me over fast because the fighting actually has some depth and enemies don't just stand there. The difficulty feels fair and it's fun to replay levels trying different moves/weapons. Doesn't feel like you need to know the show to enjoy it.",
+          "predicted_themes": {
+            "Accessibility & Inclusive Design": 0.1,
+            "Audio and Visual Quality": 0.15,
+            "Battery Life and Portability": 0.0,
+            "Performance Stability and Bug Issues": 0.1,
+            "Hardware Build Quality Comfort and Connectivity": 0.0,
+            "Gameplay Mechanics Controls and Difficulty": 0.9,
+            "Content Depth Storyline and Appropriateness": 0.55,
+            "Online Multiplayer and Connectivity Services": 0.0,
+            "Installation DRM and Privacy Requirements": 0.0,
+            "Pricing Value and Monetization": 0.25,
+            "Customer Service Support and Delivery": 0.0
+          },
+          "sentiment": "Positive"
+        },
+        "actual": {
+          "review_text": "I am not a fan of the show.  I felt it was a bit to cheesy for my taste.  But the game is NO JOKE.  I played this game till I beat and then played it many times after that.  Very fun and the story line is actually decent!",
+          "rating": 5.0,
+          "sentiment": "Positive",
+          "predicted_themes": [
+            "Content Depth Storyline and Appropriateness",
+            "Gameplay Mechanics Controls and Difficulty"
+          ]
+        },
+        "initial_deltas": {
+          "text_delta": 0.5226810724530737,
+          "theme_delta": 0.0,
+          "theme_delta_jsd": 0.17337109908627224,
+          "theme_delta_recall": 0.0,
+          "overall_delta": 0.18067026811326847
+        },
+        "deltas": {
+          "text_delta": 0.5226810724530737,
+          "theme_delta": 0.0,
+          "theme_delta_jsd": 0.17337109908627224,
+          "theme_delta_recall": 0.0,
+          "overall_delta": 0.18067026811326847,
+          "theme_jsd": 0.17337109908627224,
+          "theme_recall": 0.0,
+          "delta_weights": {
+            "text": 0.7,
+            "theme": 0.3
+          }
+        },
+        "i0_topic_classification": {
+          "topics_ordered": [
+            "Accessibility & Inclusive Design",
+            "Audio and Visual Quality",
+            "Battery Life and Portability",
+            "Performance Stability and Bug Issues",
+            "Hardware Build Quality Comfort and Connectivity",
+            "Gameplay Mechanics Controls and Difficulty",
+            "Content Depth Storyline and Appropriateness",
+            "Online Multiplayer and Connectivity Services",
+            "Installation DRM and Privacy Requirements",
+            "Pricing Value and Monetization",
+            "Customer Service Support and Delivery"
+          ],
+          "topic_probabilities": {
+            "Accessibility & Inclusive Design": 0.1,
+            "Audio and Visual Quality": 0.15,
+            "Battery Life and Portability": 0.0,
+            "Performance Stability and Bug Issues": 0.1,
+            "Hardware Build Quality Comfort and Connectivity": 0.0,
+            "Gameplay Mechanics Controls and Difficulty": 0.9,
+            "Content Depth Storyline and Appropriateness": 0.55,
+            "Online Multiplayer and Connectivity Services": 0.0,
+            "Installation DRM and Privacy Requirements": 0.0,
+            "Pricing Value and Monetization": 0.25,
+            "Customer Service Support and Delivery": 0.0
+          },
+          "topic_probabilities_before_normalisation": null,
+          "topic_logprobs": null,
+          "per_topic_errors": null,
+          "classification_method": "unified_persona_review_and_theme_confidence",
+          "prediction_uses_post_body": true,
+          "predicted_theme_labels": {
+            "Accessibility & Inclusive Design": 0.1,
+            "Audio and Visual Quality": 0.15,
+            "Battery Life and Portability": 0.0,
+            "Performance Stability and Bug Issues": 0.1,
+            "Hardware Build Quality Comfort and Connectivity": 0.0,
+            "Gameplay Mechanics Controls and Difficulty": 0.9,
+            "Content Depth Storyline and Appropriateness": 0.55,
+            "Online Multiplayer and Connectivity Services": 0.0,
+            "Installation DRM and Privacy Requirements": 0.0,
+            "Pricing Value and Monetization": 0.25,
+            "Customer Service Support and Delivery": 0.0
+          }
+        }
+      }
+    ],
+    "AGAKR2KZZS2OMN2GORTKQEW7PXPA": [
+      {
+        "product_description": "Experience a military shooter set in a diverse & hostile open world that you can play solo or up to four-player co-op.",
+        "category": "Video Games",
+        "review_key": "AGAKR2KZZS2OMN2GORTKQEW7PXPA_review_1",
+        "user_id": "AGAKR2KZZS2OMN2GORTKQEW7PXPA",
+        "review_idx": 1,
+        "status": "success",
+        "prediction": {
+          "review_text": "Feels like the sequel that still ships with the same old instability and janky AI/pathing I dealt with in the last one. I'm getting random glitches mid-mission and it just screams copy-pasted code instead of a real step forward.\n\nThe open world is big and co-op can be fun, but the visuals look dated for a modern release and no discount or extra modes make up for core bugs that should've been fixed first. If they don't clean this up with real patches (and keep servers reliable), I'm only grabbing future entries at rock-bottom clearance.",
+          "predicted_themes": {
+            "Accessibility & Inclusive Design": 0.05,
+            "Audio and Visual Quality": 0.55,
+            "Battery Life and Portability": 0.0,
+            "Performance Stability and Bug Issues": 0.95,
+            "Hardware Build Quality Comfort and Connectivity": 0.0,
+            "Gameplay Mechanics Controls and Difficulty": 0.35,
+            "Content Depth Storyline and Appropriateness": 0.25,
+            "Online Multiplayer and Connectivity Services": 0.45,
+            "Installation DRM and Privacy Requirements": 0.05,
+            "Pricing Value and Monetization": 0.55,
+            "Customer Service Support and Delivery": 0.15
+          },
+          "sentiment": "Negative"
+        },
+        "actual": {
+          "review_text": "I believe this game code was written by kids in grade school. Hmmm, maybe not. They would have done a better job.<br /><br />It's obvious poor code was lifted from Wildlands because the same bugs from that game (which should have been fixed considering how long it's been out) are still in this one. Very disappointing in so many ways.<br /><br />The graphics look like games I bought 15 years ago.<br /><br />The next game they release will only be purchased by me when it's in the clearance bin at the Dollar Store.",
+          "rating": 2.0,
+          "sentiment": "Negative",
+          "predicted_themes": [
+            "Performance Stability and Bug Issues",
+            "Audio and Visual Quality"
+          ]
+        },
+        "initial_deltas": {
+          "text_delta": 0.43648804668529473,
+          "theme_delta": 0.0,
+          "theme_delta_jsd": 0.36212177292452385,
+          "theme_delta_recall": 0.0,
+          "overall_delta": 0.15912201167132367
+        },
+        "deltas": {
+          "text_delta": 0.43648804668529473,
+          "theme_delta": 0.0,
+          "theme_delta_jsd": 0.36212177292452385,
+          "theme_delta_recall": 0.0,
+          "overall_delta": 0.15912201167132367,
+          "theme_jsd": 0.36212177292452385,
+          "theme_recall": 0.0,
+          "delta_weights": {
+            "text": 0.7,
+            "theme": 0.3
+          }
+        },
+        "i0_topic_classification": {
+          "topics_ordered": [
+            "Accessibility & Inclusive Design",
+            "Audio and Visual Quality",
+            "Battery Life and Portability",
+            "Performance Stability and Bug Issues",
+            "Hardware Build Quality Comfort and Connectivity",
+            "Gameplay Mechanics Controls and Difficulty",
+            "Content Depth Storyline and Appropriateness",
+            "Online Multiplayer and Connectivity Services",
+            "Installation DRM and Privacy Requirements",
+            "Pricing Value and Monetization",
+            "Customer Service Support and Delivery"
+          ],
+          "topic_probabilities": {
+            "Accessibility & Inclusive Design": 0.05,
+            "Audio and Visual Quality": 0.55,
+            "Battery Life and Portability": 0.0,
+            "Performance Stability and Bug Issues": 0.95,
+            "Hardware Build Quality Comfort and Connectivity": 0.0,
+            "Gameplay Mechanics Controls and Difficulty": 0.35,
+            "Content Depth Storyline and Appropriateness": 0.25,
+            "Online Multiplayer and Connectivity Services": 0.45,
+            "Installation DRM and Privacy Requirements": 0.05,
+            "Pricing Value and Monetization": 0.55,
+            "Customer Service Support and Delivery": 0.15
+          },
+          "topic_probabilities_before_normalisation": null,
+          "topic_logprobs": null,
+          "per_topic_errors": null,
+          "classification_method": "unified_persona_review_and_theme_confidence",
+          "prediction_uses_post_body": true,
+          "predicted_theme_labels": {
+            "Accessibility & Inclusive Design": 0.05,
+            "Audio and Visual Quality": 0.55,
+            "Battery Life and Portability": 0.0,
+            "Performance Stability and Bug Issues": 0.95,
+            "Hardware Build Quality Comfort and Connectivity": 0.0,
+            "Gameplay Mechanics Controls and Difficulty": 0.35,
+            "Content Depth Storyline and Appropriateness": 0.25,
+            "Online Multiplayer and Connectivity Services": 0.45,
+            "Installation DRM and Privacy Requirements": 0.05,
+            "Pricing Value and Monetization": 0.55,
+            "Customer Service Support and Delivery": 0.15
+          }
+        }
+      }
+    ],
+    "AGCSHQRXX6N4TA2ZNC5BZHQ6PQYA": [
+      {
+        "product_description": "RIG 700HX Ultralight Wireless Gaming Headset with 3D Surround Sound for Xbox Series X|S, Xbox One, PC, USB",
+        "category": "Video Games",
+        "review_key": "AGCSHQRXX6N4TA2ZNC5BZHQ6PQYA_review_1",
+        "user_id": "AGCSHQRXX6N4TA2ZNC5BZHQ6PQYA",
+        "review_idx": 1,
+        "status": "success",
+        "prediction": {
+          "review_text": "Doesn't fit my big head even at max adjustment. The clamping pressure is rough and after 10-15 minutes it felt like a headache starting, so I stopped there. Can't really speak to sound or wireless when the basic comfort fails. Not recommended.",
+          "predicted_themes": {
+            "Accessibility & Inclusive Design": 0.7,
+            "Audio and Visual Quality": 0.05,
+            "Battery Life and Portability": 0.05,
+            "Performance Stability and Bug Issues": 0.0,
+            "Hardware Build Quality Comfort and Connectivity": 0.95,
+            "Gameplay Mechanics Controls and Difficulty": 0.0,
+            "Content Depth Storyline and Appropriateness": 0.0,
+            "Online Multiplayer and Connectivity Services": 0.0,
+            "Installation DRM and Privacy Requirements": 0.0,
+            "Pricing Value and Monetization": 0.05,
+            "Customer Service Support and Delivery": 0.0
+          },
+          "sentiment": "Negative"
+        },
+        "actual": {
+          "review_text": "If you have a big head, this headset isn't for you. Even put on the biggest size wasn't even close to fitting properly. The hyperX Flights fight perfectly, however.",
+          "rating": 3.0,
+          "sentiment": "Negative",
+          "predicted_themes": [
+            "Hardware Build Quality Comfort and Connectivity",
+            "Accessibility & Inclusive Design"
+          ]
+        },
+        "initial_deltas": {
+          "text_delta": 0.4967734091011413,
+          "theme_delta": 0.0,
+          "theme_delta_jsd": 0.04695995676621816,
+          "theme_delta_recall": 0.0,
+          "overall_delta": 0.17419335227528543
+        },
+        "deltas": {
+          "text_delta": 0.4967734091011413,
+          "theme_delta": 0.0,
+          "theme_delta_jsd": 0.04695995676621816,
+          "theme_delta_recall": 0.0,
+          "overall_delta": 0.17419335227528543,
+          "theme_jsd": 0.04695995676621816,
+          "theme_recall": 0.0,
+          "delta_weights": {
+            "text": 0.7,
+            "theme": 0.3
+          }
+        },
+        "i0_topic_classification": {
+          "topics_ordered": [
+            "Accessibility & Inclusive Design",
+            "Audio and Visual Quality",
+            "Battery Life and Portability",
+            "Performance Stability and Bug Issues",
+            "Hardware Build Quality Comfort and Connectivity",
+            "Gameplay Mechanics Controls and Difficulty",
+            "Content Depth Storyline and Appropriateness",
+            "Online Multiplayer and Connectivity Services",
+            "Installation DRM and Privacy Requirements",
+            "Pricing Value and Monetization",
+            "Customer Service Support and Delivery"
+          ],
+          "topic_probabilities": {
+            "Accessibility & Inclusive Design": 0.7,
+            "Audio and Visual Quality": 0.05,
+            "Battery Life and Portability": 0.05,
+            "Performance Stability and Bug Issues": 0.0,
+            "Hardware Build Quality Comfort and Connectivity": 0.95,
+            "Gameplay Mechanics Controls and Difficulty": 0.0,
+            "Content Depth Storyline and Appropriateness": 0.0,
+            "Online Multiplayer and Connectivity Services": 0.0,
+            "Installation DRM and Privacy Requirements": 0.0,
+            "Pricing Value and Monetization": 0.05,
+            "Customer Service Support and Delivery": 0.0
+          },
+          "topic_probabilities_before_normalisation": null,
+          "topic_logprobs": null,
+          "per_topic_errors": null,
+          "classification_method": "unified_persona_review_and_theme_confidence",
+          "prediction_uses_post_body": true,
+          "predicted_theme_labels": {
+            "Accessibility & Inclusive Design": 0.7,
+            "Audio and Visual Quality": 0.05,
+            "Battery Life and Portability": 0.05,
+            "Performance Stability and Bug Issues": 0.0,
+            "Hardware Build Quality Comfort and Connectivity": 0.95,
+            "Gameplay Mechanics Controls and Difficulty": 0.0,
+            "Content Depth Storyline and Appropriateness": 0.0,
+            "Online Multiplayer and Connectivity Services": 0.0,
+            "Installation DRM and Privacy Requirements": 0.0,
+            "Pricing Value and Monetization": 0.05,
+            "Customer Service Support and Delivery": 0.0
+          }
+        }
+      }
+    ],
+    "AEB5R4AU3242FXZFI6LJWQMYHKXA": [
+      {
+        "product_description": "For ages 13 and up only. *Offer valid with the purchase of a new Meta Quest 2 device (128GB or 256GB) (\"Qualifying Product\") between August 1, 2022 12:01 AM PST- December 31, 2022 11:59 PM PST and while supplies last. User account (\"Account\") required. Offer Item (digital content): Beat Saber in the Meta Quest Store (approx. retail value $29.99). Additional downloadable content, including future music packs and other content, sold separately. To receive Offer Item, Qualifying Product must be first activated between August 1, 2022 12:01 AM PST - January 31, 2023 11:59 PM PST through an Account without Beat Saber entitlement previously enabled on such account (\"Activation\"). Upon Activation, you will receive a notification message via email, in your mobile app, and in VR with a link to redeem the Offer Item from the Meta Quest Store. There are no redemption codes in connection with this Offer. Offer Item must be redeemed within 14 days upon Activation. Once redeemed, Offer Item remains available for download indefinitely. Limit of one (1) Offer Item per Qualifying Product, regardless of the number of Accounts connected to such Qualifying Product. Qualifying Products first activated through an Account with Beat Saber entitlement previously enabled are ineligible to receive Offer Item. Not valid on prior orders or purchases. Offer is non-transferable, not for resale, and not valid for cash or cash equivalent. Offer may be canceled or modified at any time without notice. Void where prohibited or restricted.",
+        "category": "Video Games",
+        "review_key": "AEB5R4AU3242FXZFI6LJWQMYHKXA_review_0",
+        "user_id": "AEB5R4AU3242FXZFI6LJWQMYHKXA",
+        "review_idx": 0,
+        "status": "success",
+        "prediction": {
+          "review_text": "This listing is basically the Beat Saber promo tied to buying/activating a new Meta Quest 2, so just know what you're actually paying for. On the Quest 2 side, the key specs are still the same: 1832×1920 per eye at up to 120Hz, and the lenses are decent once you take the time to dial in IPD and strap fit. Clarity is good in the sweet spot for rhythm games like Beat Saber, but it's not \"edge-to-edge\" sharp and you can get some glare if your fit is off.\n\nComfort is the make-or-break thing for me. The stock strap is fine for short sessions, but for anything longer I ended up needing a better strap (even a cheap halo style) and a different face pad to reduce pressure on my cheeks/forehead. Once I did that, Beat Saber sessions were way more enjoyable and the headset felt less front-heavy.\n\nPC link is still a huge value multiplier if you have a gaming PC. Wired Link works reliably with a good cable, and Air Link can be great if your Wi‑Fi is solid, but it's more sensitive to your network than people admit. Having PCVR access is what keeps the Quest 2 from feeling like a closed toy, even though you're still dealing with Meta's ecosystem.\n\nThe promo itself is straightforward (no code), but the fine print is strict: you need a Meta account, you have to activate in the window, and you only get it if your account didn't already own Beat Saber. Also, don't forget the \"additional music packs sold separately\" part-Beat Saber can turn into ongoing DLC spend if you want specific tracks.\n\nOverall, if you were already buying a new Quest 2, getting Beat Saber included is solid value. If you're trying to buy this as \"just the game,\" this isn't that, and the account/eligibility restrictions are the main reason I wouldn't recommend it blindly.",
+          "predicted_themes": {
+            "Accessibility & Inclusive Design": 0.05,
+            "Audio and Visual Quality": 0.55,
+            "Battery Life and Portability": 0.1,
+            "Performance Stability and Bug Issues": 0.35,
+            "Hardware Build Quality Comfort and Connectivity": 0.85,
+            "Gameplay Mechanics Controls and Difficulty": 0.3,
+            "Content Depth Storyline and Appropriateness": 0.15,
+            "Online Multiplayer and Connectivity Services": 0.2,
+            "Installation DRM and Privacy Requirements": 0.8,
+            "Pricing Value and Monetization": 0.85,
+            "Customer Service Support and Delivery": 0.05
+          },
+          "sentiment": "Neutral"
+        },
+        "actual": {
+          "review_text": "This is the new Oculus Quest 2, which is basically exactly the same as the older Quest except that it comes with half the memory, 128Gb of inbuilt storage rather than 256Gb and is priced $100 cheaper than the 256Gb version.<br /><br />The Quest 2 is the perfect entry level headset to find out whether or not you like the VR world.  Some people don't  like VR for various reasons including vertigo and the feeling of getting sick, neck pain as the headsets are fairly heavy on your head etc.  Other people love it and spend hours on it.<br /><br />For your money your will get the headset itself, a fairly comfortable elastic strap to attach it to your head, two controllers and a charging cable.  Setup is fairly simple. You connect it to your phone using bluetooth and just follow the prompts.  You will need a Facebook account to tie it to and this puts some people off (I understand why) but the majority of people already have a facebook account anyway.<br /><br />The Quest 2 has 2 1832x1920 LCD screens. Not quite 4K but a higher resolution than HD.  For the money this isn't bad, especially considering the higher resolution Rift S is double the price.  The eye pieces are slightly adjustable to 3 different positions, dependent upon the size of your head and space between your eyes.  One great thing about the LCD display is that you can adjust the frame rate.  I have mine set to 72Hz which I feel is much smoother than default 60Hz setting and this makes me much less prone to feeling sick.  There is also a 90Hz refresh rate however for PC gaming that is too high unless you have a seriously beefy graphics card.  Note however that you do not need a PC to use this.<br /><br />The headset also has 3D capable audio built directly into the headset.  The sound quality is OK but nothing outstanding. As such a lot of people also wear headphones when using the Quest 2 and there is a built in 3.5mm audio port to hook your headphones into.  Personally, the sound is good enough for me and I prefer using it without the added weight of a pair of headphones.<br /><br />The headset is quite heavy and although the soft elastic strap that comes with it is adequate, I would highly recommend purchasing one of the Elite, hard backed straps that you can find on amazon. These do make a lot of difference in distributing the weight, making wearing the headset much more comfortable and you can wear it for longer.<br /><br />The Quest 2 has hundreds of apps and games available for it, from watching netflix and shooting games to fitness and boxing games.  Even games such as boxing do help you to get in shape as you quickly find yourself ducking and weaving as well as throwing punches as you get immersed in the gameplay.  These games are stored in the 128Gb of memory in the headset and aren't that large so even with 128Gb you should have plenty of room for a number of games and apps.<br /><br />You can also attach your headset to your PC and play VR games on your PC.  To do this you will need to buy an Oculus cable. The official one comes in at $80 which is very pricey.  You can find third party cables that do the exact same thing for much less.  I love to play DCS and Flight Simulator 2020 on my PC with the Quest.  The immersion takes it to a whole other level, however in order to do so you will also need a fairly beefy PC to handle the graphics.  My PC is a couple of years old, so its not powerful enough to turn up all the textures in Flight Sim to Ultra, but it is good enough to play with reasonably high definition.  Honestly this is the main use I have for the Quest 2.  At somepoint I will probably upgrade to the Rift S, but a new PC is in order before that.<br /><br />So if your interested in dabbling with VR or don't have the budget to buy the Rift S then I would highly recommend the Quest 2.  This 128Gb version, coming in at just $300 is well worth the money and I very highly recommend it.",
+          "rating": 5.0,
+          "sentiment": "Positive",
+          "predicted_themes": [
+            "Audio and Visual Quality",
+            "Hardware Build Quality Comfort and Connectivity",
+            "Pricing Value and Monetization",
+            "Installation DRM and Privacy Requirements"
+          ]
+        },
+        "initial_deltas": {
+          "text_delta": 0.3100091748226652,
+          "theme_delta": 0.0,
+          "theme_delta_jsd": 0.16240844682094396,
+          "theme_delta_recall": 0.0,
+          "overall_delta": 0.12750229370566635
+        },
+        "deltas": {
+          "text_delta": 0.3100091748226652,
+          "theme_delta": 0.0,
+          "theme_delta_jsd": 0.16240844682094396,
+          "theme_delta_recall": 0.0,
+          "overall_delta": 0.12750229370566635,
+          "theme_jsd": 0.16240844682094396,
+          "theme_recall": 0.0,
+          "delta_weights": {
+            "text": 0.7,
+            "theme": 0.3
+          }
+        },
+        "i0_topic_classification": {
+          "topics_ordered": [
+            "Accessibility & Inclusive Design",
+            "Audio and Visual Quality",
+            "Battery Life and Portability",
+            "Performance Stability and Bug Issues",
+            "Hardware Build Quality Comfort and Connectivity",
+            "Gameplay Mechanics Controls and Difficulty",
+            "Content Depth Storyline and Appropriateness",
+            "Online Multiplayer and Connectivity Services",
+            "Installation DRM and Privacy Requirements",
+            "Pricing Value and Monetization",
+            "Customer Service Support and Delivery"
+          ],
+          "topic_probabilities": {
+            "Accessibility & Inclusive Design": 0.05,
+            "Audio and Visual Quality": 0.55,
+            "Battery Life and Portability": 0.1,
+            "Performance Stability and Bug Issues": 0.35,
+            "Hardware Build Quality Comfort and Connectivity": 0.85,
+            "Gameplay Mechanics Controls and Difficulty": 0.3,
+            "Content Depth Storyline and Appropriateness": 0.15,
+            "Online Multiplayer and Connectivity Services": 0.2,
+            "Installation DRM and Privacy Requirements": 0.8,
+            "Pricing Value and Monetization": 0.85,
+            "Customer Service Support and Delivery": 0.05
+          },
+          "topic_probabilities_before_normalisation": null,
+          "topic_logprobs": null,
+          "per_topic_errors": null,
+          "classification_method": "unified_persona_review_and_theme_confidence",
+          "prediction_uses_post_body": true,
+          "predicted_theme_labels": {
+            "Accessibility & Inclusive Design": 0.05,
+            "Audio and Visual Quality": 0.55,
+            "Battery Life and Portability": 0.1,
+            "Performance Stability and Bug Issues": 0.35,
+            "Hardware Build Quality Comfort and Connectivity": 0.85,
+            "Gameplay Mechanics Controls and Difficulty": 0.3,
+            "Content Depth Storyline and Appropriateness": 0.15,
+            "Online Multiplayer and Connectivity Services": 0.2,
+            "Installation DRM and Privacy Requirements": 0.8,
+            "Pricing Value and Monetization": 0.85,
+            "Customer Service Support and Delivery": 0.05
+          }
+        }
+      }
+    ]
+  }
+}
