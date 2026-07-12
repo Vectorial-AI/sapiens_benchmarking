@@ -17,7 +17,7 @@ import {
 } from "@/lib/prompts";
 import { hasGatewayKey, mockPrediction, runModel } from "@/lib/ai";
 import { generateInferredTraitInfluences } from "@/lib/inferred-traits-explanation";
-import { generateSimilarityExplanation, buildSimilarityFallbackExplanation } from "@/lib/similarity-explanation";
+import { generateSimilarityExplanation } from "@/lib/similarity-explanation";
 import {
   lookupPrecomputedPrediction,
   normalizePreRunIndex,
@@ -198,6 +198,7 @@ export async function POST(req: Request) {
     let source: string = hasGatewayKey() ? "gateway" : "mock";
     let usedPrecomputed = false;
     let resolvedPreRunIndex: number | null = null;
+    let showcaseDelay: Promise<void> | null = null;
 
     // Video-games tribes with blind i2 pre_runs: serve rotating precomputed reviews
     // (no live review generation). Baselines stay live.
@@ -215,12 +216,12 @@ export async function POST(req: Request) {
       if (lookup) {
         usedPrecomputed = true;
         resolvedPreRunIndex = lookup.preRunIndex;
-        await new Promise((r) => setTimeout(r, showcaseLatencyMs));
+        showcaseDelay = new Promise((r) => setTimeout(r, showcaseLatencyMs));
         sapiens = toPrecomputedEngineResult(lookup, showcaseLatencyMs);
         source = `pre_run_${lookup.preRunIndex}`;
       } else if (product?.userHistoryReview?.trim()) {
         usedPrecomputed = true;
-        await new Promise((r) => setTimeout(r, showcaseLatencyMs));
+        showcaseDelay = new Promise((r) => setTimeout(r, showcaseLatencyMs));
         sapiens = catalogFallbackPrediction(product, showcaseLatencyMs);
         source = "catalog";
       }
@@ -248,47 +249,42 @@ export async function POST(req: Request) {
       }
     }
 
-    const inferredTraits =
-      sapiens.reviewText.trim() && !usedPrecomputed
-        ? await generateInferredTraitInfluences({
-            sapiensReview: sapiens.reviewText,
-            tribe,
-            user,
-            category,
-          })
-        : null;
+    const inferredTraitsPromise = sapiens.reviewText.trim()
+      ? generateInferredTraitInfluences({
+          sapiensReview: sapiens.reviewText,
+          tribe,
+          user,
+          category,
+        })
+      : Promise.resolve(null);
 
     // Prefer precomputed delta metrics; otherwise score live.
     if (!sapiens.metrics && scoringGroundTruth) {
       sapiens = await attachMetrics(sapiens, scoringGroundTruth, "SAPIENS");
     } else if (sapiens.metrics && scoringGroundTruth) {
-      const similarityExplanation = usedPrecomputed
-        ? buildSimilarityFallbackExplanation({
-            generatedReview: sapiens.reviewText,
-            groundTruthReview: scoringGroundTruth.reviewText,
-            groundTruthThemes: scoringGroundTruth.themes,
-            metrics: sapiens.metrics,
-            engine: "sapiens",
-          })
-        : await generateSimilarityExplanation({
-            generatedReview: sapiens.reviewText,
-            groundTruthReview: scoringGroundTruth.reviewText,
-            groundTruthThemes: scoringGroundTruth.themes,
-            predictedThemes: sapiens.predictedThemes,
-            predictedSentiment: sapiens.sentiment,
-            groundTruthSentiment: scoringGroundTruth.sentiment,
-            metrics: sapiens.metrics,
-            label: "SAPIENS",
-            engine: "sapiens",
-          });
+      const similarityExplanation = await generateSimilarityExplanation({
+        generatedReview: sapiens.reviewText,
+        groundTruthReview: scoringGroundTruth.reviewText,
+        groundTruthThemes: scoringGroundTruth.themes,
+        predictedThemes: sapiens.predictedThemes,
+        predictedSentiment: sapiens.sentiment,
+        groundTruthSentiment: scoringGroundTruth.sentiment,
+        metrics: sapiens.metrics,
+        label: "SAPIENS",
+        engine: "sapiens",
+      });
       sapiens = { ...sapiens, similarityExplanation };
     }
+
+    const inferredTraits = await inferredTraitsPromise;
 
     sapiens = {
       ...sapiens,
       inferredTraitSummary: inferredTraits?.summary ?? null,
       inferredTraitInfluences: inferredTraits?.influences ?? null,
     };
+
+    await showcaseDelay;
 
     return NextResponse.json({
       groundTruth,
