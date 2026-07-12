@@ -25,7 +25,7 @@
   a{color:var(--orange-ink);text-decoration:none;border-bottom:1px solid rgba(178,63,23,.28)}
   a:hover{border-bottom-color:var(--orange-ink)}
   h1,h2,h3{font-family:var(--disp);font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:0}
-  section{padding:76px 0;border-top:1px solid var(--line)}
+  section{padding:76px 0;border-top:1px solid var(--line);scroll-margin-top:110px}
   .lede{color:var(--ink-soft);font-size:17.5px;max-width:none}
   .mono{font-family:var(--mono)}
   .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--plum);display:flex;align-items:center;gap:10px;margin-bottom:20px}
@@ -40,14 +40,14 @@
   @media(max-width:680px){.sec-head{gap:10px}}
   h2.sec{font-size:clamp(30px,4.2vw,46px);max-width:none;font-weight:500}
 
-  header{position:sticky;top:0;background:rgba(251,250,247,.92);backdrop-filter:blur(8px);z-index:20}
-  .brand-bar{padding:16px 28px 14px clamp(140px,18vw,220px)}
+  header{position:sticky;top:0;background:transparent;z-index:20}
+  .brand-bar{padding:16px 28px 14px clamp(140px,18vw,220px);background:rgba(251,250,247,.92);backdrop-filter:blur(8px)}
   .logo-word{display:flex;align-items:center;gap:12px}
   .logo-word img{height:20px;width:auto;display:block;flex-shrink:0}
   .logo-word .sep{width:1px;height:13px;background:var(--line);flex-shrink:0}
   .logo-word .sapiens-tag{font-family:var(--brand);font-weight:700;font-size:21px;letter-spacing:.04em;color:var(--orange);line-height:20px;height:20px;display:inline-flex;align-items:center;transform:translateY(0.5px)}
   .nav-bar{display:flex;justify-content:center;border-top:1px solid var(--line);padding:0 28px 12px;background:transparent}
-  .nav-bar .inner{display:inline-flex;justify-content:center;border:1px solid var(--line);border-top:none;background:color-mix(in srgb,var(--paper) 70%,#fff);border-radius:0 0 12px 12px}
+  .nav-bar .inner{display:inline-flex;justify-content:center;border:1px solid var(--line);border-top:none;background:rgba(251,250,247,.96);backdrop-filter:blur(8px);border-radius:0 0 12px 12px}
   nav{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin:0;padding:6px;width:auto}
   nav a{border:none;color:var(--ink-soft);font-size:13.5px;margin:0;font-weight:500;padding:7px 14px;border-radius:8px;transition:color .15s,background .15s}
   nav a:hover{color:var(--orange-ink);background:var(--orange-wash)}
