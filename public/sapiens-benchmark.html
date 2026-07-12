@@ -40,13 +40,15 @@
   @media(max-width:680px){.sec-head{gap:10px}}
   h2.sec{font-size:clamp(30px,4.2vw,46px);max-width:none;font-weight:500}
 
-  header{padding:20px 0;position:sticky;top:0;background:rgba(251,250,247,.88);backdrop-filter:blur(8px);z-index:20;border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:center;justify-content:space-between}
+  header{position:sticky;top:0;background:rgba(251,250,247,.92);backdrop-filter:blur(8px);z-index:20;border-bottom:1px solid var(--line)}
+  .brand-stack{display:flex;flex-direction:column;align-items:flex-start;padding:16px 0 0}
   .logo-word{display:flex;align-items:center;gap:12px}
-  .logo-word img{height:22px;width:auto;display:block}
-  .logo-word .sep{width:1px;height:18px;background:var(--line)}
-  .logo-word .sapiens-tag{font-family:var(--brand);font-weight:700;font-size:19px;letter-spacing:.02em;color:var(--orange);line-height:22px}
-  nav a{border:none;color:var(--ink-soft);font-size:14px;margin-left:20px;font-weight:500;padding-bottom:2px;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+  .logo-word img{height:22px;width:auto;display:block;flex-shrink:0}
+  .logo-word .sep{width:1px;height:14px;background:var(--line);flex-shrink:0}
+  .logo-word .sapiens-tag{font-family:var(--brand);font-weight:700;font-size:16px;letter-spacing:.04em;color:var(--orange);line-height:22px;height:22px;display:inline-flex;align-items:center;transform:translateY(0.5px)}
+  nav{display:flex;flex-wrap:wrap;gap:0;margin-top:18px;padding:0;width:100%}
+  nav a{border:none;color:var(--ink-soft);font-size:13.5px;margin:0;font-weight:500;padding:2px 18px 4px 0;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+  nav a:not(:last-child){margin-right:8px}
   nav a:hover{color:var(--orange-ink)}
   nav a.active{color:var(--orange);border-bottom-color:var(--orange);font-weight:600}
   @media(max-width:760px){nav{display:none}}
@@ -57,9 +59,9 @@
   .hero p{margin-top:22px}
   .hero .lede{max-width:none}
   .paper-strip{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:30px;padding:20px 24px;background:var(--card);border:1px solid var(--line);border-radius:14px}
-  .paper-strip img{max-height:40px;max-width:140px;object-fit:contain;flex-shrink:0}
+  .paper-strip img{max-height:88px;max-width:220px;object-fit:contain;flex-shrink:0;border-radius:10px}
   .paper-strip .fb{font-family:var(--disp);font-weight:700;font-size:15px;line-height:1.35;color:var(--ink);flex-shrink:0;text-align:center;min-width:100px}
-  .paper-strip .sep{width:1px;align-self:stretch;background:var(--line);flex-shrink:0}
+  .paper-strip .sep{width:1px;align-self:stretch;min-height:72px;background:var(--line);flex-shrink:0}
   .paper-strip .txt{font-size:15px;color:var(--ink-soft);flex:1;min-width:240px;line-height:1.6}
 
   .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px}
@@ -229,10 +231,10 @@
 <body>
 
 <header>
-  <div class="wrap brand">
+  <div class="wrap brand-stack">
     <div class="logo-word">
       <img src="/vectorial-logo.png" alt="Vectorial" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
-      <span style="display:none;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:17px">VECTORIAL</span>
+      <span style="display:none;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:22px;line-height:22px">VECTORIAL</span>
       <span class="sep"></span>
       <span class="sapiens-tag">SAPIENS</span>
     </div>
@@ -256,10 +258,10 @@
     <p class="lede">As new instruction-tuned LLMs (GPT, Llama, Claude, Gemini) get better at hard math, science, PhD-level, and coding problems, they are plateauing in their ability to model behavior. The sharper these models get at reasoning, the further they drift from replicating how people actually behave.</p>
 
     <div class="paper-strip">
-      <img src="bair-logo.png" alt="Berkeley AI Research (BAIR)" onerror="this.style.display='none';this.nextElementSibling.style.display='block';this.nextElementSibling.nextElementSibling.style.display='block';">
+      <img src="/bair-logo.png" alt="Berkeley AI Research (BAIR)" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
       <div class="fb" style="display:none">Berkeley<br>AI Research</div>
-      <div class="sep" style="display:none"></div>
-      <div class="txt">Research paper submitted to <b>EMNLP</b>, a top peer-reviewed conference, with <b>BAIR</b> (Berkeley AI Research).<br><a href="#" target="_blank" rel="noopener">Read the paper →</a></div>
+      <div class="sep"></div>
+      <div class="txt">Research paper submitted to <b>EMNLP</b>, a top peer-reviewed conference, with <b>BAIR</b> (Berkeley AI Research).<br><a href="https://docsend.com/view/7u5763uwr68t6c6u" target="_blank" rel="noopener">Read the paper →</a></div>
     </div>
 
     <div class="panel" style="margin-top:34px">
