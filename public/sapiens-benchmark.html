@@ -257,7 +257,8 @@
   }
   #sapiens-vs-llms .wl-head h2 .hl { color: var(--orange); }
   #sapiens-vs-llms .wl-rule { height: 1px; background: var(--line); margin: 20px 0 26px; }
-  #sapiens-vs-llms .wl-lede { color: var(--ink-soft); font-size: 17.5px; max-width: none; margin: 0 0 34px; }
+  #sapiens-vs-llms .wl-lede { color: var(--ink-soft); font-size: 17.5px; max-width: none; margin: 0 0 16px; }
+  #sapiens-vs-llms .wl-lede--axes { margin-bottom: 34px; }
   #sapiens-vs-llms .wl-lede b { font-weight: 600; color: var(--orange-ink); }
   #sapiens-vs-llms .wl-grid {
     display: grid;
@@ -296,7 +297,7 @@
   #sapiens-vs-llms .wl-fig text { font-family: var(--mono); }
   #sapiens-vs-llms .wl-claim {
     font-family: var(--disp); font-weight: 700;
-    font-size: clamp(19px, 2.2vw, 24px); letter-spacing: -.015em; line-height: 1.28;
+    font-size: clamp(17px, 1.85vw, 20px); letter-spacing: -.012em; line-height: 1.32;
     margin: 0 0 12px; color: var(--ink);
   }
   #sapiens-vs-llms .wl-card--l .wl-claim { color: var(--llm-ink); }
@@ -753,12 +754,16 @@
   </div>
   <div class="wl-rule"></div>
   <p class="wl-lede">
-    <b>SAPIENS is roughly 30 percentage points better at predicting human behavior.</b>
-    Over 18 months we have benchmarked successive generations of frontier instruction-tuned models:
-    despite substantial gains in reasoning and problem-solving, their accuracy on our human behavior
-    benchmark has plateaued at <b>49–54%</b>. The two systems differ on three axes — what they optimize
-    for, what they model, and what they are trained on — and each one compounds. SAPIENS wins on behavior
-    because it was built for behavior, and because nothing about scaling reasoning gets you there.
+    <b>SAPIENS — our behavior modeling approach — is roughly 30 percentage points better at predicting
+    human behavior than general-purpose LLMs.</b> Over 18 months we have benchmarked successive generations
+    of frontier instruction-tuned models: despite substantial gains in reasoning and problem-solving, their
+    accuracy on our human behavior benchmark has plateaued at <b>49–54%</b>. Further academic research
+    suggests they are becoming worse.
+  </p>
+  <p class="wl-lede wl-lede--axes">
+    Behavior models differ from general-purpose LLMs on three axes — <b>modeling objective</b> (what they
+    optimize for), <b>modeling granularity</b> (what they model), and <b>data</b>. Here is a detailed
+    comparison on the same.
   </p>
 
   <div class="wl-grid">
@@ -771,12 +776,22 @@
     <div class="wl-card wl-card--s" data-side="SAPIENS">
       <svg class="wl-fig" viewBox="0 0 300 176" role="img"
            aria-label="Many tangled, looping, non-linear paths leading from one person to many different outcomes." data-fig="chaos"></svg>
-      <h3 class="wl-claim">Trained to model the irrational.</h3>
+      <h3 class="wl-claim">Trained to model human behavior — the irrational.</h3>
       <p class="wl-body">
-        SAPIENS learns the <b>latent traits</b> that predict what a person actually does —
-        background, behavioral history, psychographics, socio-demographics — from vast public and proprietary data.
+        In order to predict what a person does, you need to understand <b>the why</b> behind their decisions
+        and the behavior they exhibit. Behavior models focus on those whys, with the goal of predicting how a
+        person will react to different stimuli.
       </p>
-      <p class="wl-body">Real people are shaped by their own experience. They routinely do not answer the way a rational, generic persona would.</p>
+      <p class="wl-body">
+        People do not decide rationally. They decide through unstated perception gaps, biases, and the
+        environmental factors acting on them — the reasons they would never give you in a survey, and often
+        could not. We call these <b>latent traits</b>, and they are what SAPIENS learns and models.
+      </p>
+      <p class="wl-body">
+        SAPIENS learns those latent traits alongside a person's background, behavioral history, psychographics
+        and socio-demographic traits — from vast amounts of public and proprietary data — because together
+        they are what actually predicts what a person does.
+      </p>
     </div>
 
     <div class="wl-dim">Modeling<br>objective<span class="wl-vs">vs.</span></div>
@@ -784,23 +799,35 @@
     <div class="wl-card wl-card--l" data-side="General-purpose LLMs">
       <svg class="wl-fig" viewBox="0 0 300 176" role="img"
            aria-label="A single straight chain of logical steps leading deterministically to one answer." data-fig="logic"></svg>
-      <h3 class="wl-claim">Tuned to be rational.</h3>
+      <h3 class="wl-claim">Trained to model rational problem solving, to solve complex tasks.</h3>
       <p class="wl-body">
-        RLHF instruction-tuning optimizes for the most plausible, logically consistent response —
-        the machinery that wins at math, science and coding.
+        Frontier AI labs are optimizing to replace knowledge workers on benchmarks such as
+        <b>SWE-bench, GPQA, AIME and MMLU</b>. These benchmarks reward step-by-step rational decision making.
       </p>
-      <p class="wl-body">The plausible answer and the actual answer are not the same answer. Optimizing harder for one does not produce the other.</p>
+      <p class="wl-body">
+        RLHF instruction-tuning optimizes for the most plausible, step-by-step logically consistent response —
+        the machinery that wins at analytical tasks, strategic tasks, math, science and coding. Research on
+        human behavior simulation suggests that RLHF and instruction fine-tuning is what makes these models
+        worse at understanding human behavior.
+      </p>
+      <p class="wl-body">
+        The model is not designed to follow the trajectory of irrational decision making and behavior of
+        different individuals; it is designed to gather and learn domain knowledge across many verticals.
+      </p>
     </div>
 
     <!-- ═══════ 2 · MODELING GRANULARITY ═══════ -->
     <div class="wl-card wl-card--s" data-side="SAPIENS">
-      <svg class="wl-fig" viewBox="0 0 300 176" role="img" aria-label="Twenty-four individually modeled people, each visibly distinct." data-fig="people"></svg>
-      <h3 class="wl-claim">We model the individual real user, then the collective.</h3>
+      <svg class="wl-fig" viewBox="0 0 300 176" role="img" aria-label="Thousands of individually modeled users, each visibly distinct, with the distribution preserved." data-fig="people"></svg>
+      <h3 class="wl-claim">We model each individual “real user”, then the collective target audience they belong to.</h3>
       <p class="wl-body">
-        Every response is grounded in an <b>individually modeled real user</b> — each one carrying their own
-        experiences, preferences, attitudes and latent behavioral traits, learned from real-world data.
+        Because users are modeled one at a time, the diversity and behavioral distribution of the real
+        population is <b>preserved rather than averaged away</b>.
       </p>
-      <p class="wl-body">Because users are modeled one at a time, the diversity and behavioral distribution of the real population is preserved rather than averaged away. And as behavior evolves, the users we model evolve with it.</p>
+      <p class="wl-body">
+        Every response is therefore grounded in an <b>individually modeled real user</b> — each one carrying
+        their own experiences, preferences, attitudes and latent behavioral traits, learned from real-world data.
+      </p>
     </div>
 
     <div class="wl-dim">Modeling<br>granularity<span class="wl-vs">vs.</span></div>
@@ -810,9 +837,10 @@
       <h3 class="wl-claim">One model that represents the entire world's knowledge.</h3>
       <p class="wl-body">
         Asked to represent a population, it returns an <b>averaged, rational opinion about</b> that population —
-        which does not represent the variance, and is always seen through the lens of rationality.
+        which does not represent the variance, and is always seen through the lens of rationality, giving an
+        understanding of the domain at large.
       </p>
-      <p class="wl-body">And the model never updates, while human behavior keeps evolving.</p>
+      <p class="wl-body">At best, it will return you previously conducted surveys and studies from the internet.</p>
     </div>
 
     <!-- ═══════ 3 · DATA ═══════ -->
@@ -824,18 +852,20 @@
         breadth across many sources, and depth on each person within them.
       </p>
       <p class="wl-body">Breadth tells us what someone does. Depth tells us <b>why</b> they do it. Behavior prediction needs both.</p>
+      <p class="wl-body">And because behavior keeps evolving, so does the data. SAPIENS <b>keeps learning from evolved behavior at every step</b>, staying current with the population it models.</p>
     </div>
 
     <div class="wl-dim">Data<span class="wl-vs">vs.</span></div>
 
     <div class="wl-card wl-card--l" data-side="General-purpose LLMs">
       <svg class="wl-fig" viewBox="0 0 300 176" role="img" aria-label="The same breadth-by-depth field, filled only as a wide, shallow band hugging the axis: every domain, no depth on any individual." data-fig="knowledge"></svg>
-      <h3 class="wl-claim">A corpus of world knowledge — broad domains, no individual.</h3>
+      <h3 class="wl-claim">A corpus of world knowledge — a broad spectrum of domains ingested, with no individual-level backgrounds or trajectories explicitly captured.</h3>
       <p class="wl-body">
-        The data is gathered to cover domains — enough of them, well enough, to perform logical tasks.
-        No granular, person-specific behavioral data is collected at all.
+        The data is gathered to cover domains — enough of them, well enough, to perform logical tasks in that
+        domain. No granular, person-specific behavioral data is collected at all.
       </p>
       <p class="wl-body">What the corpus holds is a <b>generalized opinion across domains</b>. Wide, shallow, unattached to any individual — and silent on the why.</p>
+      <p class="wl-body">And it is frozen. A general-purpose LLM is <b>bounded by its last training date</b>, while the behavior it is being asked to predict keeps moving.</p>
     </div>
 
   </div>
@@ -1064,7 +1094,7 @@
     // SAPIENS — modeling chaos
     chaos: function (svg) {
       var r = rng(17);
-      svg.appendChild(txt(0, 10, 'MODELING CHAOS', MUTED));
+      svg.appendChild(txt(0, 10, 'MODELING CHAOS — THE IRRATIONAL', MUTED));
 
       var SX = 26, SY = 88;                       // the person: one origin
       var paths = 7;
@@ -1151,7 +1181,7 @@
 
     people: function (svg) {
       var r = rng(11);
-      svg.appendChild(txt(0, 10, '24 INDIVIDUALLY MODELED USERS', MUTED));
+      svg.appendChild(txt(0, 10, '1000s OF INDIVIDUALLY MODELED USERS', MUTED));
       for (var i = 0; i < 24; i++) {
         var col = i % 8, row = Math.floor(i / 8);
         var p = person(20 + col*33, 52 + row*40, 0.95 + r()*0.5, HUES[Math.floor(r()*HUES.length)]);
