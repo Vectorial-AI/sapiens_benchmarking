@@ -17,7 +17,7 @@ export const SHOWCASE_MIN_OVERALL_SIMILARITY = 0.75;
 
 /** Pinned 1-based showcase rank (overrides automatic sort). */
 const SHOWCASE_RANK_OVERRIDES: Record<string, number> = {
-  "AGQ44DK7UC7TQMR4AK7I57IDMDSA_review_4": 2, // Fibbage → #2 in micro_9
+  "AGQ44DK7UC7TQMR4AK7I57IDMDSA_review_4": 6, // Fibbage → #6 in micro_9
 };
 
 /** review_key -> static UI product title */

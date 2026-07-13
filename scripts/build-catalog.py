@@ -94,7 +94,7 @@ UI_CATALOG_EXCLUDED_REVIEW_KEYS = frozenset(
 )
 # Pinned 1-based showcase rank (overrides automatic sort for these review_keys).
 SHOWCASE_RANK_OVERRIDES: dict[str, int] = {
-    "AGQ44DK7UC7TQMR4AK7I57IDMDSA_review_4": 2,  # Fibbage → #2 in micro_9
+    "AGQ44DK7UC7TQMR4AK7I57IDMDSA_review_4": 6,  # Fibbage → #6 in micro_9
 }
 VIDEO_GAMES_SOFTWARE_DETAILS_DIR = CLUSTERING / "micro_cluster_details_video_games_software"
 VIDEO_GAMES_SOFTWARE_MAINS = frozenset({VIDEO_GAMES_MAIN, SOFTWARE_MAIN})
