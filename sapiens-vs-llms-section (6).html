@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAPIENS vs. General-Purpose LLMs — section</title>
+
+<!-- Same font stack as sapiens-benchmark-v3.html. Delete this link when pasting into v3. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   SAPIENS vs. GENERAL-PURPOSE LLMs
+   Palette / type / cards inherited from sapiens-benchmark-v3.html.
+   SAPIENS  = orange  #E85D2C  (warm, advancing)
+   LLM      = slate   #5E82A6  (cool, recedes — but alive, not grey)
+   All rules scoped to #why-not-llms.
+   ============================================================ */
+
+#why-not-llms {
+  --ink:#17161A; --ink-soft:#46443F; --muted:#8B8980;
+  --line:#E7E4DB; --paper:#FBFAF7; --card:#FFFFFF;
+  --orange:#E85D2C; --orange-ink:#B23F17; --orange-wash:#FBEDE6; --orange-line:#F3D9CB;
+  --plum:#7A2E6B;
+  --llm:#5E82A6; --llm-ink:#3F5D7C; --llm-soft:#A9BED2; --llm-line:#DAE3EC; --llm-wash:#F3F6F9;
+  --disp:"Space Grotesk",system-ui,sans-serif;
+  --body:"Inter",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  line-height: 1.62;
+  padding: 76px 0;
+  border-top: 1px solid var(--line);
+  -webkit-font-smoothing: antialiased;
+}
+#why-not-llms * { box-sizing: border-box; }
+#why-not-llms .wl-wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+
+/* ---------- section head ---------- */
+#why-not-llms .wl-eyebrow {
+  font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--plum); display: flex; align-items: center; gap: 10px; margin: 0 0 20px;
+}
+#why-not-llms .wl-eyebrow .rule { flex: 1; height: 1px; background: var(--line); }
+#why-not-llms .wl-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 6px; }
+#why-not-llms .wl-head .n {
+  font-family: var(--mono); font-size: 14px; font-weight: 500;
+  color: var(--orange); letter-spacing: .06em; padding-top: 6px;
+}
+#why-not-llms .wl-head h2 {
+  font-family: var(--disp); font-weight: 700;
+  font-size: clamp(30px, 4.2vw, 46px); letter-spacing: -.022em; line-height: 1.1;
+  max-width: 26ch; margin: 0;
+}
+#why-not-llms .wl-head h2 .hl { color: var(--orange); }
+#why-not-llms .wl-rule { height: 1px; background: var(--line); margin: 20px 0 26px; }
+#why-not-llms .wl-lede { color: var(--ink-soft); font-size: 17.5px; max-width: 68ch; margin: 0 0 34px; }
+#why-not-llms .wl-lede b { font-weight: 600; color: var(--orange-ink); }
+
+/* ---------- side-by-side grid ---------- */
+#why-not-llms .wl-grid {
+  display: grid;
+  grid-template-columns: 1fr 118px 1fr;
+  row-gap: 16px;
+}
+#why-not-llms .wl-colhead {
+  font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+  font-weight: 500; padding-bottom: 12px; margin-bottom: 4px;
+}
+#why-not-llms .wl-colhead--s { color: var(--orange-ink); border-bottom: 2px solid var(--orange); }
+#why-not-llms .wl-colhead--l { color: var(--llm-ink); border-bottom: 2px solid var(--llm-soft); }
+#why-not-llms .wl-colhead span {
+  display: block; font-family: var(--body); font-size: 12.5px;
+  letter-spacing: 0; text-transform: none; color: var(--muted); margin-top: 4px;
+}
+#why-not-llms .wl-colhead--gap { border: none; }
+
+#why-not-llms .wl-dim {
+  grid-column: 2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 0 8px;
+  font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase;
+  line-height: 1.65; color: var(--plum);
+}
+#why-not-llms .wl-vs {
+  font-family: var(--disp); font-weight: 700; font-size: 13px;
+  letter-spacing: 0; text-transform: none; color: var(--muted); margin-top: 10px;
+}
+
+#why-not-llms .wl-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  padding: 24px 26px 26px; display: flex; flex-direction: column;
+}
+#why-not-llms .wl-card--s { border-top: 3px solid var(--orange); }
+#why-not-llms .wl-card--l { background: var(--llm-wash); border-color: var(--llm-line); border-top: 3px solid var(--llm-soft); }
+
+#why-not-llms .wl-fig { width: 100%; height: 176px; display: block; margin-bottom: 18px; }
+#why-not-llms .wl-fig text { font-family: var(--mono); }
+
+#why-not-llms .wl-claim {
+  font-family: var(--disp); font-weight: 700;
+  font-size: clamp(19px, 2.2vw, 24px); letter-spacing: -.015em; line-height: 1.28;
+  margin: 0 0 12px; color: var(--ink);
+}
+#why-not-llms .wl-card--l .wl-claim { color: var(--llm-ink); }
+
+#why-not-llms .wl-body {
+  font-size: 15px; line-height: 1.6; color: var(--ink-soft);
+  margin: 0 0 10px; max-width: 46ch;
+}
+#why-not-llms .wl-card--l .wl-body { color: #5A6675; }
+#why-not-llms .wl-body:last-child { margin-bottom: 0; }
+#why-not-llms .wl-body b { font-weight: 600; color: var(--orange-ink); }
+#why-not-llms .wl-card--l .wl-body b { color: var(--llm-ink); }
+
+/* ---------- motion ---------- */
+#why-not-llms .wl-ghost { transition: opacity .6s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
+#why-not-llms .wl-avg { opacity: 0; transition: opacity .5s ease .5s; }
+#why-not-llms .wl-collapse.is-in .wl-ghost { opacity: .22; transform: translate(var(--dx), var(--dy)) scale(.6); }
+#why-not-llms .wl-collapse.is-in .wl-avg { opacity: 1; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 900px) {
+  #why-not-llms .wl-grid { grid-template-columns: 1fr; row-gap: 12px; }
+  #why-not-llms .wl-colhead { display: none; }
+  #why-not-llms .wl-dim {
+    grid-column: 1; flex-direction: row; align-items: baseline; justify-content: flex-start;
+    gap: 10px; text-align: left; padding: 22px 0 4px;
+  }
+  #why-not-llms .wl-vs { display: none; }
+  #why-not-llms .wl-card::before {
+    content: attr(data-side);
+    font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 14px;
+  }
+  #why-not-llms .wl-card--s::before { color: var(--orange-ink); }
+  #why-not-llms .wl-card--l::before { color: var(--llm-ink); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #why-not-llms * { transition: none !important; }
+  #why-not-llms .wl-ghost { opacity: .22; transform: none; }
+  #why-not-llms .wl-avg { opacity: 1; }
+}
+</style>
+</head>
+<body style="margin:0;background:#FBFAF7">
+
+<section id="why-not-llms" aria-labelledby="wl-title">
+<div class="wl-wrap">
+
+  <p class="wl-eyebrow">SAPIENS vs. general-purpose LLMs<span class="rule"></span></p>
+  <div class="wl-head">
+    <div class="n">06</div>
+    <h2 id="wl-title">Why SAPIENS <span class="hl">outperforms</span> general-purpose LLMs at predicting human behavior.</h2>
+  </div>
+  <div class="wl-rule"></div>
+  <p class="wl-lede">
+    <b>SAPIENS is roughly 30 percentage points better at predicting human behavior.</b>
+    Over 18 months we have benchmarked successive generations of frontier instruction-tuned models:
+    despite substantial gains in reasoning and problem-solving, their accuracy on our human behavior
+    benchmark has plateaued at <b>49–54%</b>. The two systems differ on three axes — what they optimize
+    for, what they model, and what they are trained on — and each one compounds. SAPIENS wins on behavior
+    because it was built for behavior, and because nothing about scaling reasoning gets you there.
+  </p>
+
+  <div class="wl-grid">
+
+    <div class="wl-colhead wl-colhead--s">SAPIENS<span>Behavior model</span></div>
+    <div class="wl-colhead wl-colhead--gap"></div>
+    <div class="wl-colhead wl-colhead--l">General-purpose LLMs<span>Instruction-tuned frontier models</span></div>
+
+    <!-- ═══════ 1 · MODELING OBJECTIVE ═══════ -->
+    <div class="wl-card wl-card--s" data-side="SAPIENS">
+      <svg class="wl-fig" viewBox="0 0 300 176" role="img"
+           aria-label="Many tangled, looping, non-linear paths leading from one person to many different outcomes." data-fig="chaos"></svg>
+      <h3 class="wl-claim">Trained to model the irrational.</h3>
+      <p class="wl-body">
+        SAPIENS learns the <b>latent traits</b> that predict what a person actually does —
+        background, behavioral history, psychographics, socio-demographics — from vast public and proprietary data.
+      </p>
+      <p class="wl-body">Real people are shaped by their own experience. They routinely do not answer the way a rational, generic persona would.</p>
+    </div>
+
+    <div class="wl-dim">Modeling<br>objective<span class="wl-vs">vs.</span></div>
+
+    <div class="wl-card wl-card--l" data-side="General-purpose LLMs">
+      <svg class="wl-fig" viewBox="0 0 300 176" role="img"
+           aria-label="A single straight chain of logical steps leading deterministically to one answer." data-fig="logic"></svg>
+      <h3 class="wl-claim">Tuned to be rational.</h3>
+      <p class="wl-body">
+        RLHF instruction-tuning optimizes for the most plausible, logically consistent response —
+        the machinery that wins at math, science and coding.
+      </p>
+      <p class="wl-body">The plausible answer and the actual answer are not the same answer. Optimizing harder for one does not produce the other.</p>
+    </div>
+
+    <!-- ═══════ 2 · MODELING GRANULARITY ═══════ -->
+    <div class="wl-card wl-card--s" data-side="SAPIENS">
+      <svg class="wl-fig" viewBox="0 0 300 176" role="img" aria-label="Twenty-four individually modeled people, each visibly distinct." data-fig="people"></svg>
+      <h3 class="wl-claim">We model the individual real user, then the collective.</h3>
+      <p class="wl-body">
+        Every response is grounded in an <b>individually modeled real user</b> — each one carrying their own
+        experiences, preferences, attitudes and latent behavioral traits, learned from real-world data.
+      </p>
+      <p class="wl-body">Because users are modeled one at a time, the diversity and behavioral distribution of the real population is preserved rather than averaged away. And as behavior evolves, the users we model evolve with it.</p>
+    </div>
+
+    <div class="wl-dim">Modeling<br>granularity<span class="wl-vs">vs.</span></div>
+
+    <div class="wl-card wl-card--l" data-side="General-purpose LLMs">
+      <svg class="wl-fig wl-collapse" viewBox="0 0 300 176" role="img" aria-label="The same twenty-four people collapsing into one averaged persona." data-fig="average"></svg>
+      <h3 class="wl-claim">One model that represents the entire world's knowledge.</h3>
+      <p class="wl-body">
+        Asked to represent a population, it returns an <b>averaged, rational opinion about</b> that population —
+        which does not represent the variance, and is always seen through the lens of rationality.
+      </p>
+      <p class="wl-body">And the model never updates, while human behavior keeps evolving.</p>
+    </div>
+
+    <!-- ═══════ 3 · DATA ═══════ -->
+    <div class="wl-card wl-card--s" data-side="SAPIENS">
+      <svg class="wl-fig" viewBox="0 0 300 176" role="img" aria-label="A breadth-by-depth field: many signal sources across the horizontal axis, deep per-person history down the vertical axis, densely filled for a target population." data-fig="spectrum"></svg>
+      <h3 class="wl-claim">A spectrum of behavior — breadth and depth, per person.</h3>
+      <p class="wl-body">
+        We collect a <b>spectrum of behavioral data</b> on the individuals inside a specific target population:
+        breadth across many sources, and depth on each person within them.
+      </p>
+      <p class="wl-body">Breadth tells us what someone does. Depth tells us <b>why</b> they do it. Behavior prediction needs both.</p>
+    </div>
+
+    <div class="wl-dim">Data<span class="wl-vs">vs.</span></div>
+
+    <div class="wl-card wl-card--l" data-side="General-purpose LLMs">
+      <svg class="wl-fig" viewBox="0 0 300 176" role="img" aria-label="The same breadth-by-depth field, filled only as a wide, shallow band hugging the axis: every domain, no depth on any individual." data-fig="knowledge"></svg>
+      <h3 class="wl-claim">A corpus of world knowledge — broad domains, no individual.</h3>
+      <p class="wl-body">
+        The data is gathered to cover domains — enough of them, well enough, to perform logical tasks.
+        No granular, person-specific behavioral data is collected at all.
+      </p>
+      <p class="wl-body">What the corpus holds is a <b>generalized opinion across domains</b>. Wide, shallow, unattached to any individual — and silent on the why.</p>
+    </div>
+
+  </div>
+
+</div>
+</section>
+
+<script>
+(function () {
+  var root = document.getElementById('why-not-llms');
+  if (!root) return;
+  var NS = 'http://www.w3.org/2000/svg';
+
+  var ORANGE='#E85D2C', ORANGE_INK='#B23F17', PLUM='#7A2E6B',
+      LLM='#5E82A6', LLM_INK='#3F5D7C', LLM_SOFT='#A9BED2', LLM_LINE='#DAE3EC',
+      MUTED='#8B8980', LINE='#E7E4DB', INK='#17161A';
+
+  // individually modeled users, drawn from the site's warm family so each person is distinct on-brand
+  var HUES = ['#E85D2C','#B23F17','#F0A57E','#7A2E6B','#A85C93','#D9754A','#C2703C','#8E4A2E','#E08A5F','#9C4E85','#CF5F3B','#6B3418'];
+
+  function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
+  function txt(x,y,s,fill,size,ls,anchor){
+    var t=el('text',{x:x,y:y,fill:fill,'font-size':size||8,'letter-spacing':ls||'0.06em'});
+    if(anchor) t.setAttribute('text-anchor',anchor);
+    t.textContent=s; return t;
+  }
+  function rng(seed){return function(){seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;};}
+
+  function person(cx,cy,s,fill,cls){
+    var g=el('g',cls?{class:cls}:{});
+    g.appendChild(el('circle',{cx:cx,cy:cy-3.4*s,r:2.6*s,fill:fill}));
+    g.appendChild(el('path',{d:'M'+(cx-4*s)+' '+(cy+5*s)+' a '+(4*s)+' '+(4.4*s)+' 0 0 1 '+(8*s)+' 0 Z',fill:fill}));
+    return g;
+  }
+
+  /* ── row 1 ──────────────────────────────────────────────
+     Abstract, not literal. Left: chaos — many tangled, looping,
+     non-linear trajectories from one person to many different
+     outcomes. Right: logic — one straight deterministic chain
+     of steps to a single answer.
+     ─────────────────────────────────────────────────────── */
+  var figs = {
+
+    // SAPIENS — modeling chaos
+    chaos: function (svg) {
+      var r = rng(17);
+      svg.appendChild(txt(0, 10, 'MODELING CHAOS', MUTED));
+
+      var SX = 26, SY = 88;                       // the person: one origin
+      var paths = 7;
+
+      for (var i = 0; i < paths; i++) {
+        var hue = HUES[Math.floor(r() * HUES.length)];
+        var endY = 32 + (i * 122 / (paths - 1)) + (r() - .5) * 8;
+        var endX = 252 + (r() - .5) * 12;
+
+        // a wandering trajectory: doubles back, loops, crosses the others
+        var d = 'M' + SX + ' ' + SY;
+        var px = SX, py = SY, n = 4;
+        for (var s = 1; s <= n; s++) {
+          var t = s / n;
+          var tx = SX + (endX - SX) * t + (r() - .5) * 46;   // can move backwards
+          var ty = SY + (endY - SY) * t + (r() - .5) * 74;   // swings wide
+          var c1x = px + (r() - .5) * 90, c1y = py + (r() - .5) * 96;
+          var c2x = tx - (r() - .5) * 90, c2y = ty + (r() - .5) * 96;
+          d += ' C' + c1x.toFixed(1) + ' ' + c1y.toFixed(1) + ', ' +
+                      c2x.toFixed(1) + ' ' + c2y.toFixed(1) + ', ' +
+                      tx.toFixed(1) + ' ' + ty.toFixed(1);
+          px = tx; py = ty;
+        }
+        svg.appendChild(el('path', {d:d, fill:'none', stroke:hue,
+          'stroke-width': (1.1 + r() * .9).toFixed(2), 'stroke-linecap':'round',
+          'stroke-opacity': (.5 + r() * .45).toFixed(2)}));
+        // the outcome this trajectory actually lands on — all different
+        svg.appendChild(el('circle', {cx:px, cy:py, r: 2.6 + r() * 1.8, fill:hue}));
+      }
+
+      // the person the paths all start from
+      svg.appendChild(el('circle', {cx:SX, cy:SY, r:9, fill:'#FFFFFF', stroke:ORANGE, 'stroke-width':1.6}));
+      svg.appendChild(person(SX, SY + 2.5, 1.05, ORANGE));
+      svg.appendChild(txt(SX, 116, 'ONE', MUTED, 7, '0.08em', 'middle'));
+      svg.appendChild(txt(SX, 125, 'PERSON', MUTED, 7, '0.08em', 'middle'));
+
+      svg.appendChild(txt(0, 172, '→ NON-LINEAR. DOUBLES BACK. MANY OUTCOMES.', ORANGE_INK));
+    },
+
+    // General-purpose LLMs — modeling logic
+    logic: function (svg) {
+      svg.appendChild(txt(0, 10, 'MODELING LOGIC', LLM_INK));
+
+      var CY = 84, BW = 46, BH = 30, X0 = 20, GAP = 20;
+      var labels = ['STEP', 'STEP', 'STEP'];
+
+      // one straight spine — nothing deviates from it
+      svg.appendChild(el('line', {x1:X0, y1:CY, x2:280, y2:CY, stroke:LLM_LINE, 'stroke-width':1}));
+
+      for (var i = 0; i < 3; i++) {
+        var x = X0 + i * (BW + GAP);
+        svg.appendChild(el('rect', {x:x, y:CY - BH/2, width:BW, height:BH, rx:5,
+          fill:'#FFFFFF', stroke:LLM, 'stroke-width':1.4}));
+        svg.appendChild(txt(x + BW/2, CY - 1, labels[i], LLM_INK, 7, '0.08em', 'middle'));
+        svg.appendChild(txt(x + BW/2, CY + 8, String(i + 1), LLM, 8, '0', 'middle'));
+        // the deterministic arrow to the next step
+        var ax = x + BW, bx = x + BW + GAP;
+        svg.appendChild(el('path', {
+          d: 'M' + (ax + 4) + ' ' + CY + ' L' + (bx - 6) + ' ' + CY +
+             ' M' + (bx - 11) + ' ' + (CY - 3.5) + ' L' + (bx - 6) + ' ' + CY + ' L' + (bx - 11) + ' ' + (CY + 3.5),
+          stroke: LLM, 'stroke-width': 1.4, fill: 'none', 'stroke-linecap':'round'}));
+      }
+
+      // → the single answer
+      var lastX = X0 + 3 * (BW + GAP);
+      svg.appendChild(el('path', {
+        d: 'M' + (lastX + 4) + ' ' + CY + ' L' + (lastX + 18) + ' ' + CY +
+           ' M' + (lastX + 13) + ' ' + (CY - 3.5) + ' L' + (lastX + 18) + ' ' + CY + ' L' + (lastX + 13) + ' ' + (CY + 3.5),
+        stroke: LLM, 'stroke-width': 1.4, fill: 'none', 'stroke-linecap':'round'}));
+      svg.appendChild(el('circle', {cx: lastX + 34, cy: CY, r: 15, fill: LLM}));
+      svg.appendChild(txt(lastX + 34, CY + 2.8, 'ONE', '#FFFFFF', 7, '0.06em', 'middle'));
+      svg.appendChild(txt(lastX + 34, CY + 30, 'ANSWER', LLM_INK, 7, '0.08em', 'middle'));
+
+      // the path not taken: everything off the line is pruned away
+      svg.appendChild(el('path', {d:'M40 44 C 90 26, 150 30, 214 44', stroke:LLM_SOFT,
+        'stroke-width':1.1, fill:'none', 'stroke-dasharray':'3 4', 'stroke-opacity':.75}));
+      svg.appendChild(el('path', {d:'M40 124 C 90 142, 150 138, 214 124', stroke:LLM_SOFT,
+        'stroke-width':1.1, fill:'none', 'stroke-dasharray':'3 4', 'stroke-opacity':.75}));
+      svg.appendChild(txt(127, 38, 'PRUNED AS IMPLAUSIBLE', LLM_SOFT, 7, '0.08em', 'middle'));
+      svg.appendChild(txt(127, 138, 'PRUNED AS IMPLAUSIBLE', LLM_SOFT, 7, '0.08em', 'middle'));
+
+      svg.appendChild(txt(0, 172, '→ LINEAR. DETERMINISTIC. ONE OUTCOME.', LLM_INK));
+    },
+
+    people: function (svg) {
+      var r = rng(11);
+      svg.appendChild(txt(0, 10, '24 INDIVIDUALLY MODELED USERS', MUTED));
+      for (var i = 0; i < 24; i++) {
+        var col = i % 8, row = Math.floor(i / 8);
+        var p = person(20 + col*33, 52 + row*40, 0.95 + r()*0.5, HUES[Math.floor(r()*HUES.length)]);
+        p.setAttribute('opacity', (0.78 + r()*0.22).toFixed(2));
+        svg.appendChild(p);
+      }
+      svg.appendChild(txt(0, 172, '→ DISTRIBUTION PRESERVED', ORANGE_INK));
+    },
+
+    average: function (svg) {
+      var r = rng(11), CX = 130, CY = 92;
+      svg.appendChild(txt(0, 10, 'ONE AVERAGED PERSONA', LLM_INK));
+      for (var i = 0; i < 24; i++) {
+        var col = i % 8, row = Math.floor(i / 8);
+        var x = 20 + col*33, y = 52 + row*40;
+        r(); r(); // keep the sequence in step with the SAPIENS panel opposite
+        var g = person(x, y, 1.1, LLM, 'wl-ghost');
+        g.style.setProperty('--dx', (CX - x) + 'px');
+        g.style.setProperty('--dy', (CY - y) + 'px');
+        g.style.transitionDelay = (i * 14) + 'ms';
+        svg.appendChild(g);
+      }
+      var avg = el('g', {class:'wl-avg'});
+      avg.appendChild(el('circle', {cx:CX, cy:CY-6, r:38, fill:'none', stroke:LLM_SOFT, 'stroke-width':1, 'stroke-dasharray':'2 5'}));
+      avg.appendChild(person(CX, CY, 3.5, LLM));
+      avg.appendChild(txt(CX, CY+46, 'THE MEAN', LLM_INK, 8, '0.08em', 'middle'));
+      svg.appendChild(avg);
+      svg.appendChild(txt(0, 172, '→ VARIANCE AVERAGED AWAY', LLM_INK));
+    },
+
+    /* ── row 3 ────────────────────────────────────────────
+       Identical axes on both sides. X = breadth (how many
+       sources / domains). Y = depth (how much on any one
+       individual). SAPIENS fills the quadrant. The LLM covers
+       the full width at zero depth: every domain, no person.
+       ───────────────────────────────────────────────────── */
+
+    // SAPIENS — breadth × depth on a target population
+    spectrum: function (svg) {
+      var r = rng(29);
+      var X0 = 30, X1 = 278, Y0 = 22, Y1 = 132;
+
+      svg.appendChild(txt(0, 10, 'BREADTH × DEPTH, PER PERSON', MUTED));
+
+      // axes
+      svg.appendChild(el('path', {d:'M'+X0+' '+Y0+' L'+X0+' '+Y1+' L'+X1+' '+Y1, stroke:INK, 'stroke-width':1, fill:'none'}));
+
+      // the filled quadrant: 8 sources wide, 9 people deep
+      for (var c = 0; c < 8; c++) {
+        for (var d = 0; d < 9; d++) {
+          var x = X0 + 10 + c * 29, y = Y1 - 10 - d * 12.5;
+          if (r() < 0.12) continue;                     // real data has holes
+          svg.appendChild(el('rect', {
+            x: x - 4, y: y - 3.4, width: 8 + r()*3, height: 6.6, rx: 1.6,
+            fill: HUES[Math.floor(r() * HUES.length)],
+            'fill-opacity': (.45 + r() * .5).toFixed(2)
+          }));
+        }
+      }
+
+      // depth bracket
+      svg.appendChild(el('path', {d:'M22 30 L18 30 L18 124 L22 124', stroke:ORANGE, 'stroke-width':1.2, fill:'none'}));
+      svg.appendChild(txt(12, 82, 'DEPTH', ORANGE_INK, 7, '0.1em', 'middle'));
+
+      svg.appendChild(txt(154, 144, 'BREADTH · SIGNAL SOURCES', MUTED, 7.5, '0.08em', 'middle'));
+      svg.appendChild(txt(154, 156, 'ONE TARGET POPULATION, MODELED PERSON BY PERSON', MUTED, 7, '0.06em', 'middle'));
+      svg.appendChild(txt(0, 172, '→ WE CAN SEE THE WHY', ORANGE_INK));
+    },
+
+    // General-purpose LLMs — every domain, no depth
+    knowledge: function (svg) {
+      var r = rng(53);
+      var X0 = 30, X1 = 278, Y0 = 22, Y1 = 132;
+
+      svg.appendChild(txt(0, 10, 'EVERY DOMAIN, NO INDIVIDUAL', LLM_INK));
+
+      svg.appendChild(el('path', {d:'M'+X0+' '+Y0+' L'+X0+' '+Y1+' L'+X1+' '+Y1, stroke:LLM_INK, 'stroke-width':1, fill:'none'}));
+
+      // the empty quadrant — nothing is collected here
+      svg.appendChild(el('rect', {x:X0+2, y:Y0, width:X1-X0-2, height:Y1-Y0-24, fill:LLM_SOFT, 'fill-opacity':.1}));
+      svg.appendChild(txt(154, 66, 'NO PERSON-LEVEL DATA', LLM_SOFT, 7.5, '0.1em', 'middle'));
+      svg.appendChild(txt(154, 78, 'IS COLLECTED HERE', LLM_SOFT, 7.5, '0.1em', 'middle'));
+
+      // a wide, shallow band hugging the axis: broad domain coverage, zero depth
+      for (var c = 0; c < 16; c++) {
+        for (var d = 0; d < 2; d++) {
+          var x = X0 + 8 + c * 15.6, y = Y1 - 7 - d * 10;
+          svg.appendChild(el('rect', {
+            x: x - 4, y: y - 3.2, width: 9, height: 6.4, rx: 1.6,
+            fill: LLM, 'fill-opacity': (.35 + r() * .5).toFixed(2)
+          }));
+        }
+      }
+
+      svg.appendChild(el('path', {d:'M22 108 L18 108 L18 124 L22 124', stroke:LLM, 'stroke-width':1.2, fill:'none'}));
+      svg.appendChild(txt(12, 118, 'DEPTH', LLM_INK, 7, '0.1em', 'middle'));
+
+      svg.appendChild(txt(154, 144, 'BREADTH · DOMAINS', LLM_INK, 7.5, '0.08em', 'middle'));
+      svg.appendChild(txt(154, 156, 'A GENERALIZED OPINION, ATTACHED TO NO ONE', LLM_SOFT, 7, '0.06em', 'middle'));
+      svg.appendChild(txt(0, 172, '→ NO WHY. NO WHO.', LLM_INK));
+    }
+  };
+
+  root.querySelectorAll('.wl-fig[data-fig]').forEach(function (svg) {
+    var f = figs[svg.getAttribute('data-fig')];
+    if (f) f(svg);
+  });
+
+  var c = root.querySelector('.wl-collapse');
+  if (c && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function (es, obs) {
+      es.forEach(function (e) {
+        if (e.isIntersecting) {
+          setTimeout(function(){ e.target.classList.add('is-in'); }, 260);
+          obs.unobserve(e.target);
+        }
+      });
+    }, {threshold:.55}).observe(c);
+  } else if (c) { c.classList.add('is-in'); }
+})();
+</script>
+</body>
+</html>
