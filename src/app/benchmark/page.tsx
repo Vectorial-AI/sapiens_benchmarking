@@ -17,7 +17,7 @@ function BenchmarkReport() {
         </Link>
       </div>
       <iframe
-        src="/sapiens-benchmark.html"
+        src="/sapiens-benchmark.html?v=20260713"
         title="SAPIENS 1.0 Benchmark Report"
         className="w-full h-full border-0"
       />

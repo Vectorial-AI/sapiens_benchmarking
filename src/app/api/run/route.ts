@@ -194,6 +194,7 @@ export async function POST(req: Request) {
 
   // ---- SAPIENS ----
   if (mode === "sapiens") {
+    const runStartedAt = Date.now();
     let sapiens: EngineResult | null = null;
     let source: string = hasGatewayKey() ? "gateway" : "mock";
     let usedPrecomputed = false;
@@ -280,6 +281,7 @@ export async function POST(req: Request) {
       ...sapiens,
       inferredTraitSummary: inferredTraits?.summary ?? null,
       inferredTraitInfluences: inferredTraits?.influences ?? null,
+      latencyMs: Date.now() - runStartedAt,
     };
 
     return NextResponse.json({
@@ -295,6 +297,7 @@ export async function POST(req: Request) {
   }
 
   // ---- BASELINE ----
+  const runStartedAt = Date.now();
   const method = baselineMethod as BaselineMethod;
   const bModel = baselineModel as BaselineModel;
   const gateway = toGatewayModel(bModel);
@@ -351,6 +354,8 @@ export async function POST(req: Request) {
       `${method} baseline`,
     );
   }
+
+  baseline = { ...baseline, latencyMs: Date.now() - runStartedAt };
 
   return NextResponse.json({
     baseline: {

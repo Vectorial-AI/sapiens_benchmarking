@@ -271,7 +271,7 @@
 
     <div class="panel" style="margin-top:34px">
       <p class="cap">reviews the model reproduced in substance — same topics, features, and sentiment · each model given its strongest setup (full user history)</p>
-      <div class="chart-box"><canvas id="timeline" role="img" aria-label="Behavior prediction accuracy by frontier model, ordered by release date. All frontier models fall between 47.6% and 53.2% regardless of release date. SAPIENS reaches 86.1%.">Frontier models stay near 50% across releases; SAPIENS reaches 86.1%.</canvas></div>
+      <div class="chart-box"><canvas id="timeline" role="img" aria-label="Behavior prediction accuracy by frontier model, ordered by release date. All frontier models fall between 46.65% and 53.2% regardless of release date. SAPIENS reaches 86.1%.">Frontier models stay near 50% across releases; SAPIENS reaches 86.1%.</canvas></div>
     </div>
   </div>
 
@@ -286,12 +286,12 @@
       <div class="panel">
         <h3>AI agent with user history</h3>
         <div class="sub">Pass the user's own history to the agent and have it model their behavior.</div>
-        <div class="chart-box"><canvas id="m_hist" role="img" aria-label="User-history baseline: frontier models score 47.6% to 53.2%; SAPIENS 86.1%.">User-history baseline vs SAPIENS 86.1%.</canvas></div>
+        <div class="chart-box"><canvas id="m_hist" role="img" aria-label="User-history baseline: frontier models score 46.65% to 53.2%; SAPIENS 86.1%.">User-history baseline vs SAPIENS 86.1%.</canvas></div>
       </div>
       <div class="panel">
         <h3>Tribe persona prompting</h3>
         <div class="sub">Prompt the agent with a detailed description of a niche audience segment and have it act like that tribe.</div>
-        <div class="chart-box"><canvas id="m_tribe" role="img" aria-label="Tribe-persona baseline: frontier models score 41.3% to 44.4%; SAPIENS 86.1%.">Tribe-persona baseline vs SAPIENS 86.1%.</canvas></div>
+        <div class="chart-box"><canvas id="m_tribe" role="img" aria-label="Tribe-persona baseline: frontier models score 31% to 44.4%; SAPIENS 86.1%.">Tribe-persona baseline vs SAPIENS 86.1%.</canvas></div>
       </div>
       <div class="panel">
         <h3>Population persona prompting</h3>
@@ -644,20 +644,19 @@
   Chart.defaults.font.family="'IBM Plex Mono', monospace";
   Chart.defaults.color=AXIS;
 
-  /* =========================================================
-     RELEASE DATES — o3 and GPT-5 confirmed; the rest are
-     PLACEHOLDERS. Replace `date` with the true release month
-     for each model before this page is shown to investors.
-     ========================================================= */
+  /* Reviews >= 0.65 (%) */
   var MODELS=[
     {label:'o3',         date:'Apr 2025', v:53.2},
     {label:'GPT-5',      date:'Aug 2025', v:47.6},
-    {label:'Sonnet 4.6', date:'Oct 2025', v:51.2},
-    {label:'GPT-5.2',    date:'Nov 2025', v:50.4},
-    {label:'GPT-5.5',    date:'Feb 2026', v:50.4},
-    {label:'Opus 4.8',   date:'Apr 2026', v:50.4}
+    {label:'GPT-5.2',    date:'Dec 2025', v:49.95},
+    {label:'Sonnet 4.6', date:'Feb 2026', v:51.2},
+    {label:'GPT-5.5',    date:'Apr 2026', v:50.4},
+    {label:'Opus 4.8',   date:'May 2026', v:46.65}
   ];
 
+  function fmtPct(v){
+    return (Number(v.toFixed(2))===Number(v.toFixed(1)) ? v.toFixed(1) : v.toFixed(2)) + '%';
+  }
   function valueLabels(suffix,fontSize){
     suffix=suffix||'%'; fontSize=fontSize||12;
     return {id:'vl'+Math.random(),afterDatasetsDraw:function(c){
@@ -668,7 +667,7 @@
           var v=ds.data[i]; if(v===null||v===undefined) return;
           var col=Array.isArray(ds.backgroundColor)?ds.backgroundColor[i]:ds.backgroundColor;
           ctx.fillStyle=(col===ORANGE)?ORANGE_INK:AXIS;
-          ctx.fillText(v.toFixed(1)+suffix,bar.x,bar.y-9);
+          ctx.fillText(suffix==='%'?fmtPct(v):v.toFixed(1)+suffix,bar.x,bar.y-9);
         });
       });
       ctx.restore();}};
@@ -732,8 +731,8 @@
       plugins:[valueLabels('%',10),refLine(ceil,'',CEIL,false)]
     });
   }
-  mini('m_hist',[['o3',53.2],['GPT-5',47.6],['GPT-5.2',50.4],['GPT-5.5',50.4],['Sonnet 4.6',51.2],['Opus 4.8',50.4]],53.2);
-  mini('m_tribe',[['GPT-5',41.3],['GPT-5.2',44.4],['GPT-5.5',43.7]],44.4);
+  mini('m_hist',[['o3',53.2],['GPT-5',47.6],['GPT-5.2',49.95],['GPT-5.5',50.4],['Sonnet 4.6',51.2],['Opus 4.8',46.65]],53.2);
+  mini('m_tribe',[['GPT-5',41.3],['GPT-5.2',44.4],['GPT-5.5',43.7],['Sonnet 4.6',31],['Opus 4.8',42.5]],44.4);
   mini('m_pop',[['GPT-5',47.6],['GPT-5.2',45.2],['GPT-5.5',49.2],['Sonnet 4.6',46.8],['Opus 4.8',44.8]],49.2);
 
   /* BEHAVIOR MODELS */

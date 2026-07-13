@@ -47,6 +47,13 @@ import {
 } from "@/lib/wizard-session";
 import { mainThemeEntriesForDisplay, topKThemeEntries, themeTopKFromGroundTruth } from "@/lib/scoring";
 
+function formatRunLatency(ms: number): string {
+  const seconds = ms / 1000;
+  if (seconds >= 10) return `${seconds.toFixed(0)}s`;
+  if (seconds >= 1) return `${seconds.toFixed(1)}s`;
+  return `${seconds.toFixed(2)}s`;
+}
+
 const PRE_RUN_COUNT = 3;
 
 function preRunStorageKey(reviewKey: string): string {
@@ -1559,8 +1566,8 @@ function ResultCard({
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0 ml-3">
-          {latencyMs ? (
-            <span className="text-[11px] font-normal text-foreground/40 tabular-nums">{(latencyMs / 1000).toFixed(1)}s</span>
+          {typeof latencyMs === "number" ? (
+            <span className="text-[11px] font-normal text-foreground/40 tabular-nums">{formatRunLatency(latencyMs)}</span>
           ) : null}
           {onRemove && (
             <button
