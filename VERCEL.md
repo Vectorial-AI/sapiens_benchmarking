@@ -10,8 +10,12 @@
 |----------|----------|---------|
 | `AI_GATEWAY_API_KEY` | Yes* | Live LLM calls via Vercel AI Gateway |
 | `VERCEL_OIDC_TOKEN` | Auto on Vercel | Alternative auth when deployed on Vercel |
+| `SITE_PASSWORD` | Yes (prod) | Shared password gate for `/` and `/api/*`. Leave unset locally to skip auth. |
+| `AUTH_SECRET` | Optional | HMAC secret for the auth cookie. Defaults to `SITE_PASSWORD` if unset. |
 
 \* Without a gateway key the app returns **mock reviews** (demo mode).
+
+`/benchmark` and `/sapiens-benchmark.html` stay public without login.
 
 4. Deploy — Vercel runs `npm run build` automatically.
 
