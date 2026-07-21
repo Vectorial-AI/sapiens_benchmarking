@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -578,11 +579,16 @@ export default function Home() {
               <p className="text-[15px] font-medium text-foreground mt-1.5">{tribe.name}</p>
             ) : null}
           </div>
-          {tribeId && (
-            <button type="button" onClick={openBenchmarking} className={`shrink-0 ${TYPE.link}`}>
-              View benchmarking →
-            </button>
-          )}
+          <div className="flex items-center gap-4 shrink-0">
+            <Link href="/release-notes" className={`${TYPE.link} whitespace-nowrap`}>
+              Release Notes
+            </Link>
+            {tribeId ? (
+              <button type="button" onClick={openBenchmarking} className={`shrink-0 ${TYPE.link}`}>
+                View benchmarking →
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
 

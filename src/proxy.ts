@@ -32,10 +32,11 @@ export const config = {
     /*
      * Protect app pages + APIs. Leave public:
      * - /benchmark (report page)
+     * - /release-notes
      * - /login
      * - /sapiens-benchmark.html (iframe source)
      * - Next internals + common static assets
      */
-    "/((?!_next/static|_next/image|favicon.ico|benchmark(?:/.*)?|login(?:/.*)?|sapiens-benchmark\\.html|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map|woff2?)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|benchmark(?:/.*)?|release-notes(?:/.*)?|login(?:/.*)?|sapiens-benchmark\\.html|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map|woff2?)$).*)",
   ],
 };
